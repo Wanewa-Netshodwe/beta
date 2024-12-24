@@ -32,24 +32,7 @@ const appSlice = createSlice({
       }
     },
     setColor: (state, action) => {
-      const { type, color }: { type: string; color: string } = action.payload;
-      switch (type) {
-        case "primary":
-          state.appTheme.colors!!.primary = color;
-          break;
-        case "secondary":
-          state.appTheme.colors!!.secondary = color;
-          break;
-        case "quaternary":
-          state.appTheme.colors!!.quaternary = color;
-          break;
-        case "tertiary":
-          state.appTheme.colors!!.tertiary = color;
-          break;
-        case "textColor":
-          state.appTheme.colors!!.textColor = color;
-          break;
-      }
+      state.appTheme = action.payload;
     },
   },
 });

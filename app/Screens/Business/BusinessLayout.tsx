@@ -41,6 +41,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
   const handleDeleteSection = (sectionInfo: sectionData) => {
     BE_deleteSection({ dispatch, sectionInfo });
   };
+  const [isLoading, setLoading] = useState(false);
   const { width } = Dimensions.get("window");
   const appTheme = useSelector((state: RootState) => state.appTheme.appTheme);
   const font = useSelector(
@@ -52,9 +53,14 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
     (state: RootState) => state.business.userBusiness
   );
   // console.log(fontMap[font]);
+  // useEffect(() => {
+
+  //   setLoading(loaded);
+  // }, [font]);
   const [loaded] = Font.useFonts({
     font: fontMap[font], // Map Redux font name to the correct font file
   });
+
   console.log("selected fonts :", font);
   const dispatch = useDispatch();
 
@@ -75,11 +81,11 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
         <Screen>
           <View className="w-full  h-full  relative ">
             <ScrollView>
-              <View className="p-[5%]">
+              <View className="p-[5%] h-fit">
                 <LoadingComp
                   loaded={loaded}
                   item={
-                    <Text style={styles.text} className={`text-[24px]  `}>
+                    <Text style={styles.text} className={`text-[24px] h-fit  `}>
                       Shop Layout
                     </Text>
                   }
@@ -88,10 +94,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
                   <View className="flex-row items-center gap-1 mt-[2%] ">
                     {loaded ? (
                       <Text
-                        style={{
-                          color: appTheme.colors!!.textColor,
-                          fontFamily: font,
-                        }}
+                        style={styles.text}
                         className=" w-[14%] font-bold text-[11px] "
                       >
                         Preview
@@ -108,10 +111,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
                     ></Switch>
                     {loaded ? (
                       <Text
-                        style={{
-                          color: appTheme.colors!!.textColor,
-                          fontFamily: font,
-                        }}
+                        style={styles.text}
                         className=" w-[14%] font-bold text-[11px] "
                       >
                         Edit
@@ -201,33 +201,13 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
                 />
               )}
 
-              <View
-                style={{ backgroundColor: appTheme.colors?.primary }}
-                className="w-[190px] h-[60px] self-center mb-2"
-              ></View>
-              <View
-                style={{ backgroundColor: appTheme.colors?.secondary }}
-                className="w-[190px] h-[60px] self-center mb-2"
-              ></View>
-              <View
-                style={{ backgroundColor: appTheme.colors?.tertiary }}
-                className="w-[190px] h-[60px] self-center mb-2"
-              ></View>
-              <View
-                style={{ backgroundColor: appTheme.colors?.quaternary }}
-                className="w-[190px] h-[60px] self-center mb-2"
-              ></View>
-              <View
-                style={{ backgroundColor: appTheme.colors?.quaternarySup }}
-                className="w-[190px] h-[60px] self-center mb-2"
-              ></View>
               <TouchableNativeFeedback onPress={handlePresentModalPress}>
                 <View
                   style={{ backgroundColor: appTheme.colors!!.tertiary }}
                   className=" self-center rounded-full  w-8 h-8 items-center mt-[8%]"
                 >
                   <Text
-                    style={{ color: appTheme.colors!!.primary }}
+                    style={styles.text}
                     className="text-center font-bold text-[20px]"
                   >
                     +
@@ -237,10 +217,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
               {!editmode && (
                 <View className="flex-row items-center gap-1 mt-[2%] ">
                   <Text
-                    style={{
-                      color: appTheme.colors!!.tertiary,
-                      fontFamily: font,
-                    }}
+                    style={styles.text}
                     className=" w-[14%] font-bold text-[11px] "
                   >
                     Preview
@@ -253,10 +230,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
                     }}
                   ></Switch>
                   <Text
-                    style={{
-                      color: appTheme.colors!!.textColor,
-                      fontFamily: "font",
-                    }}
+                    style={styles.text}
                     className=" w-[11%] font-bold text-[11px]"
                   >
                     Edit

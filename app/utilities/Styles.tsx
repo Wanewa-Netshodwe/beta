@@ -8,7 +8,7 @@ export const useDynamicStyles = () => {
   return StyleSheet.create({
     text: {
       color: appTheme.colors!!.textColor,
-      fontFamily: "font",
+      fontFamily: appTheme.fonts?.primary,
     },
   });
 };

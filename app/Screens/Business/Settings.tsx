@@ -44,6 +44,9 @@ const Settings: React.FC<Props> = ({ navigation }: Props) => {
                 style={{
                   borderBottomColor: appTheme.colors?.quaternarySup,
                   borderTopColor: appTheme.colors?.quaternarySup,
+                  borderLeftWidth:0,
+                  borderTopWidth:0,
+                  borderRightWidth:0,
                   borderWidth: 1,
                 }}
               >
