@@ -26,8 +26,9 @@ import {
   BusRegData,
   category,
   product,
-  RootStackParamList,
+
   sectionData,
+  StackShopLayoutParamList,
 } from "../utilities/Types";
 import { useSelector } from "react-redux";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -252,7 +253,7 @@ export const BE_signup_Business = async (
   }
 };
 export const BE_addSection = (data: {
-  navigator: StackNavigationProp<RootStackParamList, "section", undefined>;
+  navigator: StackNavigationProp<StackShopLayoutParamList, "banner", undefined>
   loading: React.Dispatch<React.SetStateAction<boolean>>;
   dispatch: Dispatch<UnknownAction>;
   sectionInfo: sectionData;
@@ -262,7 +263,7 @@ export const BE_addSection = (data: {
   loading(true);
   dispatch(addSection(sectionInfo));
   loading(false);
-  navigator.navigate("shopLayout");
+  navigator.navigate("home");
 };
 export const BE_deleteSection = (data: {
   // loading: React.Dispatch<React.SetStateAction<boolean>>;

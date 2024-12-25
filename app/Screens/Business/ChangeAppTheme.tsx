@@ -73,7 +73,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
       },
     };
     dispatch(setColor(data));
-    navigation.navigate("shopLayout");
+    navigation.navigate("Layout");
   };
   const [fontList, setFontList] = useState(
     Object.keys(fontMap).map((key) => ({ key, value: key }))
@@ -147,8 +147,8 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
     );
   } else {
     return (
-      <Screen>
-        <View className="p-5 mb-14">
+    
+        <View style={{ backgroundColor: appTheme.colors?.background }} className="p-5 h-full">
           <LoadingComp
             loaded={isFontLoaded}
             item={
@@ -189,7 +189,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                   <View className="mt-5 w-[180px] self-end right-5  rounded-md  ">
                     <ColorPicker
                       style={{ width: "100%", gap: 10 }}
-                      value="red"
+                      value={'red'}
                       onComplete={({ hex }) => {
                         setbackgroundColor(hex);
                       }}
@@ -230,7 +230,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                   <View className="mt-5 self-start  w-[180px]  rounded-md  ">
                     <ColorPicker
                       style={{ width: "100%", gap: 10 }}
-                      value="red"
+                      value={appTheme.colors?.primary}
                       onComplete={({ hex }) => {
                         setPrimary(hex);
                       }}
@@ -271,7 +271,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                   <View className="mt-5 self-end w-[180px] right-5 rounded-md  ">
                     <ColorPicker
                       style={{ width: "100%", gap: 10 }}
-                      value="red"
+                      value={appTheme.colors?.secondary}
                       onComplete={({ hex }) => {
                         setSecondary(hex);
                       }}
@@ -312,7 +312,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                   <View className="mt-5 self-start  w-[180px]  rounded-md  ">
                     <ColorPicker
                       style={{ width: "100%", gap: 10 }}
-                      value="red"
+                      value={appTheme.colors?.tertiary}
                       onComplete={({ hex }) => {
                         setTertiary(hex);
                       }}
@@ -353,7 +353,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                   <View className="mt-5 self-end right-5 w-[180px] rounded-md  ">
                     <ColorPicker
                       style={{ width: "100%", gap: 10 }}
-                      value="red"
+                      value={appTheme.colors?.quaternary}
                       onComplete={({ hex }) => {
                         setQuanternary(hex);
                       }}
@@ -394,7 +394,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                   <View className="mt-5 self-start w-[180px] rounded-md  ">
                     <ColorPicker
                       style={{ width: "100%", gap: 10 }}
-                      value="red"
+                      value={appTheme.colors?.quaternarySup}
                       onComplete={({ hex }) => {
                         setQuanternarySup(hex);
                       }}
@@ -425,7 +425,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                   <View className="mt-5 self-end right-5 w-[180px] rounded-md  ">
                     <ColorPicker
                       style={{ width: "100%", gap: 10 }}
-                      value="red"
+                      value={'red'}
                       onComplete={({ hex }) => {
                         setTextColor(hex);
                       }}
@@ -485,10 +485,11 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                 title="Save"
                 className=""
               />
+              <View className="h-[35px]"></View>
             </ScrollView>
           </View>
         </View>
-      </Screen>
+    
     );
   }
 };

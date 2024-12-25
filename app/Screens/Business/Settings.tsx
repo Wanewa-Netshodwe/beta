@@ -21,49 +21,50 @@ const Settings: React.FC<Props> = ({ navigation }: Props) => {
   });
   const styles = useDynamicStyles();
   return (
-    <Screen>
-      <View className="w-full h-full">
-        <View className="p-5">
-          <LoadingComp
-            loaded={loaded}
-            item={
-              <Text style={styles.text} className={`text-[24px]  `}>
-                Settings
-              </Text>
-            }
-          />
+    <View
+      style={{ backgroundColor: appTheme.colors?.background }}
+      className="w-full h-full"
+    >
+      <View className="p-5">
+        <LoadingComp
+          loaded={loaded}
+          item={
+            <Text style={styles.text} className={`text-[24px]  `}>
+              Settings
+            </Text>
+          }
+        />
 
-          <ScrollView>
-            <TouchableNativeFeedback
-              onPress={() => {
-                navigation.navigate("AppTheme");
+        <ScrollView>
+          <TouchableNativeFeedback
+            onPress={() => {
+              navigation.navigate("AppTheme");
+            }}
+          >
+            <View
+              className=" mt-5 flex-row p-4 items-center gap-3"
+              style={{
+                borderBottomColor: appTheme.colors?.quaternarySup,
+                borderTopColor: appTheme.colors?.quaternarySup,
+                borderLeftWidth: 0,
+                borderTopWidth: 0,
+                borderRightWidth: 0,
+                borderWidth: 1,
               }}
             >
-              <View
-                className=" mt-5 flex-row p-4 items-center gap-3"
-                style={{
-                  borderBottomColor: appTheme.colors?.quaternarySup,
-                  borderTopColor: appTheme.colors?.quaternarySup,
-                  borderLeftWidth:0,
-                  borderTopWidth:0,
-                  borderRightWidth:0,
-                  borderWidth: 1,
-                }}
-              >
-                <Entypo
-                  name="colours"
-                  size={30}
-                  color={appTheme.colors?.secondary}
-                />
-                <Text style={styles.text} className="text-[18px] font-semibold">
-                  Change App Theme
-                </Text>
-              </View>
-            </TouchableNativeFeedback>
-          </ScrollView>
-        </View>
+              <Entypo
+                name="colours"
+                size={30}
+                color={appTheme.colors?.secondary}
+              />
+              <Text style={styles.text} className="text-[18px] font-semibold">
+                Change App Theme
+              </Text>
+            </View>
+          </TouchableNativeFeedback>
+        </ScrollView>
       </View>
-    </Screen>
+    </View>
   );
 };
 

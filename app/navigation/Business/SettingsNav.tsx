@@ -6,7 +6,7 @@ import BusinessLayout from "../../Screens/Business/BusinessLayout";
 
 const Stack = createStackNavigator();
 const SettingsNavigator = () => (
-  <Stack.Navigator initialRouteName="Home" screenOptions={{animation:'reveal_from_bottom'}}>
+  <Stack.Navigator initialRouteName="Home" screenOptions={{animation:'fade'}}>
     <Stack.Screen
       options={{ headerShown: false }}
       name="Home"

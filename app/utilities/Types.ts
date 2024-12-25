@@ -1,10 +1,10 @@
 export type TabParamList = {
-  shopLayout: undefined;
+  Layout: undefined;
   addProduct: undefined;
   settings: undefined;
 };
 export type StackShopLayoutParamList = {
-  shopLayout: undefined;
+  home: undefined;
   banner: undefined;
   section: undefined;
   carousel: undefined;
@@ -18,6 +18,7 @@ export type StackSettingsParamList = {
 };
 
 export type BusinessAccount = {
+  foregroundImg?: string;
   id: string;
   offering: string;
   location: {

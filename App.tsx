@@ -11,10 +11,11 @@ LogBox.ignoreAllLogs(true);
 export default function App() {
   return (
     <Provider store={store}>
+      <Screen>
       <NavigationContainer>
         <BusinessNav />
       </NavigationContainer>
-
+      </Screen>
       <StatusBar style="auto" />
 
       <Toast />

@@ -5,6 +5,7 @@ import {
   Switch,
   ScrollView,
   FlatList,
+  RefreshControl,
 } from "react-native";
 import * as Font from "expo-font";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -35,7 +36,7 @@ import CarouselSection from "../../components/CarouselSection";
 import { useDynamicStyles } from "../../utilities/Styles";
 import LoadingComp from "../../utilities/LoadingComp";
 
-type prop = StackScreenProps<StackShopLayoutParamList, "shopLayout">;
+type prop = StackScreenProps<StackShopLayoutParamList, "home">;
 const BusinessLayout: React.FC<prop> = ({ navigation }) => {
   const styles = useDynamicStyles();
   const handleDeleteSection = (sectionInfo: sectionData) => {
@@ -78,150 +79,42 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
   return (
     <GestureHandlerRootView>
       <BottomSheetModalProvider>
-        <Screen>
-          <View className="w-full  h-full  relative ">
-            <ScrollView>
-              <View className="p-[5%] h-fit">
-                <LoadingComp
-                  loaded={loaded}
-                  item={
-                    <Text style={styles.text} className={`text-[24px] h-fit  `}>
-                      Shop Layout
-                    </Text>
-                  }
-                />
-                {editmode && (
-                  <View className="flex-row items-center gap-1 mt-[2%] ">
-                    {loaded ? (
-                      <Text
-                        style={styles.text}
-                        className=" w-[14%] font-bold text-[11px] "
-                      >
-                        Preview
-                      </Text>
-                    ) : (
-                      <TextLoader width={"Preview".length} />
-                    )}
-
-                    <Switch
-                      value={editmode}
-                      onValueChange={(b) => {
-                        setEditMode(b);
-                      }}
-                    ></Switch>
-                    {loaded ? (
-                      <Text
-                        style={styles.text}
-                        className=" w-[14%] font-bold text-[11px] "
-                      >
-                        Edit
-                      </Text>
-                    ) : (
-                      <TextLoader width={"Edit".length} />
-                    )}
-                  </View>
-                )}
-
-                {!editmode && <SearchBar />}
-              </View>
-
-              {BusinessInfo.sections.length > 0 && (
-                <FlatList
-                  data={BusinessInfo.sections}
-                  keyExtractor={(item, index) => index.toString()}
-                  renderItem={({ item }) => {
-                    if (item.type === "Banner" && item.imgs && item.height) {
-                      return <BannerSection item={item} editmode={editmode} />;
-                    }
-
-                    if (item.type === "Carousel" && item.imgs && item.height) {
-                      return (
-                        <CarouselSection editmode={editmode} item={item} />
-                      );
-                    }
-
-                    if (item.type === "Section") {
-                      console.log("products : ", item.products);
-                      return (
-                        <View className="relative ">
-                          {editmode && (
-                            <AntDesign
-                              onPress={() => handleDeleteSection(item)}
-                              size={20}
-                              style={{ color: appTheme.colors!!.tertiary }}
-                              className="absolute z-40 left-[200px] top-[22px] "
-                              name="delete"
-                            />
-                          )}
-
-                          <MySection
-                            name={item.name}
-                            section={item}
-                            products={item.products ? item.products : undefined}
-                            nav={navigation}
-                          />
-                        </View>
-                      );
-                    }
-                    if (item.type === "categories") {
-                      console.log("products : ", item.categoryList);
-                      return (
-                        <View
-                          style={{
-                            backgroundColor: appTheme.colors!!.secondary,
-                            height: 128,
-                          }}
-                          className="px-5  mt-2"
-                        >
-                          <View className="flex-row items-center mt-2">
-                            <Text
-                              className="font-bold text-[25px] w-[80%]"
-                              style={{ color: appTheme.colors!!.tertiary }}
-                            >
-                              {item.name}
-                            </Text>
-                          </View>
-                          <FlatList
-                            horizontal
-                            data={item.categoryList?.categories}
-                            keyExtractor={(item, index) => index.toString()}
-                            renderItem={({ item }) => (
-                              <CategoryView
-                                name={item.name!!}
-                                img={item.img!!}
-                              />
-                            )}
-                          />
-                        </View>
-                      );
-                    }
-
-                    return null;
-                  }}
-                />
-              )}
-
-              <TouchableNativeFeedback onPress={handlePresentModalPress}>
-                <View
-                  style={{ backgroundColor: appTheme.colors!!.tertiary }}
-                  className=" self-center rounded-full  w-8 h-8 items-center mt-[8%]"
-                >
-                  <Text
-                    style={styles.text}
-                    className="text-center font-bold text-[20px]"
-                  >
-                    +
+        <View
+          style={{ backgroundColor: appTheme.colors?.background }}
+          className=" h-full relative "
+        >
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={false}
+                colors={[
+                  appTheme.colors?.secondary!!,
+                  appTheme.colors?.primary!!,
+                ]}
+              />
+            }
+          >
+            <View className="p-[5%]  h-fit">
+              <LoadingComp
+                loaded={loaded}
+                item={
+                  <Text style={styles.text} className={`text-[24px] h-fit  `}>
+                    Shop Layout
                   </Text>
-                </View>
-              </TouchableNativeFeedback>
-              {!editmode && (
+                }
+              />
+              {editmode && (
                 <View className="flex-row items-center gap-1 mt-[2%] ">
-                  <Text
-                    style={styles.text}
-                    className=" w-[14%] font-bold text-[11px] "
-                  >
-                    Preview
-                  </Text>
+                  {loaded ? (
+                    <Text
+                      style={styles.text}
+                      className=" w-[14%] font-bold text-[11px] "
+                    >
+                      Preview
+                    </Text>
+                  ) : (
+                    <TextLoader width={"Preview".length} />
+                  )}
 
                   <Switch
                     value={editmode}
@@ -229,17 +122,131 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
                       setEditMode(b);
                     }}
                   ></Switch>
-                  <Text
-                    style={styles.text}
-                    className=" w-[11%] font-bold text-[11px]"
-                  >
-                    Edit
-                  </Text>
+                  {loaded ? (
+                    <Text
+                      style={styles.text}
+                      className=" w-[14%] font-bold text-[11px] "
+                    >
+                      Edit
+                    </Text>
+                  ) : (
+                    <TextLoader width={"Edit".length} />
+                  )}
                 </View>
               )}
-            </ScrollView>
-          </View>
-        </Screen>
+
+              {!editmode && <SearchBar />}
+            </View>
+
+            {BusinessInfo.sections.length > 0 && (
+              <FlatList
+                data={BusinessInfo.sections}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => {
+                  if (item.type === "Banner" && item.imgs && item.height) {
+                    return <BannerSection item={item} editmode={editmode} />;
+                  }
+
+                  if (item.type === "Carousel" && item.imgs && item.height) {
+                    return <CarouselSection editmode={editmode} item={item} />;
+                  }
+
+                  if (item.type === "Section") {
+                    console.log("products : ", item.products);
+                    return (
+                      <View className="relative ">
+                        {editmode && (
+                          <AntDesign
+                            onPress={() => handleDeleteSection(item)}
+                            size={20}
+                            style={{ color: appTheme.colors!!.tertiary }}
+                            className="absolute z-40 left-[200px] top-[22px] "
+                            name="delete"
+                          />
+                        )}
+
+                        <MySection
+                          name={item.name}
+                          section={item}
+                          products={item.products ? item.products : undefined}
+                          nav={navigation}
+                        />
+                      </View>
+                    );
+                  }
+                  if (item.type === "categories") {
+                    console.log("products : ", item.categoryList);
+                    return (
+                      <View
+                        style={{
+                          backgroundColor: appTheme.colors!!.secondary,
+                          height: 128,
+                        }}
+                        className="px-5  mt-2"
+                      >
+                        <View className="flex-row items-center mt-2">
+                          <Text
+                            className="font-bold text-[25px] w-[80%]"
+                            style={{ color: appTheme.colors!!.tertiary }}
+                          >
+                            {item.name}
+                          </Text>
+                        </View>
+                        <FlatList
+                          horizontal
+                          data={item.categoryList?.categories}
+                          keyExtractor={(item, index) => index.toString()}
+                          renderItem={({ item }) => (
+                            <CategoryView name={item.name!!} img={item.img!!} />
+                          )}
+                        />
+                      </View>
+                    );
+                  }
+
+                  return null;
+                }}
+              />
+            )}
+
+            <TouchableNativeFeedback onPress={handlePresentModalPress}>
+              <View
+                style={{ backgroundColor: appTheme.colors!!.tertiary }}
+                className=" self-center rounded-full  w-8 h-8 items-center mt-[8%]"
+              >
+                <Text
+                  style={styles.text}
+                  className="text-center font-bold text-[20px]"
+                >
+                  +
+                </Text>
+              </View>
+            </TouchableNativeFeedback>
+            {!editmode && (
+              <View className="flex-row items-center gap-1 mt-[2%] ">
+                <Text
+                  style={styles.text}
+                  className=" w-[14%] font-bold text-[11px] "
+                >
+                  Preview
+                </Text>
+
+                <Switch
+                  value={editmode}
+                  onValueChange={(b) => {
+                    setEditMode(b);
+                  }}
+                ></Switch>
+                <Text
+                  style={styles.text}
+                  className=" w-[11%] font-bold text-[11px]"
+                >
+                  Edit
+                </Text>
+              </View>
+            )}
+          </ScrollView>
+        </View>
 
         <BottomSheetModal
           backgroundStyle={{ backgroundColor: appTheme.colors!!.secondary }}
