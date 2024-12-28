@@ -155,16 +155,22 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
         <LoadingComp
           loaded={isFontLoaded}
           item={
-            <View style={{backgroundColor:appTheme.colors?.primary}} className="p-[5%] w-full">
-            <Text style={styles.text} className={`text-[24px]  `}>
-              App Theme
-            </Text>
+            <View
+              style={{ backgroundColor: appTheme.colors?.primary }}
+              className="p-[5%] w-full"
+            >
+              <Text style={styles.text} className={`text-[24px]  `}>
+                App Theme
+              </Text>
             </View>
           }
         />
         <View className="">
           <ScrollView>
-            <View style={{backgroundColor:appTheme.colors?.primary}} className="mt-1  p-[5%]  ">
+            <View
+              style={{ backgroundColor: appTheme.colors?.primary }}
+              className="mt-1  p-[5%]  "
+            >
               <View className="mt-2 mb-4">
                 <Text style={styles.text}>Background Color</Text>
               </View>
@@ -209,7 +215,10 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                 </View>
               </TouchableNativeFeedback>
             </View>
-            <View style={{backgroundColor:appTheme.colors?.primary}} className=" mt-2  p-[5%] ">
+            <View
+              style={{ backgroundColor: appTheme.colors?.primary }}
+              className=" mt-2  p-[5%] "
+            >
               <View className="mt-2 mb-4">
                 <Text style={styles.text}>Primary Color</Text>
               </View>
@@ -235,7 +244,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                 <View className="mt-5 self-start  w-[180px]  rounded-md  ">
                   <ColorPicker
                     style={{ width: "100%", gap: 10 }}
-                    value={appTheme.colors?.primary}
+                    value={"red"}
                     onComplete={({ hex }) => {
                       setPrimary(hex);
                     }}
@@ -250,7 +259,10 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                 </View>
               </TouchableNativeFeedback>
             </View>
-            <View  style={{backgroundColor:appTheme.colors?.primary}} className=" mt-2  p-[5%] ">
+            <View
+              style={{ backgroundColor: appTheme.colors?.primary }}
+              className=" mt-2  p-[5%] "
+            >
               <View className="mt-2 mb-4">
                 <Text style={styles.text}>Secondary Color</Text>
               </View>
@@ -276,7 +288,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                 <View className="mt-5 self-end w-[180px] right-5 rounded-md  ">
                   <ColorPicker
                     style={{ width: "100%", gap: 10 }}
-                    value={appTheme.colors?.secondary}
+                    value={"red"}
                     onComplete={({ hex }) => {
                       setSecondary(hex);
                     }}
@@ -291,7 +303,10 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                 </View>
               </TouchableNativeFeedback>
             </View>
-            <View  style={{backgroundColor:appTheme.colors?.primary}} className=" mt-2  p-[5%] ">
+            <View
+              style={{ backgroundColor: appTheme.colors?.primary }}
+              className=" mt-2  p-[5%] "
+            >
               <View className="mt-2 mb-4">
                 <Text style={styles.text}>Tertiary Color</Text>
               </View>
@@ -317,7 +332,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                 <View className="mt-5 self-start  w-[180px]  rounded-md  ">
                   <ColorPicker
                     style={{ width: "100%", gap: 10 }}
-                    value={appTheme.colors?.tertiary}
+                    value={"red"}
                     onComplete={({ hex }) => {
                       setTertiary(hex);
                     }}
@@ -332,7 +347,10 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                 </View>
               </TouchableNativeFeedback>
             </View>
-            <View  style={{backgroundColor:appTheme.colors?.primary}} className=" mt-2  p-[5%] ">
+            <View
+              style={{ backgroundColor: appTheme.colors?.primary }}
+              className=" mt-2  p-[5%] "
+            >
               <View className="mt-2 mb-4">
                 <Text style={styles.text}>quaternary Color</Text>
               </View>
@@ -358,7 +376,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                 <View className="mt-5 self-end right-5 w-[180px] rounded-md  ">
                   <ColorPicker
                     style={{ width: "100%", gap: 10 }}
-                    value={appTheme.colors?.quaternary}
+                    value={"red"}
                     onComplete={({ hex }) => {
                       setQuanternary(hex);
                     }}
@@ -374,7 +392,10 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
               </TouchableNativeFeedback>
             </View>
 
-            <View  style={{backgroundColor:appTheme.colors?.primary}} className=" mt-2  p-[5%] ">
+            <View
+              style={{ backgroundColor: appTheme.colors?.primary }}
+              className=" mt-2  p-[5%] "
+            >
               <View className="mt-2 mb-4">
                 <Text style={styles.text}>Quirnary Color</Text>
               </View>
@@ -400,7 +421,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                 <View className="mt-5 self-start w-[180px] rounded-md  ">
                   <ColorPicker
                     style={{ width: "100%", gap: 10 }}
-                    value={appTheme.colors?.quaternarySup}
+                    value={"red"}
                     onComplete={({ hex }) => {
                       setQuanternarySup(hex);
                     }}
@@ -415,7 +436,10 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                 </View>
               </TouchableNativeFeedback>
             </View>
-            <View  style={{backgroundColor:appTheme.colors?.primary}} className=" mt-2  p-[5%] ">
+            <View
+              style={{ backgroundColor: appTheme.colors?.primary }}
+              className=" mt-2  p-[5%] "
+            >
               <View className="mt-2 mb-4">
                 <Text style={styles.text}>Select Text Color</Text>
               </View>
@@ -446,7 +470,10 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
                 </View>
               </TouchableNativeFeedback>
             </View>
-            <View  style={{backgroundColor:appTheme.colors?.primary}} className=" mt-2  p-[5%] ">
+            <View
+              style={{ backgroundColor: appTheme.colors?.primary }}
+              className=" mt-2  p-[5%] "
+            >
               <View className="mt-2 mb-4">
                 <Text style={styles.text}>Select Font Style</Text>
               </View>

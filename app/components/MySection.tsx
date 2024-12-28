@@ -6,7 +6,11 @@ import {
   TouchableNativeFeedback,
 } from "react-native";
 import React from "react";
-import { product, StackShopLayoutParamList, sectionData } from "../utilities/Types";
+import {
+  product,
+  StackShopLayoutParamList,
+  sectionData,
+} from "../utilities/Types";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
@@ -24,7 +28,7 @@ type Props = {
 };
 
 const MySection = (props: Props) => {
-  const styles2 = useDynamicStyles()
+  const styles2 = useDynamicStyles();
   const { nav } = props;
   const appTheme = useSelector((state: RootState) => state.appTheme.appTheme);
   const prod = props.products ? props.products : null;
@@ -45,10 +49,7 @@ const MySection = (props: Props) => {
               borderWidth: 2,
             }}
           >
-            <Text
-              className="text-center  text-[10px]"
-              style={styles2.text}
-            >
+            <Text className="text-center  text-[10px]" style={styles2.text}>
               View All
             </Text>
           </View>
@@ -66,14 +67,14 @@ const MySection = (props: Props) => {
                 renderItem={({ item }) => (
                   <TouchableNativeFeedback
                     onPress={() => {
-                      nav.navigate("viewProduct", { product: item });
+                      // nav.navigate("viewProduct", { product: item });
                       console.log("prssed");
                     }}
                   >
                     <View
                       style={{
-                        backgroundColor: appTheme.colors!!.quaternary,
-                        borderColor: appTheme.colors!!.primary,
+                        backgroundColor: appTheme.colors?.background,
+                        borderColor: appTheme.colors!!.textColor,
                         borderWidth: 1,
                         marginRight: 5,
                       }}
@@ -85,9 +86,9 @@ const MySection = (props: Props) => {
                             name="delivery-dining"
                             size={20}
                             style={{
-                              backgroundColor: appTheme.colors!!.primary,
+                              backgroundColor: appTheme.colors?.background,
                             }}
-                            color={appTheme.colors!!.tertiary}
+                            color={appTheme.colors!!.textColor}
                             className=" absolute -top-2 z-50 -left-3    p-2 rounded-full"
                           />
                         )}
@@ -101,8 +102,8 @@ const MySection = (props: Props) => {
                       </View>
                       <View>
                         <Text
-                          className="font-medium text-[13px] w-[120px] max-h-[48px]  mb-2 "
-                          style={{ color: appTheme.colors!!.tertiary }}
+                          className=" text-[13px] w-[120px] max-h-[48px]  mb-2 "
+                          style={styles2.text}
                         >
                           {item.name!!.length > 50
                             ? item.name?.substring(0, 50) + "..."
@@ -112,14 +113,14 @@ const MySection = (props: Props) => {
                       <View className="flex-row justify-between items-baseline">
                         <Text
                           className="font-semibold relative -top-2 text-[18px] "
-                          style={{ color: appTheme.colors!!.tertiary }}
+                          style={styles2.text}
                         >
                           R{item.auction ? item.auction.startPrice : item.price}
                         </Text>
                         {item.auction && (
                           <Text
                             className="font-semibold relative -top-2  text-[10px] "
-                            style={{ color: appTheme.colors!!.tertiary }}
+                            style={styles2.text}
                           >
                             {" "}
                             auction
@@ -127,15 +128,15 @@ const MySection = (props: Props) => {
                         )}
                       </View>
                       {item.rating && (
-                        <View className="flex-row -top-1  items-center gap-2">
+                        <View className="flex-row -top-3  items-center gap-2">
                           <Feather
                             name="star"
                             size={13}
-                            color={appTheme.colors!!.tertiary}
+                            color={appTheme.colors!!.primary}
                           />
                           <Text
                             className="font-semibold relative  text-[13px] "
-                            style={{ color: appTheme.colors!!.tertiary }}
+                            style={styles2.text}
                           >
                             {item.rating}
                           </Text>
