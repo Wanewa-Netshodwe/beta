@@ -5,6 +5,7 @@ export type TabParamList = {
 };
 export type StackShopLayoutParamList = {
   foregroundImg: undefined;
+  searchModal:undefined
   home: undefined;
   banner: undefined;
   section: undefined;

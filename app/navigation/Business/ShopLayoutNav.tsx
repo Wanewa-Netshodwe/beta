@@ -4,6 +4,8 @@ import AddBanner from "../../Screens/Business/AddBanner";
 import AddForegroundImage from "../../Screens/Business/AddForegroundImage";
 import AddCarousel from "../../Screens/Business/AddCarousel";
 import AddSection from "../../Screens/Business/AddSection";
+import ViewProduct from "../../Screens/Business/ViewProduct";
+import SearchModal from "../../Screens/Business/SearchModal";
 
 const Stack = createStackNavigator();
 const ShopLayoutNavigator = () => (
@@ -28,6 +30,21 @@ const ShopLayoutNavigator = () => (
       name="section"
       options={{ headerShown: false }}
       component={AddSection}
+    />
+    <Stack.Screen
+      name="searchModal"
+      options={{
+        headerShown: false,
+        presentation: "modal",
+        animation: "reveal_from_bottom",
+      }}
+      component={SearchModal}
+    />
+
+    <Stack.Screen
+      name="viewProduct"
+      options={{ headerShown: false }}
+      component={ViewProduct}
     />
     {/* <Stack.Screen name="Carousel" component={AddCarousel} />
     <Stack.Screen name="ViewProduct" component={ViewProduct} />

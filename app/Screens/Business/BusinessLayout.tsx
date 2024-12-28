@@ -46,6 +46,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
     BE_deleteSection({ dispatch, sectionInfo });
   };
   const [isLoading, setLoading] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const { width } = Dimensions.get("screen");
   const appTheme = useSelector((state: RootState) => state.appTheme.appTheme);
   const font = useSelector(
@@ -217,7 +218,10 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
                     )}
 
                     {!editmode && (
-                      <SearchBar className=" absolute top-4 elevation-sm" />
+                      <SearchBar
+                        nav={navigation}
+                        className=" absolute top-4 elevation-sm"
+                      />
                     )}
                   </View>
                 </ImageBackground>
@@ -268,7 +272,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
                     </View>
                   )}
 
-                  {!editmode && <SearchBar />}
+                  {!editmode && <SearchBar nav={navigation} />}
                 </View>
               </>
             )}

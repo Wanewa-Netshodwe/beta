@@ -44,6 +44,7 @@
     "react-native-screens": "^4.4.0",
     "react-native-star-rating-widget": "^1.9.2",
     "react-native-switch-toggle": "^2.2.1",
+    "react-native-table-component": "^1.2.2",
     "react-native-toast-message": "^2.2.1",
     "react-native-vector-icons": "^10.2.0",
     "react-native-webview": "13.12.5",
@@ -55,6 +56,7 @@
     "@babel/core": "^7.25.2",
     "@types/react": "~18.3.12",
     "@types/react-native-canvas": "^0.1.14",
+    "@types/react-native-table-component": "^1.2.8",
     "typescript": "^5.3.3"
   },
   "private": true

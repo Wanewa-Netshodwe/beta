@@ -67,7 +67,7 @@ const MySection = (props: Props) => {
                 renderItem={({ item }) => (
                   <TouchableNativeFeedback
                     onPress={() => {
-                      // nav.navigate("viewProduct", { product: item });
+                      nav.navigate("viewProduct", { product: item });
                       console.log("prssed");
                     }}
                   >
@@ -148,184 +148,95 @@ const MySection = (props: Props) => {
               />
             ) : (
               <>
-                <FlatList
-                  horizontal
-                  data={prod.slice(0, 2)}
-                  keyExtractor={(item, index) => index.toString()}
-                  renderItem={({ item }) => (
-                    <TouchableNativeFeedback
-                      onPress={() => {
-                        nav.navigate("viewProduct", { product: item });
-                        console.log("prssed");
-                      }}
-                    >
-                      <View
-                        style={{
-                          backgroundColor: appTheme.colors!!.quaternary,
-                          borderColor: appTheme.colors!!.primary,
-                          borderWidth: 1,
-                          marginRight: 5,
+                <View  className=" gap-2  flex-wrap flex-row  ">
+                  {prod.slice(0, 4).map((item, index) => {
+                    return (
+                      <TouchableNativeFeedback
+                      key={index}
+                        onPress={() => {
+                          nav.navigate("viewProduct", { product: item });
+                          console.log("prssed");
                         }}
-                        className="w-[130px] rounded-sm h-[235px] mb-5  p-1 relative"
                       >
-                        <View className="w-[160px] h-[130px] mb-2">
-                          {item.free_delivery === "yes" && (
-                            <MaterialIcons
-                              name="delivery-dining"
-                              size={20}
-                              style={{
-                                backgroundColor: appTheme.colors!!.primary,
-                              }}
-                              color={appTheme.colors!!.tertiary}
-                              className=" absolute -top-2 z-50 -left-3    p-2 rounded-full"
-                            />
-                          )}
+                        <View
+                          style={{
+                            backgroundColor: appTheme.colors!!.background,
+                            borderColor: appTheme.colors!!.textColor,
+                            borderWidth: 1,
+                            marginRight: 5,
+                          }}
+                          className="w-[130px] rounded-sm h-[235px] mb-5  p-1 relative"
+                        >
+                          <View className="w-[160px] h-[130px] mb-2">
+                            {item.free_delivery === "yes" && (
+                              <MaterialIcons
+                                name="delivery-dining"
+                                size={20}
+                                style={{
+                                  backgroundColor: appTheme.colors!!.background,
+                                }}
+                                color={appTheme.colors!!.textColor}
+                                className=" absolute -top-2 z-50 -left-3    p-2 rounded-full"
+                              />
+                            )}
 
-                          <Image
-                            width={120}
-                            height={130}
-                            className="rounded-md"
-                            source={{ uri: item.imgs!![0] }}
-                          />
-                        </View>
-                        <View>
-                          <Text
-                            className="font-medium text-[13px] w-[120px] max-h-[48px]  mb-2 "
-                            style={{ color: appTheme.colors!!.tertiary }}
-                          >
-                            {item.name!!.length > 50
-                              ? item.name?.substring(0, 50) + "..."
-                              : item.name}
-                          </Text>
-                        </View>
-                        <View className="flex-row justify-between items-baseline">
-                          <Text
-                            className="font-semibold relative -top-2 text-[18px] "
-                            style={{ color: appTheme.colors!!.tertiary }}
-                          >
-                            R
-                            {item.auction
-                              ? item.auction.startPrice
-                              : item.price}
-                          </Text>
-                          {item.auction && (
-                            <Text
-                              className="font-semibold relative -top-2  text-[10px] "
-                              style={{ color: appTheme.colors!!.tertiary }}
-                            >
-                              {" "}
-                              auction
-                            </Text>
-                          )}
-                        </View>
-                        {item.rating && (
-                          <View className="flex-row -top-1  items-center gap-2">
-                            <Feather
-                              name="star"
-                              size={13}
-                              color={appTheme.colors!!.tertiary}
+                            <Image
+                              width={120}
+                              height={130}
+                              className="rounded-md"
+                              source={{ uri: item.imgs!![0] }}
                             />
+                          </View>
+                          <View>
                             <Text
-                              className="font-semibold relative  text-[13px] "
-                              style={{ color: appTheme.colors!!.tertiary }}
+                              className="font-medium text-[13px] w-[120px] max-h-[48px]  mb-2 "
+                              style={styles2.text}
                             >
-                              {item.rating}
+                              {item.name!!.length > 50
+                                ? item.name?.substring(0, 50) + "..."
+                                : item.name}
                             </Text>
                           </View>
-                        )}
-                      </View>
-                    </TouchableNativeFeedback>
-                  )}
-                />
-                <FlatList
-                  horizontal
-                  data={prod.slice(2, 4)}
-                  keyExtractor={(item, index) => index.toString()}
-                  renderItem={({ item }) => (
-                    <TouchableNativeFeedback
-                      onPress={() => {
-                        nav.navigate("viewProduct", { product: item });
-                        console.log("prssed");
-                      }}
-                    >
-                      <View
-                        style={{
-                          backgroundColor: appTheme.colors!!.quaternary,
-                          borderColor: appTheme.colors!!.primary,
-                          borderWidth: 1,
-                          marginRight: 5,
-                        }}
-                        className="w-[130px] rounded-sm h-[235px] mb-5  p-1 relative"
-                      >
-                        <View className="w-[160px] h-[130px] mb-2">
-                          {item.free_delivery === "yes" && (
-                            <MaterialIcons
-                              name="delivery-dining"
-                              size={20}
-                              style={{
-                                backgroundColor: appTheme.colors!!.primary,
-                              }}
-                              color={appTheme.colors!!.tertiary}
-                              className=" absolute -top-2 z-50 -left-3    p-2 rounded-full"
-                            />
-                          )}
-
-                          <Image
-                            width={120}
-                            height={130}
-                            className="rounded-md"
-                            source={{ uri: item.imgs!![0] }}
-                          />
-                        </View>
-                        <View>
-                          <Text
-                            className="font-medium text-[13px] w-[120px] max-h-[48px]  mb-2 "
-                            style={{ color: appTheme.colors!!.tertiary }}
-                          >
-                            {item.name!!.length > 50
-                              ? item.name?.substring(0, 50) + "..."
-                              : item.name}
-                          </Text>
-                        </View>
-                        <View className="flex-row justify-between items-baseline">
-                          <Text
-                            className="font-semibold relative -top-2 text-[18px] "
-                            style={{ color: appTheme.colors!!.tertiary }}
-                          >
-                            R
-                            {item.auction
-                              ? item.auction.startPrice
-                              : item.price}
-                          </Text>
-                          {item.auction && (
+                          <View className="flex-row justify-between items-baseline">
                             <Text
-                              className="font-semibold relative -top-2  text-[10px] "
-                              style={{ color: appTheme.colors!!.tertiary }}
+                              className="font-semibold relative -top-2 text-[18px] "
+                              style={styles2.text}
                             >
-                              {" "}
-                              auction
+                              R
+                              {item.auction
+                                ? item.auction.startPrice
+                                : item.price}
                             </Text>
-                          )}
-                        </View>
-                        {item.rating && (
-                          <View className="flex-row -top-1  items-center gap-2">
-                            <Feather
-                              name="star"
-                              size={13}
-                              color={appTheme.colors!!.tertiary}
-                            />
-                            <Text
-                              className="font-semibold relative  text-[13px] "
-                              style={{ color: appTheme.colors!!.tertiary }}
-                            >
-                              {item.rating}
-                            </Text>
+                            {item.auction && (
+                              <Text
+                                className="font-semibold relative -top-2  text-[10px] "
+                                style={styles2.text}
+                              >
+                                {" "}
+                                auction
+                              </Text>
+                            )}
                           </View>
-                        )}
-                      </View>
-                    </TouchableNativeFeedback>
-                  )}
-                />
+                          {item.rating && (
+                            <View className="flex-row -top-3  items-center gap-2">
+                              <Feather
+                                name="star"
+                                size={13}
+                                color={appTheme.colors!!.textColor}
+                              />
+                              <Text
+                                className="font-semibold relative  text-[13px] "
+                                style={styles2.text}
+                              >
+                                {item.rating}
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                      </TouchableNativeFeedback>
+                    );
+                  })}
+                </View>
               </>
             )}
           </>
