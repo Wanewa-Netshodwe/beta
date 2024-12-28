@@ -318,15 +318,15 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
                     return (
                       <View
                         style={{
-                          backgroundColor: appTheme.colors!!.secondary,
-                          height: 128,
+                          backgroundColor: appTheme.colors!!.primary,
+                          height: 148,
                         }}
                         className="px-5  mt-2"
                       >
                         <View className="flex-row items-center mt-2">
                           <Text
-                            className="font-bold text-[25px] w-[80%]"
-                            style={{ color: appTheme.colors!!.tertiary }}
+                            className="text-[25px] w-[80%]"
+                            style={styles.text}
                           >
                             {item.name}
                           </Text>

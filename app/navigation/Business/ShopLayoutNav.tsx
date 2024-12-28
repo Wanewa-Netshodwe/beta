@@ -6,6 +6,8 @@ import AddCarousel from "../../Screens/Business/AddCarousel";
 import AddSection from "../../Screens/Business/AddSection";
 import ViewProduct from "../../Screens/Business/ViewProduct";
 import SearchModal from "../../Screens/Business/SearchModal";
+import ListCategories from "../../Screens/Business/ListCategories";
+import Category from "../../Screens/Business/Category";
 
 const Stack = createStackNavigator();
 const ShopLayoutNavigator = () => (
@@ -27,6 +29,11 @@ const ShopLayoutNavigator = () => (
       component={AddCarousel}
     />
     <Stack.Screen
+      name="categoryList"
+      options={{ headerShown: false }}
+      component={ListCategories}
+    />
+    <Stack.Screen
       name="section"
       options={{ headerShown: false }}
       component={AddSection}
@@ -45,6 +52,11 @@ const ShopLayoutNavigator = () => (
       name="viewProduct"
       options={{ headerShown: false }}
       component={ViewProduct}
+    />
+    <Stack.Screen
+      name="category"
+      options={{ headerShown: false }}
+      component={Category}
     />
     {/* <Stack.Screen name="Carousel" component={AddCarousel} />
     <Stack.Screen name="ViewProduct" component={ViewProduct} />
