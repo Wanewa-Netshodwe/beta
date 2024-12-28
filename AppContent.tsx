@@ -8,17 +8,28 @@ import Screen from "./app/utilities/Screen";
 import { useStates } from "./app/utilities/States";
 import "./global.css"; // Ensure this path is correct
 import Toast from "react-native-toast-message";
-import AppContent from "./AppContent";
 
 LogBox.ignoreAllLogs(true);
 
-export default function App() {
-  
+export default function AppContent() {
+  const { appTheme, businessState } = useStates();
+
+  const shouldRenderScreen =
+    appTheme.current_screen === "layout" &&
+    businessState.userBusiness?.foregroundImg;
 
   return (
-    <Provider store={store}>
-      <AppContent/>
-    </Provider>
+    <NavigationContainer>
+      {shouldRenderScreen ? (
+        <BusinessNav />
+      ) : (
+        <Screen>
+          <BusinessNav />
+        </Screen>
+      )}
+      <StatusBar style="auto" />
+      <Toast />
+    </NavigationContainer>
   );
 }
 

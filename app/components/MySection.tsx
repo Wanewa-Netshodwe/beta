@@ -6,34 +6,35 @@ import {
   TouchableNativeFeedback,
 } from "react-native";
 import React from "react";
-import { product, RootStackParamList, sectionData } from "../utilities/Types";
+import { product, StackShopLayoutParamList, sectionData } from "../utilities/Types";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { styles } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetScrollable/BottomSheetFlashList";
+import { useStates } from "../utilities/States";
+import { useDynamicStyles } from "../utilities/Styles";
 
 type Props = {
   name: string;
   products?: product[];
   section: sectionData;
-  nav: StackNavigationProp<RootStackParamList, "shopLayout", undefined>;
+  nav: StackNavigationProp<StackShopLayoutParamList>;
 };
 
 const MySection = (props: Props) => {
+  const styles2 = useDynamicStyles()
   const { nav } = props;
   const appTheme = useSelector((state: RootState) => state.appTheme.appTheme);
   const prod = props.products ? props.products : null;
   return (
     <View
-      style={{ backgroundColor: appTheme.colors!!!!.secondary }}
-      className="px-5  mt-2"
+      style={{ backgroundColor: appTheme.colors?.primary }}
+      className=" p-[5%]  mt-2"
     >
       <View className="flex-row items-center mt-2">
-        <Text
-          className="font-bold text-[25px] w-[80%]"
-          style={{ color: appTheme.colors!!!!.tertiary }}
-        >
+        <Text className=" text-[25px] w-[80%]" style={styles2.text}>
           {props.name}
         </Text>
         <TouchableNativeFeedback>
@@ -45,8 +46,8 @@ const MySection = (props: Props) => {
             }}
           >
             <Text
-              className="text-center font-bold text-[10px]"
-              style={{ color: appTheme.colors!!.tertiary }}
+              className="text-center  text-[10px]"
+              style={styles2.text}
             >
               View All
             </Text>
@@ -330,7 +331,7 @@ const MySection = (props: Props) => {
         ) : (
           <>
             <Text
-              style={{ color: appTheme.colors!!.tertiary }}
+              style={styles2.text}
               className="text-[14px] font-semibold text-center mb-5"
             >
               {" "}

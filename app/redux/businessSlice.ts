@@ -9,31 +9,33 @@ import {
 const defaultBusRegData: BusRegData = {};
 
 export const defaultBusiness: BusinessAccount = {
+  foregroundImg:
+    "https://1000logos.net/wp-content/uploads/2017/05/Color-PUMA-Logo.jpg",
   dis_auth: false,
-  font: "",
+  font: "DESIGNER",
   has_subscription: false,
   business_hours: {
-    closing: "",
-    opening: "",
+    closing: "10:00:00",
+    opening: "00:30:00",
   },
-  id: "",
+  id: "hjoZMJGDpAe802w4SDEw",
   location: {
-    address: "",
+    address:
+      "Rosebank Mall, Cradock Avenue, Rosebank, Johannesburg, South Africa",
     coord: {
-      latitude: 889,
-      longtitude: 99,
+      latitude: -26.1463218,
+      longtitude: 28.0417405,
     },
   },
-  offering: "",
-  password: "",
+  offering: "Product && Service",
+  password: "12345",
   sections: [],
   seller_rating: 0,
-  social_media_links: "",
-  store_name: "",
-  store_pic: "",
-  userId: "",
-  verified: false,
-  edit: true,
+  store_name: "Carl Electronics",
+  store_pic:
+    "https://firebasestorage.googleapis.com/v0/b/pocketpal-509a5.firebasestorage.app/o/images%2FHd81oqoxT0NDLs80xJY33Vlwbs23%2Fbusiness%2FBusinessLogo.png?alt=media&token=9e5d65f2-6743-4a4d-8122-d405551fe39c",
+  userId: "Hd81oqoxT0NDLs80xJY33Vlwbs23",
+  verified: true,
 };
 const products: product[] = [];
 const initialState = {
@@ -54,6 +56,12 @@ const businessSlice = createSlice({
     setBusiness: (state, action) => {
       const business = action.payload;
       state.userBusiness = business;
+    },
+    removeForeground: (state) => {
+      state.userBusiness.foregroundImg = "";
+    },
+    setForegroundImg: (state, action) => {
+      state.userBusiness.foregroundImg = action.payload;
     },
     addSection: (state, action) => {
       const section: sectionData = action.payload;
@@ -177,5 +185,7 @@ export const {
   addCat,
   saveCategoryList,
   delCat,
+  setForegroundImg,
+  removeForeground,
 } = businessSlice.actions;
 export default businessSlice.reducer;

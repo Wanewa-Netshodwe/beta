@@ -26,9 +26,9 @@ import {
   BusRegData,
   category,
   product,
-
   sectionData,
   StackShopLayoutParamList,
+  TabParamList,
 } from "../utilities/Types";
 import { useSelector } from "react-redux";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -43,6 +43,7 @@ import {
   saveCategoryList,
   setBusiness,
 } from "../redux/businessSlice";
+import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 
 //Collection names
 const USERCOLLECTION = "users";
@@ -253,7 +254,7 @@ export const BE_signup_Business = async (
   }
 };
 export const BE_addSection = (data: {
-  navigator: StackNavigationProp<StackShopLayoutParamList, "banner", undefined>
+  navigator: StackNavigationProp<StackShopLayoutParamList>;
   loading: React.Dispatch<React.SetStateAction<boolean>>;
   dispatch: Dispatch<UnknownAction>;
   sectionInfo: sectionData;
@@ -280,12 +281,12 @@ export const BE_addProduct = (data: {
   // loading: React.Dispatch<React.SetStateAction<boolean>>;
   dispatch: Dispatch<UnknownAction>;
   sectionInfo: product;
-  navigator: StackNavigationProp<RootStackParamList, "shopLayout", undefined>;
+  navigator: BottomTabNavigationProp<TabParamList>;
 }) => {
   const { dispatch, sectionInfo, navigator } = data;
   console.log("add product called");
   dispatch(addProduct(sectionInfo));
-  navigator.navigate("shopLayout");
+  navigator.navigate("Layout");
 };
 let uidg: string;
 export const getUid = () => {
@@ -311,6 +312,7 @@ export const BE_delC = (data: category, dispatch: Dispatch<UnknownAction>) => {
   console.log("id to find is : ", data.id);
   dispatch(delCat(data));
 };
+
 export const BE_saveCategory = (
   data: category,
   dispatch: Dispatch<UnknownAction>,

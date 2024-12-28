@@ -23,7 +23,7 @@ const CarouselSection = ({ item, editmode }: Props) => {
     <View
       className=" mt-2 relative"
       style={{
-        backgroundColor: appTheme.colors!!.secondary,
+        backgroundColor: appTheme.colors!!.primary,
         height: item.height!! + 20,
       }}
     >

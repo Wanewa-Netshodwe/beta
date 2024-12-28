@@ -14,6 +14,7 @@ const fontMap: Record<string, any> = {
   Sleepy_Moody: require("../../assets/fonts/Sleepy Moody.otf"),
   Super_Pixe_Personal: require("../../assets/fonts/Super Pixel Personal Use.ttf"),
   Zector: require("../../assets/fonts/Zector.ttf"),
+  Poppins: require("../../assets/fonts/Poppins-Medium.ttf"),
 };
 
 export default fontMap;

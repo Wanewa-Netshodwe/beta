@@ -11,7 +11,7 @@ type Props = {
 const CategoryView = (props: Props) => {
   const appTheme = useSelector((state: RootState) => state.appTheme.appTheme);
   return (
-    <View className="w-[110px]  gap-2 mt-2 items-center">
+    <View className="w-[110px] p-[5%]  gap-2 mt-2 items-center">
       <Image
         width={50}
         height={50}

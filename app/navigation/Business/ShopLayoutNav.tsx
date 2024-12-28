@@ -1,6 +1,9 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import BusinessLayout from "../../Screens/Business/BusinessLayout";
 import AddBanner from "../../Screens/Business/AddBanner";
+import AddForegroundImage from "../../Screens/Business/AddForegroundImage";
+import AddCarousel from "../../Screens/Business/AddCarousel";
+import AddSection from "../../Screens/Business/AddSection";
 
 const Stack = createStackNavigator();
 const ShopLayoutNavigator = () => (
@@ -10,7 +13,22 @@ const ShopLayoutNavigator = () => (
       name="home"
       component={BusinessLayout}
     />
-    <Stack.Screen name="banner" component={AddBanner} />
+    <Stack.Screen
+      options={{ headerShown: false }}
+      name="banner"
+      component={AddBanner}
+    />
+    <Stack.Screen name="foregroundImg" component={AddForegroundImage} />
+    <Stack.Screen
+      name="carousel"
+      options={{ headerShown: false }}
+      component={AddCarousel}
+    />
+    <Stack.Screen
+      name="section"
+      options={{ headerShown: false }}
+      component={AddSection}
+    />
     {/* <Stack.Screen name="Carousel" component={AddCarousel} />
     <Stack.Screen name="ViewProduct" component={ViewProduct} />
     <Stack.Screen name="Section" component={AddSection} />

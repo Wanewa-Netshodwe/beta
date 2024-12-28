@@ -10,5 +10,16 @@ export const useDynamicStyles = () => {
       color: appTheme.colors!!.textColor,
       fontFamily: appTheme.fonts?.primary,
     },
+    inputs: {
+      borderBottomColor: appTheme.colors?.background,
+      borderBottomWidth: 2,
+      backgroundColor: "transparent",
+      color: appTheme.colors!!.textColor,
+      fontFamily: appTheme.fonts?.primary,
+    },
+    sections: {
+      backgroundColor: appTheme.colors?.primary,
+      padding: "5%",
+    },
   });
 };

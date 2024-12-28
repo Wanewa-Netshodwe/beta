@@ -44,6 +44,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
   const [textColor, setTextColor] = useState(appTheme.colors?.textColor!!);
   const handleSave = () => {
     const data: AppTheme = {
+      current_screen: "layout",
       colors: {
         background: backgroundColor,
         secondary:
@@ -147,349 +148,353 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
     );
   } else {
     return (
-    
-        <View style={{ backgroundColor: appTheme.colors?.background }} className="p-5 h-full">
-          <LoadingComp
-            loaded={isFontLoaded}
-            item={
-              <Text style={styles.text} className={`text-[24px]  `}>
-                App Theme
-              </Text>
-            }
-          />
-          <View className="mt-3">
-            <ScrollView>
-              <View className="mt-6 ">
-                <View className="mt-2 mb-4">
-                  <Text style={styles.text}>Background Color</Text>
-                </View>
-                <View className=" flex-row gap-7 items-center">
-                  <View
-                    style={{
-                      backgroundColor: appTheme.colors?.background,
-                      borderColor: appTheme.colors?.quaternarySup,
-                      borderWidth: 1,
-                    }}
-                    className="w-[120px] h-[100px] rounded-md "
-                  ></View>
-                  <View
-                    style={{
-                      backgroundColor: backgroundColor,
-                      borderColor: appTheme.colors?.quaternarySup,
-                      borderWidth: 1,
-                    }}
-                    className="w-[120px] h-[100px] rounded-md "
-                  ></View>
-                </View>
-                <TouchableNativeFeedback
-                  onPress={() => {
-                    // setShowModal(true);
+      <View
+        style={{ backgroundColor: appTheme.colors?.background }}
+        className=" h-full"
+      >
+        <LoadingComp
+          loaded={isFontLoaded}
+          item={
+            <View style={{backgroundColor:appTheme.colors?.primary}} className="p-[5%] w-full">
+            <Text style={styles.text} className={`text-[24px]  `}>
+              App Theme
+            </Text>
+            </View>
+          }
+        />
+        <View className="">
+          <ScrollView>
+            <View style={{backgroundColor:appTheme.colors?.primary}} className="mt-1  p-[5%]  ">
+              <View className="mt-2 mb-4">
+                <Text style={styles.text}>Background Color</Text>
+              </View>
+              <View className=" flex-row gap-7 items-center">
+                <View
+                  style={{
+                    backgroundColor: appTheme.colors?.background,
+                    borderColor: appTheme.colors?.quaternarySup,
+                    borderWidth: 1,
                   }}
-                >
-                  <View className="mt-5 w-[180px] self-end right-5  rounded-md  ">
-                    <ColorPicker
-                      style={{ width: "100%", gap: 10 }}
-                      value={'red'}
-                      onComplete={({ hex }) => {
-                        setbackgroundColor(hex);
-                      }}
-                    >
-                      <HueSlider
-                        style={{ width: "60%", alignSelf: "flex-end" }}
-                        thumbSize={20}
-                        thumbShape="circle"
-                      />
-                      <LuminanceSlider thumbSize={20} thumbShape="circle" />
-                    </ColorPicker>
-                  </View>
-                </TouchableNativeFeedback>
-              </View>
-              <View className="mt-6 ">
-                <View className="mt-2 mb-4">
-                  <Text style={styles.text}>Primary Color</Text>
-                </View>
-                <View className=" flex-row gap-7 items-center">
-                  <View
-                    style={{
-                      backgroundColor: appTheme.colors?.primary,
-                      borderColor: appTheme.colors?.quaternarySup,
-                      borderWidth: 1,
-                    }}
-                    className="w-[120px] h-[100px] rounded-md "
-                  ></View>
-                  <View
-                    style={{
-                      backgroundColor: primary,
-                      borderColor: appTheme.colors?.quaternarySup,
-                      borderWidth: 1,
-                    }}
-                    className="w-[120px] h-[100px] rounded-md "
-                  ></View>
-                </View>
-                <TouchableNativeFeedback>
-                  <View className="mt-5 self-start  w-[180px]  rounded-md  ">
-                    <ColorPicker
-                      style={{ width: "100%", gap: 10 }}
-                      value={appTheme.colors?.primary}
-                      onComplete={({ hex }) => {
-                        setPrimary(hex);
-                      }}
-                    >
-                      <HueSlider
-                        style={{ width: "60%" }}
-                        thumbSize={20}
-                        thumbShape="circle"
-                      />
-                      <LuminanceSlider thumbSize={20} thumbShape="circle" />
-                    </ColorPicker>
-                  </View>
-                </TouchableNativeFeedback>
-              </View>
-              <View className="mt-6 ">
-                <View className="mt-2 mb-4">
-                  <Text style={styles.text}>Secondary Color</Text>
-                </View>
-                <View className=" flex-row gap-7 items-center">
-                  <View
-                    style={{
-                      backgroundColor: appTheme.colors?.secondary,
-                      borderColor: appTheme.colors?.quaternarySup,
-                      borderWidth: 1,
-                    }}
-                    className="w-[120px] h-[100px] rounded-md "
-                  ></View>
-                  <View
-                    style={{
-                      backgroundColor: secondary,
-                      borderColor: appTheme.colors?.quaternarySup,
-                      borderWidth: 1,
-                    }}
-                    className="w-[120px] h-[100px] rounded-md "
-                  ></View>
-                </View>
-                <TouchableNativeFeedback>
-                  <View className="mt-5 self-end w-[180px] right-5 rounded-md  ">
-                    <ColorPicker
-                      style={{ width: "100%", gap: 10 }}
-                      value={appTheme.colors?.secondary}
-                      onComplete={({ hex }) => {
-                        setSecondary(hex);
-                      }}
-                    >
-                      <HueSlider
-                        style={{ width: "60%", alignSelf: "flex-end" }}
-                        thumbSize={20}
-                        thumbShape="circle"
-                      />
-                      <LuminanceSlider thumbSize={20} thumbShape="circle" />
-                    </ColorPicker>
-                  </View>
-                </TouchableNativeFeedback>
-              </View>
-              <View className="mt-6 ">
-                <View className="mt-2 mb-4">
-                  <Text style={styles.text}>Tertiary Color</Text>
-                </View>
-                <View className=" flex-row gap-7 items-center">
-                  <View
-                    style={{
-                      backgroundColor: appTheme.colors?.tertiary,
-                      borderColor: appTheme.colors?.quaternarySup,
-                      borderWidth: 1,
-                    }}
-                    className="w-[120px] h-[100px] rounded-md "
-                  ></View>
-                  <View
-                    style={{
-                      backgroundColor: tertiary,
-                      borderColor: appTheme.colors?.quaternarySup,
-                      borderWidth: 1,
-                    }}
-                    className="w-[120px] h-[100px] rounded-md "
-                  ></View>
-                </View>
-                <TouchableNativeFeedback>
-                  <View className="mt-5 self-start  w-[180px]  rounded-md  ">
-                    <ColorPicker
-                      style={{ width: "100%", gap: 10 }}
-                      value={appTheme.colors?.tertiary}
-                      onComplete={({ hex }) => {
-                        setTertiary(hex);
-                      }}
-                    >
-                      <HueSlider
-                        style={{ width: "60%" }}
-                        thumbSize={20}
-                        thumbShape="circle"
-                      />
-                      <LuminanceSlider thumbSize={20} thumbShape="circle" />
-                    </ColorPicker>
-                  </View>
-                </TouchableNativeFeedback>
-              </View>
-              <View className="mt-6 ">
-                <View className="mt-2 mb-4">
-                  <Text style={styles.text}>quaternary Color</Text>
-                </View>
-                <View className=" flex-row gap-7 items-center">
-                  <View
-                    style={{
-                      backgroundColor: appTheme.colors?.quaternary,
-                      borderColor: appTheme.colors?.quaternarySup,
-                      borderWidth: 1,
-                    }}
-                    className="w-[120px] h-[100px] rounded-md "
-                  ></View>
-                  <View
-                    style={{
-                      backgroundColor: quaternary,
-                      borderColor: appTheme.colors?.quaternarySup,
-                      borderWidth: 1,
-                    }}
-                    className="w-[120px] h-[100px] rounded-md "
-                  ></View>
-                </View>
-                <TouchableNativeFeedback>
-                  <View className="mt-5 self-end right-5 w-[180px] rounded-md  ">
-                    <ColorPicker
-                      style={{ width: "100%", gap: 10 }}
-                      value={appTheme.colors?.quaternary}
-                      onComplete={({ hex }) => {
-                        setQuanternary(hex);
-                      }}
-                    >
-                      <HueSlider
-                        style={{ width: "60%", alignSelf: "flex-end" }}
-                        thumbSize={20}
-                        thumbShape="circle"
-                      />
-                      <LuminanceSlider thumbSize={20} thumbShape="circle" />
-                    </ColorPicker>
-                  </View>
-                </TouchableNativeFeedback>
-              </View>
-              <View className="mt-6 ">
-                <View className="mt-2 mb-4">
-                  <Text style={styles.text}>Quirnary Color</Text>
-                </View>
-                <View className=" flex-row gap-7 items-center">
-                  <View
-                    style={{
-                      backgroundColor: appTheme.colors?.quaternarySup,
-                      borderColor: appTheme.colors?.quaternarySup,
-                      borderWidth: 1,
-                    }}
-                    className="w-[120px] h-[100px] rounded-md "
-                  ></View>
-                  <View
-                    style={{
-                      backgroundColor: quaternarySup,
-                      borderColor: appTheme.colors?.quaternarySup,
-                      borderWidth: 1,
-                    }}
-                    className="w-[120px] h-[100px] rounded-md "
-                  ></View>
-                </View>
-                <TouchableNativeFeedback>
-                  <View className="mt-5 self-start w-[180px] rounded-md  ">
-                    <ColorPicker
-                      style={{ width: "100%", gap: 10 }}
-                      value={appTheme.colors?.quaternarySup}
-                      onComplete={({ hex }) => {
-                        setQuanternarySup(hex);
-                      }}
-                    >
-                      <HueSlider
-                        style={{ width: "60%" }}
-                        thumbSize={20}
-                        thumbShape="circle"
-                      />
-                      <LuminanceSlider thumbSize={20} thumbShape="circle" />
-                    </ColorPicker>
-                  </View>
-                </TouchableNativeFeedback>
-              </View>
-              <View className="mt-6 ">
-                <View className="mt-2 mb-4">
-                  <Text style={styles.text}>Select Text Color</Text>
-                </View>
-                <View className="mt-2">
-                  <Text
-                    style={{ color: textColor, fontFamily: "font" }}
-                    className={`text-[24px]  `}
-                  >
-                    Dummy Text
-                  </Text>
-                </View>
-                <TouchableNativeFeedback>
-                  <View className="mt-5 self-end right-5 w-[180px] rounded-md  ">
-                    <ColorPicker
-                      style={{ width: "100%", gap: 10 }}
-                      value={'red'}
-                      onComplete={({ hex }) => {
-                        setTextColor(hex);
-                      }}
-                    >
-                      <HueSlider
-                        style={{ width: "60%", alignSelf: "flex-end" }}
-                        thumbSize={20}
-                        thumbShape="circle"
-                      />
-                      <LuminanceSlider thumbSize={20} thumbShape="circle" />
-                    </ColorPicker>
-                  </View>
-                </TouchableNativeFeedback>
-              </View>
-              <View className="mt-6">
-                <View className="mt-2 mb-4">
-                  <Text style={styles.text}>Select Font Style</Text>
-                </View>
-                <SelectList
-                  setSelected={handleFontChange}
-                  data={fontList}
-                  boxStyles={{ borderColor: appTheme.colors?.secondary }}
-                  save="key"
-                  inputStyles={{
-                    color: appTheme.colors?.textColor || "black",
-                    fontFamily: selectedFont,
+                  className="w-[120px] h-[100px] rounded-md "
+                ></View>
+                <View
+                  style={{
+                    backgroundColor: backgroundColor,
+                    borderColor: appTheme.colors?.quaternarySup,
+                    borderWidth: 1,
                   }}
-                  dropdownTextStyles={{
-                    color: appTheme.colors?.textColor || "black",
-                    fontFamily: selectedFont,
-                  }}
-                  placeholder="Select Font"
-                  search={false}
-                />
-                {/* Font Preview */}
-                <LoadingComp
-                  loaded={isFontLoaded}
-                  item={
-                    <View className="mt-8">
-                      <Text
-                        style={{
-                          fontFamily: selectedFont,
-                          color: appTheme.colors?.textColor,
-                        }}
-                        className="text-[24px] "
-                      >
-                        This is a preview of the selected font.
-                      </Text>
-                    </View>
-                  }
-                />
+                  className="w-[120px] h-[100px] rounded-md "
+                ></View>
               </View>
-              <ClickableBtn
+              <TouchableNativeFeedback
                 onPress={() => {
-                  handleSave();
+                  // setShowModal(true);
                 }}
-                title="Save"
-                className=""
+              >
+                <View className="mt-5 w-[180px] self-end right-5  rounded-md  ">
+                  <ColorPicker
+                    style={{ width: "100%", gap: 10 }}
+                    value={"red"}
+                    onComplete={({ hex }) => {
+                      setbackgroundColor(hex);
+                    }}
+                  >
+                    <HueSlider
+                      style={{ width: "60%", alignSelf: "flex-end" }}
+                      thumbSize={20}
+                      thumbShape="circle"
+                    />
+                    <LuminanceSlider thumbSize={20} thumbShape="circle" />
+                  </ColorPicker>
+                </View>
+              </TouchableNativeFeedback>
+            </View>
+            <View style={{backgroundColor:appTheme.colors?.primary}} className=" mt-2  p-[5%] ">
+              <View className="mt-2 mb-4">
+                <Text style={styles.text}>Primary Color</Text>
+              </View>
+              <View className=" flex-row gap-7 items-center">
+                <View
+                  style={{
+                    backgroundColor: appTheme.colors?.primary,
+                    borderColor: appTheme.colors?.quaternarySup,
+                    borderWidth: 1,
+                  }}
+                  className="w-[120px] h-[100px] rounded-md "
+                ></View>
+                <View
+                  style={{
+                    backgroundColor: primary,
+                    borderColor: appTheme.colors?.quaternarySup,
+                    borderWidth: 1,
+                  }}
+                  className="w-[120px] h-[100px] rounded-md "
+                ></View>
+              </View>
+              <TouchableNativeFeedback>
+                <View className="mt-5 self-start  w-[180px]  rounded-md  ">
+                  <ColorPicker
+                    style={{ width: "100%", gap: 10 }}
+                    value={appTheme.colors?.primary}
+                    onComplete={({ hex }) => {
+                      setPrimary(hex);
+                    }}
+                  >
+                    <HueSlider
+                      style={{ width: "60%" }}
+                      thumbSize={20}
+                      thumbShape="circle"
+                    />
+                    <LuminanceSlider thumbSize={20} thumbShape="circle" />
+                  </ColorPicker>
+                </View>
+              </TouchableNativeFeedback>
+            </View>
+            <View  style={{backgroundColor:appTheme.colors?.primary}} className=" mt-2  p-[5%] ">
+              <View className="mt-2 mb-4">
+                <Text style={styles.text}>Secondary Color</Text>
+              </View>
+              <View className=" flex-row gap-7 items-center">
+                <View
+                  style={{
+                    backgroundColor: appTheme.colors?.secondary,
+                    borderColor: appTheme.colors?.quaternarySup,
+                    borderWidth: 1,
+                  }}
+                  className="w-[120px] h-[100px] rounded-md "
+                ></View>
+                <View
+                  style={{
+                    backgroundColor: secondary,
+                    borderColor: appTheme.colors?.quaternarySup,
+                    borderWidth: 1,
+                  }}
+                  className="w-[120px] h-[100px] rounded-md "
+                ></View>
+              </View>
+              <TouchableNativeFeedback>
+                <View className="mt-5 self-end w-[180px] right-5 rounded-md  ">
+                  <ColorPicker
+                    style={{ width: "100%", gap: 10 }}
+                    value={appTheme.colors?.secondary}
+                    onComplete={({ hex }) => {
+                      setSecondary(hex);
+                    }}
+                  >
+                    <HueSlider
+                      style={{ width: "60%", alignSelf: "flex-end" }}
+                      thumbSize={20}
+                      thumbShape="circle"
+                    />
+                    <LuminanceSlider thumbSize={20} thumbShape="circle" />
+                  </ColorPicker>
+                </View>
+              </TouchableNativeFeedback>
+            </View>
+            <View  style={{backgroundColor:appTheme.colors?.primary}} className=" mt-2  p-[5%] ">
+              <View className="mt-2 mb-4">
+                <Text style={styles.text}>Tertiary Color</Text>
+              </View>
+              <View className=" flex-row gap-7 items-center">
+                <View
+                  style={{
+                    backgroundColor: appTheme.colors?.tertiary,
+                    borderColor: appTheme.colors?.quaternarySup,
+                    borderWidth: 1,
+                  }}
+                  className="w-[120px] h-[100px] rounded-md "
+                ></View>
+                <View
+                  style={{
+                    backgroundColor: tertiary,
+                    borderColor: appTheme.colors?.quaternarySup,
+                    borderWidth: 1,
+                  }}
+                  className="w-[120px] h-[100px] rounded-md "
+                ></View>
+              </View>
+              <TouchableNativeFeedback>
+                <View className="mt-5 self-start  w-[180px]  rounded-md  ">
+                  <ColorPicker
+                    style={{ width: "100%", gap: 10 }}
+                    value={appTheme.colors?.tertiary}
+                    onComplete={({ hex }) => {
+                      setTertiary(hex);
+                    }}
+                  >
+                    <HueSlider
+                      style={{ width: "60%" }}
+                      thumbSize={20}
+                      thumbShape="circle"
+                    />
+                    <LuminanceSlider thumbSize={20} thumbShape="circle" />
+                  </ColorPicker>
+                </View>
+              </TouchableNativeFeedback>
+            </View>
+            <View  style={{backgroundColor:appTheme.colors?.primary}} className=" mt-2  p-[5%] ">
+              <View className="mt-2 mb-4">
+                <Text style={styles.text}>quaternary Color</Text>
+              </View>
+              <View className=" flex-row gap-7 items-center">
+                <View
+                  style={{
+                    backgroundColor: appTheme.colors?.quaternary,
+                    borderColor: appTheme.colors?.quaternarySup,
+                    borderWidth: 1,
+                  }}
+                  className="w-[120px] h-[100px] rounded-md "
+                ></View>
+                <View
+                  style={{
+                    backgroundColor: quaternary,
+                    borderColor: appTheme.colors?.quaternarySup,
+                    borderWidth: 1,
+                  }}
+                  className="w-[120px] h-[100px] rounded-md "
+                ></View>
+              </View>
+              <TouchableNativeFeedback>
+                <View className="mt-5 self-end right-5 w-[180px] rounded-md  ">
+                  <ColorPicker
+                    style={{ width: "100%", gap: 10 }}
+                    value={appTheme.colors?.quaternary}
+                    onComplete={({ hex }) => {
+                      setQuanternary(hex);
+                    }}
+                  >
+                    <HueSlider
+                      style={{ width: "60%", alignSelf: "flex-end" }}
+                      thumbSize={20}
+                      thumbShape="circle"
+                    />
+                    <LuminanceSlider thumbSize={20} thumbShape="circle" />
+                  </ColorPicker>
+                </View>
+              </TouchableNativeFeedback>
+            </View>
+
+            <View  style={{backgroundColor:appTheme.colors?.primary}} className=" mt-2  p-[5%] ">
+              <View className="mt-2 mb-4">
+                <Text style={styles.text}>Quirnary Color</Text>
+              </View>
+              <View className=" flex-row gap-7 items-center">
+                <View
+                  style={{
+                    backgroundColor: appTheme.colors?.quaternarySup,
+                    borderColor: appTheme.colors?.quaternarySup,
+                    borderWidth: 1,
+                  }}
+                  className="w-[120px] h-[100px] rounded-md "
+                ></View>
+                <View
+                  style={{
+                    backgroundColor: quaternarySup,
+                    borderColor: appTheme.colors?.quaternarySup,
+                    borderWidth: 1,
+                  }}
+                  className="w-[120px] h-[100px] rounded-md "
+                ></View>
+              </View>
+              <TouchableNativeFeedback>
+                <View className="mt-5 self-start w-[180px] rounded-md  ">
+                  <ColorPicker
+                    style={{ width: "100%", gap: 10 }}
+                    value={appTheme.colors?.quaternarySup}
+                    onComplete={({ hex }) => {
+                      setQuanternarySup(hex);
+                    }}
+                  >
+                    <HueSlider
+                      style={{ width: "60%" }}
+                      thumbSize={20}
+                      thumbShape="circle"
+                    />
+                    <LuminanceSlider thumbSize={20} thumbShape="circle" />
+                  </ColorPicker>
+                </View>
+              </TouchableNativeFeedback>
+            </View>
+            <View  style={{backgroundColor:appTheme.colors?.primary}} className=" mt-2  p-[5%] ">
+              <View className="mt-2 mb-4">
+                <Text style={styles.text}>Select Text Color</Text>
+              </View>
+              <View className="mt-2">
+                <Text
+                  style={{ color: textColor, fontFamily: "font" }}
+                  className={`text-[24px]  `}
+                >
+                  Dummy Text
+                </Text>
+              </View>
+              <TouchableNativeFeedback>
+                <View className="mt-5 self-end right-5 w-[180px] rounded-md  ">
+                  <ColorPicker
+                    style={{ width: "100%", gap: 10 }}
+                    value={"red"}
+                    onComplete={({ hex }) => {
+                      setTextColor(hex);
+                    }}
+                  >
+                    <HueSlider
+                      style={{ width: "60%", alignSelf: "flex-end" }}
+                      thumbSize={20}
+                      thumbShape="circle"
+                    />
+                    <LuminanceSlider thumbSize={20} thumbShape="circle" />
+                  </ColorPicker>
+                </View>
+              </TouchableNativeFeedback>
+            </View>
+            <View  style={{backgroundColor:appTheme.colors?.primary}} className=" mt-2  p-[5%] ">
+              <View className="mt-2 mb-4">
+                <Text style={styles.text}>Select Font Style</Text>
+              </View>
+              <SelectList
+                setSelected={handleFontChange}
+                data={fontList}
+                boxStyles={{ borderColor: appTheme.colors?.secondary }}
+                save="key"
+                inputStyles={{
+                  color: appTheme.colors?.textColor || "black",
+                  fontFamily: selectedFont,
+                }}
+                dropdownTextStyles={{
+                  color: appTheme.colors?.textColor || "black",
+                  fontFamily: selectedFont,
+                }}
+                placeholder="Select Font"
+                search={false}
               />
-              <View className="h-[35px]"></View>
-            </ScrollView>
-          </View>
+              {/* Font Preview */}
+              <LoadingComp
+                loaded={isFontLoaded}
+                item={
+                  <View className="mt-8">
+                    <Text
+                      style={{
+                        fontFamily: selectedFont,
+                        color: appTheme.colors?.textColor,
+                      }}
+                      className="text-[24px] "
+                    >
+                      This is a preview of the selected font.
+                    </Text>
+                  </View>
+                }
+              />
+            </View>
+            <ClickableBtn
+              onPress={() => {
+                handleSave();
+              }}
+              title="Save"
+              className="left-4"
+            />
+            <View className=" h-[85px]"></View>
+          </ScrollView>
         </View>
-    
+      </View>
     );
   }
 };

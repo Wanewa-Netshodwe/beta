@@ -4,6 +4,7 @@ export type TabParamList = {
   settings: undefined;
 };
 export type StackShopLayoutParamList = {
+  foregroundImg: undefined;
   home: undefined;
   banner: undefined;
   section: undefined;
@@ -39,14 +40,19 @@ export type BusinessAccount = {
   password: string;
   sections: sectionData[];
   seller_rating: number;
-  social_media_links: string;
+  social_media_links?: {
+    facebook?: string;
+    website?: string;
+    twitter?: string;
+    instagram?: string;
+    linkedin?: string;
+  };
   store_name: string;
   store_pic: string;
   userId: string;
   verified: boolean;
   font: string;
   dis_auth: false;
-  edit: boolean;
 };
 export type sectionData = {
   id?: string;
@@ -114,7 +120,13 @@ export type product = {
 };
 export type personalAccount = {
   id: string;
-  store_id: string;
+  location?: {
+    address: string;
+    coord: {
+      latitude: number;
+      longtitude: number;
+    };
+  };
   buyer_rating: number;
   following: string[];
   followers: string[];
@@ -130,6 +142,7 @@ export type personalAccount = {
   businessid: string;
 };
 export type AppTheme = {
+  current_screen?: string;
   colors?: {
     background?: string;
     textColor?: string;

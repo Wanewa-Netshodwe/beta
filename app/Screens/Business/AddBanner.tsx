@@ -6,6 +6,7 @@ import {
   Image,
   ScrollView,
   Dimensions,
+  Pressable,
 } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,7 +14,13 @@ import { RootState } from "../../redux/store";
 import Screen from "../../utilities/Screen";
 import * as ImagePicker from "expo-image-picker";
 import { BusRegData, sectionData } from "../../utilities/Types";
-
+import {
+  AntDesign,
+  MaterialIcons,
+  MaterialCommunityIcons,
+  Feather,
+  FontAwesome,
+} from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import { SelectList } from "react-native-dropdown-select-list";
 import { BE_addSection } from "../../backend/Queries";
@@ -22,6 +29,8 @@ import { useDynamicStyles } from "../../utilities/Styles";
 import ClickableBtn from "../../components/ClickableBtn";
 import { StackScreenProps } from "@react-navigation/stack";
 import { StackShopLayoutParamList } from "../../utilities/Types";
+import OutlineBtn from "../../components/OutlineBtn";
+import { errorMsg } from "../../errors/catchErrors";
 type prop = StackScreenProps<StackShopLayoutParamList, "banner">;
 const AddBanner: React.FC<prop> = ({ navigation }) => {
   const { width } = Dimensions.get("screen");
@@ -36,6 +45,9 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
   const [data, setData] = useState<{ key: number; value: string }[]>([]);
   const [d, setD] = useState<{ key: string; value: number }[]>([]);
   const styles = useDynamicStyles();
+  const [textPostion, setTextPostion] = useState({ x: 0, y: 0 });
+  const [newText, setText] = useState("");
+
   useMemo(() => {
     let dataDummy: { key: string; index: number }[] | null =
       businessData.sections.length > 0 ? [] : null;
@@ -65,6 +77,10 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
   useEffect(() => {}, []);
 
   const handleSubmit = () => {
+    if (!name || !img || !Position) {
+      errorMsg("Fill in all fields to Continue");
+      return;
+    }
     console.log(d.length < 1);
     const r =
       d.length < 1
@@ -115,26 +131,30 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
     }
   };
   return (
-    
-      <ScrollView>
-        <View style={{ backgroundColor: appTheme.colors?.background }} className="w-full h-full  p-[5%]">
-          <View className="">
-            <Text style={styles.text} className={`text-[24px] font-bold`}>
-              Add Banner
-            </Text>
-          </View>
+    <View
+      style={{ backgroundColor: appTheme.colors?.background }}
+      className="w-full h-full  "
+    >
+      <View
+        style={{ backgroundColor: appTheme.colors?.primary }}
+        className=" p-[5%]"
+      >
+        <Text style={[styles.text]} className={`text-[25px] `}>
+          Add Banner
+        </Text>
+      </View>
+      <ScrollView className=" ">
+        <View
+          style={{ backgroundColor: appTheme.colors?.primary }}
+          className="flex-row  p-[5%]  mt-1 items-center  gap-4"
+        >
           <View>
-            <View className="mt-[10%]"></View>
-            <TouchableNativeFeedback onPress={handleImageUpload}>
-              <View
-                className="bg-transparent rounded-md p-2 w-[35%]"
-                style={{
-                  borderColor: appTheme.colors?.secondary,
-                  borderWidth: 2,
-                }}
-              >
-                <Text style={styles.text}>Upload Banner</Text>
-              </View>
+            <TouchableNativeFeedback>
+              <OutlineBtn
+                onPress={handleImageUpload}
+                width={120}
+                title="Upload Image "
+              />
             </TouchableNativeFeedback>
           </View>
           <View
@@ -142,16 +162,17 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
             style={{
               borderColor: appTheme.colors?.secondary,
               borderWidth: 2,
+              height: 50,
             }}
           >
             <Text
               style={styles.text}
-              className="text-[9px] text-center absolute -bottom-7 left-3 font-bold"
+              className="text-[9px] text-center w-[60px] absolute -bottom-4 left-0        font-bold"
             >
-              Carousel height
+              Banner height
             </Text>
             <TextInput
-              className="text-center"
+              className="text-center w-full h-full"
               placeholder="Enter Height"
               keyboardType={"number-pad"}
               onChangeText={(t) => {
@@ -161,79 +182,94 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
               style={styles.text}
             />
           </View>
+        </View>
+
+        <View
+          style={{ backgroundColor: appTheme.colors?.primary }}
+          className=" mt-2 p-[5%]"
+        >
           <View>
-            <View className="mt-[10%]">
-              <Text style={styles.text} className="text-[18px] font-semibold">
-                Banner Preview
-              </Text>
-            </View>
-            <TouchableNativeFeedback onPress={handleImageUpload}>
-              <View className="mt-[5%] w-[280px] ">
-                {img ? (
-                  <>
+            <Text style={styles.text} className="text-[18px] font-semibold">
+              Banner Preview
+            </Text>
+          </View>
+          <TouchableNativeFeedback>
+            <View style={{ width: "auto" }} className="mt-[5%] relative ">
+              {img && (
+                <>
+                  <Pressable
+                    onPress={(e) => {
+                      const { locationX, locationY } = e.nativeEvent;
+                      setTextPostion({ x: locationX, y: locationY });
+                    }}
+                  >
                     <Image
-                      width={width}
+                      // className="relative"
+                      width={width - 30}
                       height={height}
                       borderRadius={5}
                       source={{
                         uri: img[0],
                       }}
                     />
-                  </>
-                ) : (
-                  <>
-                    <View
-                      style={{
-                        backgroundColor: appTheme.colors?.secondary,
-                      }}
-                      className=" rounded-sm py-14 w-[100%] h-[200px] "
-                    ></View>
-                  </>
-                )}
-              </View>
-            </TouchableNativeFeedback>
+                  </Pressable>
+                </>
+              )}
+            </View>
+          </TouchableNativeFeedback>
+        </View>
+        <View
+          style={{ backgroundColor: appTheme.colors?.primary }}
+          className=" mt-2 p-[5%]"
+        >
+          <View className="mt-[5%] ">
+            <Text style={styles.text} className="text-[18px] font-semibold">
+              Position
+            </Text>
           </View>
-          <View>
-            <View className="mt-[10%]">
-              <Text style={styles.text} className="text-[18px] font-semibold">
-                Position
-              </Text>
-            </View>
-            <View className="mt-[5%]">
-              <SelectList
-                setSelected={(val: string) => setPosition(val)}
-                data={data.length > 0 ? data : [{ key: 0, value: "First" }]}
-                save="value"
-                inputStyles={styles.text}
-                dropdownTextStyles={styles.text}
-                placeholder="Postion"
-                search={false}
-              />
-            </View>
+          <View className="mt-[5%]">
+            <SelectList
+              setSelected={(val: string) => setPosition(val)}
+              data={data.length > 0 ? data : [{ key: 0, value: "First" }]}
+              save="value"
+              inputStyles={styles.text}
+              dropdownTextStyles={styles.text}
+              placeholder="Postion"
+              search={false}
+            />
           </View>
-          <View>
-            <View className="mt-[10%]">
-              <Text style={styles.text} className="text-[18px] font-semibold">
-                Section Name
-              </Text>
-            </View>
-            <View className="mt-[5%]">
-              <TextInput
-                onChangeText={(text) => {
-                  setName(text);
-                }}
-                style={[
-                  {
-                    backgroundColor: appTheme.colors?.secondary,
-                  },
-                  styles.text,
-                ]}
-                className=" rounded-sm py-3 w-[70%] "
-              ></TextInput>
-            </View>
+        </View>
+        <View
+          style={{ backgroundColor: appTheme.colors?.primary }}
+          className="mt-2 p-[5%]"
+        >
+          <View className="mt-[5%]">
+            <Text style={styles.text} className="text-[18px] font-semibold">
+              Section Name
+            </Text>
           </View>
-          <View className=" flex-rows justify-between">
-            {/* <TouchableNativeFeedback
+          <View className="mt-[5%]">
+            <TextInput
+              onChangeText={(text) => {
+                setName(text);
+              }}
+              placeholderTextColor={appTheme.colors?.textColor}
+              placeholder="Section Name"
+              placeholderClassName="font-bold"
+              style={[
+                {
+                  backgroundColor: "transparent",
+                  borderBottomWidth: 2,
+                  borderBottomColor: appTheme.colors?.background,
+                },
+                styles.text,
+              ]}
+              className=" rounded-sm py-3 w-[70%] "
+            ></TextInput>
+          </View>
+        </View>
+        <View className=" flex-row p-[5%] justify-between">
+          {/* <TouchableNativeFeedback
               onPress={() => {
                 handleSubmit();
               }}
@@ -248,41 +284,8 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
                 </Text>
               </View>
             </TouchableNativeFeedback> */}
-            <ClickableBtn
-              onPress={() => {
-                console.log(d.length < 1);
-                const r =
-                  d.length < 1
-                    ? [0]
-                    : d
-                        .filter((item) => item.key === Position)
-                        .map((item) => item.value);
-
-                console.log(r);
-                let num = r[0];
-                console.log("number : ", num);
-                if (num !== undefined || num === 0) {
-                  const sectionData: sectionData = {
-                    valid: true,
-                    name: name,
-                    postion: num,
-                    imgs: img,
-                    businessid: businessData.id,
-                    type: "Banner",
-                    height: height,
-                  };
-                  const data = {
-                    sectionInfo: sectionData,
-                    loading: setLoading,
-                    dispatch: dispatch,
-                    navigator: navigation,
-                  };
-                  BE_addSection(data);
-                }
-              }}
-              title="Save"
-            />
-            {/* <TouchableNativeFeedback
+          <ClickableBtn width={125} onPress={handleSubmit} title="Save" />
+          {/* <TouchableNativeFeedback
               onPress={() => {
                 cancel();
               }}
@@ -297,16 +300,16 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
                 </Text>
               </View>
             </TouchableNativeFeedback> */}
-            <ClickableBtn
-              onPress={() => {
-                navigation.navigate("home");
-              }}
-              title="Cancel"
-            />
-          </View>
+          <ClickableBtn
+            width={125}
+            onPress={() => {
+              navigation.navigate("home");
+            }}
+            title="Cancel"
+          />
         </View>
       </ScrollView>
-   
+    </View>
   );
 };
 export default AddBanner;

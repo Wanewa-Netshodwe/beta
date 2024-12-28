@@ -19,7 +19,7 @@ export default function Screen({ children }: props) {
   );
   return (
     <SafeAreaView
-      className={`h-full w-full`}
+      className={`h-full w-full `}
       style={{
         paddingTop: Constants.statusBarHeight,
         backgroundColor: appTheme?.background,

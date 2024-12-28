@@ -20,14 +20,14 @@ const BannerSection = ({ item, editmode }: Props) => {
   const appTheme = useSelector((state: RootState) => state.appTheme.appTheme);
   return (
     <View
-      className=" mt-2 relative"
+      className=" mt-1 relative"
       style={{
-        backgroundColor: appTheme.colors!!.secondary,
-        height: item.height!! + 20,
+        backgroundColor: appTheme.colors!!.primary,
+        height: item.height!! + 10,
       }}
     >
       <Image
-        style={{ marginTop: 10 }}
+        style={{ marginTop: 5 }}
         width={width}
         height={item.height}
         source={{ uri: item.imgs!![0] }}
@@ -36,14 +36,14 @@ const BannerSection = ({ item, editmode }: Props) => {
         <AntDesign
           onPress={() => handleDeleteSection(item)}
           size={30}
-          style={{ color: appTheme.colors!!.secondary }}
+          style={{ color: appTheme.colors!!.primary }}
           className="absolute z-40 right-5 top-3 "
           name="delete"
         />
       ) : null}
       {editmode ? (
         <Text
-          style={{ color: appTheme.colors!!.secondary }}
+          style={{ color: appTheme.colors!!.primary }}
           className="absolute text-[18px] font-bold  z-40 left-1 top-6"
         >
           {item.name}

@@ -2,17 +2,18 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppTheme } from "../utilities/Types";
 
 const defaultTheme: AppTheme = {
+  current_screen: "layout",
   colors: {
-    background: "#000000",
-    primary: "#7d0405",
-    secondary: "#d33f0f",
-    tertiary: "#fa8840",
-    quaternary: "#f7b16c",
-    quaternarySup: "#fedfcd",
-    textColor: "#ededed",
+    background: "#e6e6e6",
+    primary: "#ffffff",
+    secondary: "#26274a",
+    tertiary: "#292929",
+    quaternary: "#9d9d9e",
+    quaternarySup: "#ffffff",
+    textColor: "#292929",
   },
   fonts: {
-    primary: "roman_font_7",
+    primary: "Poppins",
   },
 };
 

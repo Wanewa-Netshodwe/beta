@@ -6,14 +6,16 @@ import {
   ScrollView,
   FlatList,
   RefreshControl,
+  ImageBackground,
+  Image,
 } from "react-native";
 import * as Font from "expo-font";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
-import Screen from "../../utilities/Screen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
+
 import {
   BottomSheetModal,
   BottomSheetModalProvider,
@@ -35,6 +37,7 @@ import BannerSection from "../../components/BannerSection";
 import CarouselSection from "../../components/CarouselSection";
 import { useDynamicStyles } from "../../utilities/Styles";
 import LoadingComp from "../../utilities/LoadingComp";
+import { removeForeground } from "../../redux/businessSlice";
 
 type prop = StackScreenProps<StackShopLayoutParamList, "home">;
 const BusinessLayout: React.FC<prop> = ({ navigation }) => {
@@ -43,7 +46,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
     BE_deleteSection({ dispatch, sectionInfo });
   };
   const [isLoading, setLoading] = useState(false);
-  const { width } = Dimensions.get("window");
+  const { width } = Dimensions.get("screen");
   const appTheme = useSelector((state: RootState) => state.appTheme.appTheme);
   const font = useSelector(
     (state: RootState) => state.appTheme.appTheme.fonts!!.primary
@@ -58,12 +61,30 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
 
   //   setLoading(loaded);
   // }, [font]);
-  const [loaded] = Font.useFonts({
-    font: fontMap[font], // Map Redux font name to the correct font file
-  });
+  // const [loaded] = Font.useFonts({
+  //   font: fontMap[font], // Map Redux font name to the correct font file
+  // });
+  const [selectedFont, setSelectedFont] = useState(
+    appTheme.fonts?.primary || ""
+  );
+  const [isFontLoaded, setIsFontLoaded] = useState(true);
+  const loadFont = async (fontName: string) => {
+    if (fontMap[fontName]) {
+      setIsFontLoaded(false); // Set loading state
+      await Font.loadAsync({ [fontName]: fontMap[fontName] });
+      setIsFontLoaded(true); // Set font loaded
+    }
+  };
+  useEffect(() => {
+    if (selectedFont) {
+      loadFont(selectedFont);
+      setLoading(true);
+    }
+  }, [selectedFont]);
 
   console.log("selected fonts :", font);
   const dispatch = useDispatch();
+  console.log("font loaded :", isLoading, " the font is : ", font);
 
   // console.log("business :", BusinessInfo);
   console.log("business :", BusinessInfo.sections);
@@ -76,14 +97,21 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
     console.log("handleSheetChanges", index);
   }, []);
 
+  console.log("app theme : ", appTheme);
   return (
     <GestureHandlerRootView>
       <BottomSheetModalProvider>
         <View
-          style={{ backgroundColor: appTheme.colors?.background }}
-          className=" h-full relative "
+          style={{
+            backgroundColor: appTheme.colors?.background,
+
+            // borderColor:'green',
+            // borderWidth:1,
+            height: "100%",
+          }}
         >
           <ScrollView
+            style={{ height: "100%" }}
             refreshControl={
               <RefreshControl
                 refreshing={false}
@@ -94,49 +122,156 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
               />
             }
           >
-            <View className="p-[5%]  h-fit">
-              <LoadingComp
-                loaded={loaded}
-                item={
-                  <Text style={styles.text} className={`text-[24px] h-fit  `}>
-                    Shop Layout
-                  </Text>
-                }
-              />
-              {editmode && (
-                <View className="flex-row items-center gap-1 mt-[2%] ">
-                  {loaded ? (
-                    <Text
-                      style={styles.text}
-                      className=" w-[14%] font-bold text-[11px] "
-                    >
-                      Preview
-                    </Text>
-                  ) : (
-                    <TextLoader width={"Preview".length} />
-                  )}
-
-                  <Switch
-                    value={editmode}
-                    onValueChange={(b) => {
-                      setEditMode(b);
+            {BusinessInfo.foregroundImg ? (
+              <>
+                <ImageBackground
+                  source={{ uri: BusinessInfo.foregroundImg }}
+                  resizeMethod="resize"
+                  style={{ height: 180 }}
+                  width={width}
+                  className="relative"
+                >
+                  <AntDesign
+                    onPress={() => {
+                      dispatch(removeForeground());
                     }}
-                  ></Switch>
-                  {loaded ? (
-                    <Text
-                      style={styles.text}
-                      className=" w-[14%] font-bold text-[11px] "
-                    >
-                      Edit
-                    </Text>
-                  ) : (
-                    <TextLoader width={"Edit".length} />
-                  )}
-                </View>
-              )}
+                    size={25}
+                    style={{ color: appTheme.colors!!.quaternary }}
+                    className="absolute z-40 left-[280px] top-[28px] "
+                    name="delete"
+                  />
+                  <View className="p-[5%] mt-3  h-fit">
+                    <LoadingComp
+                      loaded={isLoading}
+                      item={
+                        <View className="flex-row gap-2 ">
+                          <Image
+                            style={{
+                              borderRadius: 5,
+                              borderColor: appTheme.colors?.secondary,
+                              borderWidth: 1,
+                            }}
+                            resizeMethod="resize"
+                            resizeMode="cover"
+                            source={{ uri: BusinessInfo.store_pic }}
+                            height={35}
+                            width={35}
+                          />
+                          <View className=" flex-row gap-2 items-center">
+                            <Text
+                              style={[
+                                styles.text,
+                                { borderColor: "transparent", borderWidth: 1 },
+                              ]}
+                              className={`text-[22px] h-fit   `}
+                            >
+                              {editmode
+                                ? "Shop Layout"
+                                : BusinessInfo.store_name}
+                            </Text>
+                            {!editmode && (
+                              <>
+                                {BusinessInfo.verified && (
+                                  <MaterialIcons
+                                    name="verified"
+                                    size={25}
+                                    color={appTheme.colors?.primary}
+                                  />
+                                )}
+                              </>
+                            )}
+                          </View>
+                        </View>
+                      }
+                    />
+                    {editmode && (
+                      <View className="flex-row items-center gap-1 mt-[2%] ">
+                        {isLoading ? (
+                          <Text
+                            style={styles.text}
+                            className=" w-[14%] font-bold text-[11px] "
+                          >
+                            Preview
+                          </Text>
+                        ) : (
+                          <TextLoader width={"Preview".length} />
+                        )}
 
-              {!editmode && <SearchBar />}
-            </View>
+                        <Switch
+                          value={editmode}
+                          onValueChange={(b) => {
+                            setEditMode(b);
+                          }}
+                        ></Switch>
+                        {isLoading ? (
+                          <Text
+                            style={styles.text}
+                            className=" w-[14%] font-bold text-[11px] "
+                          >
+                            Edit
+                          </Text>
+                        ) : (
+                          <TextLoader width={"Edit".length} />
+                        )}
+                      </View>
+                    )}
+
+                    {!editmode && (
+                      <SearchBar className=" absolute top-4 elevation-sm" />
+                    )}
+                  </View>
+                </ImageBackground>
+              </>
+            ) : (
+              <>
+                <View className="p-[5%]  h-fit">
+                  <LoadingComp
+                    loaded={isLoading}
+                    item={
+                      <Text
+                        style={styles.text}
+                        className={`text-[24px] h-fit  `}
+                      >
+                        Shop Layout
+                      </Text>
+                    }
+                  />
+                  {editmode && (
+                    <View className="flex-row items-center gap-1 mt-[2%] ">
+                      {isLoading ? (
+                        <Text
+                          style={styles.text}
+                          className=" w-[14%] font-bold text-[11px] "
+                        >
+                          Preview
+                        </Text>
+                      ) : (
+                        <TextLoader width={"Preview".length} />
+                      )}
+
+                      <Switch
+                        value={editmode}
+                        onValueChange={(b) => {
+                          setEditMode(b);
+                        }}
+                      ></Switch>
+                      {isLoading ? (
+                        <Text
+                          style={styles.text}
+                          className=" w-[14%] font-bold text-[11px] "
+                        >
+                          Edit
+                        </Text>
+                      ) : (
+                        <TextLoader width={"Edit".length} />
+                      )}
+                    </View>
+                  )}
+
+                  {!editmode && <SearchBar />}
+                </View>
+              </>
+            )}
 
             {BusinessInfo.sections.length > 0 && (
               <FlatList
@@ -159,8 +294,8 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
                           <AntDesign
                             onPress={() => handleDeleteSection(item)}
                             size={20}
-                            style={{ color: appTheme.colors!!.tertiary }}
-                            className="absolute z-40 left-[200px] top-[22px] "
+                            style={{ color: appTheme.colors?.textColor }}
+                            className="absolute z-40 left-[200px] top-[37px] "
                             name="delete"
                           />
                         )}
@@ -212,7 +347,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
             <TouchableNativeFeedback onPress={handlePresentModalPress}>
               <View
                 style={{ backgroundColor: appTheme.colors!!.tertiary }}
-                className=" self-center rounded-full  w-8 h-8 items-center mt-[8%]"
+                className=" self-center rounded-full  w-8 h-8 items-center mt-[5%]"
               >
                 <Text
                   style={styles.text}
@@ -245,6 +380,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
                 </Text>
               </View>
             )}
+            <View className="h-[50px]"></View>
           </ScrollView>
         </View>
 
@@ -270,6 +406,12 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
                   title="Banner"
                   onPress={() => {
                     navigation.navigate("banner");
+                  }}
+                />
+                <ClickableBtn
+                  title="Foreground Image"
+                  onPress={() => {
+                    navigation.navigate("foregroundImg");
                   }}
                 />
                 <ClickableBtn
