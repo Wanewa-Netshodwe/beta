@@ -100,6 +100,39 @@ const businessSlice = createSlice({
         ];
       }
     },
+    editProduct: (state, action) => {
+      const product = action.payload;
+      const sectionIndex = state.userBusiness.sections.findIndex(
+        (sec) => sec.name === product.section
+      );
+
+      if (sectionIndex !== -1) {
+        const products = state.userBusiness.sections[sectionIndex].products;
+        if (products) {
+          products.forEach((pro, index) => {
+            if (pro.name === product.name) {
+              products[index] = product;
+            }
+          });
+        }
+      }
+    },
+    delProduct: (state, action) => {
+      const product = action.payload;
+      const sectionIndex = state.userBusiness.sections.findIndex(
+        (sec) => sec.name === product.section
+      );
+
+      if (sectionIndex !== -1) {
+        const products = state.userBusiness.sections[sectionIndex].products;
+        if (products) {
+          state.userBusiness.sections[sectionIndex].products = products.filter(
+            (pro) => pro.name !== product.name
+          );
+        }
+      }
+    },
+
     addCat: (state, action) => {
       const cat: category = action.payload;
       const sections = state.userBusiness.sections;
@@ -187,5 +220,7 @@ export const {
   delCat,
   setForegroundImg,
   removeForeground,
+  editProduct,
+  delProduct,
 } = businessSlice.actions;
 export default businessSlice.reducer;

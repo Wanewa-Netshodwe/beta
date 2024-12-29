@@ -39,7 +39,9 @@ import {
   addProduct,
   addSection,
   delCat,
+  delProduct,
   delSection,
+  editProduct,
   saveCategoryList,
   setBusiness,
 } from "../redux/businessSlice";
@@ -287,6 +289,28 @@ export const BE_addProduct = (data: {
   console.log("add product called");
   dispatch(addProduct(sectionInfo));
   navigator.navigate("Layout");
+};
+export const BE_EditProduct = (data: {
+  // loading: React.Dispatch<React.SetStateAction<boolean>>;
+  dispatch: Dispatch<UnknownAction>;
+  sectionInfo: product;
+  navigator: StackNavigationProp<StackShopLayoutParamList>;
+}) => {
+  const { dispatch, sectionInfo, navigator } = data;
+  console.log("add product called");
+  dispatch(editProduct(sectionInfo));
+  navigator.navigate("home");
+};
+export const BE_delProduct = (data: {
+  // loading: React.Dispatch<React.SetStateAction<boolean>>;
+  dispatch: Dispatch<UnknownAction>;
+  sectionInfo: product;
+  navigator: StackNavigationProp<StackShopLayoutParamList>;
+}) => {
+  const { dispatch, sectionInfo, navigator } = data;
+  console.log("add product called");
+  dispatch(delProduct(sectionInfo));
+  navigator.navigate("home");
 };
 let uidg: string;
 export const getUid = () => {

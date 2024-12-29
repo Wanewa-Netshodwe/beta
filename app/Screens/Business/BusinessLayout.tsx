@@ -305,6 +305,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
                         )}
 
                         <MySection
+                          edit={editmode}
                           name={item.name}
                           section={item}
                           products={item.products ? item.products : undefined}

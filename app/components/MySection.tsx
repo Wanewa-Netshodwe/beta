@@ -11,23 +11,26 @@ import {
   StackShopLayoutParamList,
   sectionData,
 } from "../utilities/Types";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
-import { Feather, MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { styles } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetScrollable/BottomSheetFlashList";
 import { useStates } from "../utilities/States";
 import { useDynamicStyles } from "../utilities/Styles";
+import { BE_delProduct, BE_EditProduct } from "../backend/Queries";
 
 type Props = {
   name: string;
   products?: product[];
   section: sectionData;
   nav: StackNavigationProp<StackShopLayoutParamList>;
+  edit?: boolean;
 };
 
 const MySection = (props: Props) => {
+  const dispatch = useDispatch();
   const styles2 = useDynamicStyles();
   const { nav } = props;
   const appTheme = useSelector((state: RootState) => state.appTheme.appTheme);
@@ -67,7 +70,10 @@ const MySection = (props: Props) => {
                 renderItem={({ item }) => (
                   <TouchableNativeFeedback
                     onPress={() => {
-                      nav.navigate("viewProduct", { product: item });
+                      if (!props.edit) {
+                        nav.navigate("viewProduct", { product: item });
+                      }
+
                       console.log("prssed");
                     }}
                   >
@@ -92,6 +98,32 @@ const MySection = (props: Props) => {
                             className=" absolute -top-2 z-50 -left-3    p-2 rounded-full"
                           />
                         )}
+                        {props.edit ? (
+                          <>
+                            <AntDesign
+                              name="edit"
+                              onPress={() => {
+                                nav.navigate("editProduct", { product: item });
+                              }}
+                              size={18}
+                              color={appTheme.colors?.textColor}
+                              className="right-14  top-4 z-20 absolute"
+                            />
+                            <AntDesign
+                              color={appTheme.colors?.textColor}
+                              onPress={() => {
+                                BE_delProduct({
+                                  dispatch: dispatch,
+                                  sectionInfo: item,
+                                  navigator: nav,
+                                });
+                              }}
+                              name="delete"
+                              size={18}
+                              className="left-1  bottom-1 z-20 absolute"
+                            />
+                          </>
+                        ) : null}
 
                         <Image
                           width={120}
@@ -148,13 +180,16 @@ const MySection = (props: Props) => {
               />
             ) : (
               <>
-                <View  className=" gap-2  flex-wrap flex-row  ">
+                <View className=" gap-2  flex-wrap flex-row  ">
                   {prod.slice(0, 4).map((item, index) => {
                     return (
                       <TouchableNativeFeedback
-                      key={index}
+                        key={index}
                         onPress={() => {
-                          nav.navigate("viewProduct", { product: item });
+                          if (!props.edit) {
+                            nav.navigate("viewProduct", { product: item });
+                          }
+
                           console.log("prssed");
                         }}
                       >
@@ -179,6 +214,34 @@ const MySection = (props: Props) => {
                                 className=" absolute -top-2 z-50 -left-3    p-2 rounded-full"
                               />
                             )}
+                            {props.edit ? (
+                              <>
+                                <AntDesign
+                                  name="edit"
+                                  onPress={() => {
+                                    nav.navigate("editProduct", {
+                                      product: item,
+                                    });
+                                  }}
+                                  size={18}
+                                  color={appTheme.colors?.textColor}
+                                  className="right-14  top-2 z-20 absolute"
+                                />
+                                <AntDesign
+                                  color={appTheme.colors?.textColor}
+                                  onPress={() => {
+                                    BE_delProduct({
+                                      dispatch: dispatch,
+                                      sectionInfo: item,
+                                      navigator: nav,
+                                    });
+                                  }}
+                                  name="delete"
+                                  size={18}
+                                  className="left-1  bottom-1 z-20 absolute"
+                                />
+                              </>
+                            ) : null}
 
                             <Image
                               width={120}

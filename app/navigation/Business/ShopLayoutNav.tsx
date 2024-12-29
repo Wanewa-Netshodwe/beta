@@ -8,6 +8,7 @@ import ViewProduct from "../../Screens/Business/ViewProduct";
 import SearchModal from "../../Screens/Business/SearchModal";
 import ListCategories from "../../Screens/Business/ListCategories";
 import Category from "../../Screens/Business/Category";
+import EditProduct from "../../Screens/Business/EditProduct";
 
 const Stack = createStackNavigator();
 const ShopLayoutNavigator = () => (
@@ -52,6 +53,11 @@ const ShopLayoutNavigator = () => (
       name="viewProduct"
       options={{ headerShown: false }}
       component={ViewProduct}
+    />
+    <Stack.Screen
+      name="editProduct"
+      options={{ headerShown: false }}
+      component={EditProduct}
     />
     <Stack.Screen
       name="category"

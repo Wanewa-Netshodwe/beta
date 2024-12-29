@@ -4,8 +4,9 @@ export type TabParamList = {
   settings: undefined;
 };
 export type StackShopLayoutParamList = {
+  editProduct: { product: product };
   foregroundImg: undefined;
-  searchModal:undefined
+  searchModal: undefined;
   home: undefined;
   banner: undefined;
   section: undefined;
