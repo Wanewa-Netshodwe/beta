@@ -8,7 +8,7 @@ import {
   Dimensions,
   Pressable,
 } from "react-native";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { memo, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import Screen from "../../utilities/Screen";
@@ -47,7 +47,7 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
   const styles = useDynamicStyles();
   const [textPostion, setTextPostion] = useState({ x: 0, y: 0 });
   const [newText, setText] = useState("");
-
+  console.log("add baanner scrren called");
   useMemo(() => {
     let dataDummy: { key: string; index: number }[] | null =
       businessData.sections.length > 0 ? [] : null;
@@ -73,7 +73,7 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
         { key: "AFter " + item.key, value: item.index + 1 },
       ]);
     });
-  }, []);
+  }, [businessData]);
   useEffect(() => {}, []);
 
   const handleSubmit = () => {
@@ -81,15 +81,13 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
       errorMsg("Fill in all fields to Continue");
       return;
     }
-    console.log(d.length < 1);
+
     const r =
       d.length < 1
         ? [0]
         : d.filter((item) => item.key === Position).map((item) => item.value);
 
-    console.log(r);
     let num = r[0];
-    console.log("number : ", num);
     if (num !== undefined || num === 0) {
       const sectionData: sectionData = {
         valid: true,
@@ -120,8 +118,8 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
     }
     const data = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [16, 9],
+      // allowsEditing: true,
+      // aspect: [16, 9],
       quality: 1,
     });
 
@@ -312,4 +310,4 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
     </View>
   );
 };
-export default AddBanner;
+export default memo(AddBanner);

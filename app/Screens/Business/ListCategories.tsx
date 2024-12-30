@@ -8,7 +8,7 @@ import {
   Animated,
   StyleSheet,
 } from "react-native";
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import Screen from "../../utilities/Screen";
@@ -36,51 +36,62 @@ import { useDynamicStyles } from "../../utilities/Styles";
 import ClickableBtn from "../../components/ClickableBtn";
 type prop = StackScreenProps<StackShopLayoutParamList, "categoryList">;
 const ListCategories: React.FC<prop> = ({ navigation }) => {
+  console.log("catgorylist scrren called");
   const styles = useDynamicStyles();
   const { businessState, appTheme } = useStates();
-  const business = businessState.userBusiness;
-  let dataDummy: { key: string; index: number }[] | null =
-    business.sections.length > 0 ? [] : null;
-  business.sections.map((item, idx) => {
-    if (item.valid)
-      if (dataDummy) dataDummy.push({ key: item.name, index: idx });
-  });
-  let d: { key: string; value: number }[] = [];
-  let data: { key: number; value: string }[] = [];
-  dataDummy?.map((item) => {
-    data.push({ key: item.index, value: "Before " + item.key });
-    d.push({ key: "Before " + item.key, value: item.index });
-  });
-  dataDummy?.map((item) => {
-    data.push({ key: item.index + 1, value: "After " + item.key });
-    d.push({ key: "After " + item.key, value: item.index + 1 });
-  });
+  const businessData = businessState.userBusiness;
+  const [data, setData] = useState<{ key: number; value: string }[]>([]);
+  const [d, setD] = useState<{ key: string; value: number }[]>([]);
+  useMemo(() => {
+    let dataDummy: { key: string; index: number }[] | null =
+      businessData.sections.length > 0 ? [] : null;
+    businessData.sections.map((item, idx) => {
+      if (item.valid)
+        if (dataDummy) dataDummy.push({ key: item.name, index: idx });
+    });
+
+    dataDummy?.map((item) => {
+      setData((prev) => [
+        ...prev,
+        { key: item.index, value: "Before " + item.key },
+      ]);
+      setData((prev) => [
+        ...prev,
+        { key: item.index + 1, value: "After " + item.key },
+      ]);
+      setD((prev) => [
+        ...prev,
+        { key: "Before " + item.key, value: item.index },
+      ]);
+      setD((prev) => [
+        ...prev,
+        { key: "AFter " + item.key, value: item.index + 1 },
+      ]);
+    });
+  }, [businessData.sections]);
   const handleDelCatogory = (item: category) => {
     BE_delC(item, dispatch);
   };
-  const cat = business.sections
+  const cat = businessData.sections
     .filter((section) => {
-      if (section.type === "categories" && !section.valid) {
-        console.log("found");
+      if (section.type === "Categories" && !section.valid) {
         return section.categoryList?.categories;
       }
     })
     .flatMap((section) => section.categoryList?.categories);
-  console.log("categories : ", cat);
-  console.log("sections : ", business.sections);
-  console.log("sections length : ", business.sections.length);
+
   let id: string;
 
   useEffect(() => {
     // Find an existing unsaved section
-    let section = business.sections.find(
-      (sec) => sec.type === "categories" && !sec.valid
+    let section = businessData.sections.find(
+      (sec) => sec.type === "Categories" && !sec.valid
     );
 
     if (!section) {
       // If no unsaved section exists, create a new one
       const id = createRandomId();
-      console.log("Created a new section with id:", id);
+
       const section: sectionData = {
         name: "kk",
         type: "categories",
@@ -119,8 +130,6 @@ const ListCategories: React.FC<prop> = ({ navigation }) => {
   };
   id = getUid();
 
-  console.log("id : ", id);
-  console.log("name :", title);
   const handleSave = () => {
     const category: category = {
       id: id,
@@ -166,7 +175,7 @@ const ListCategories: React.FC<prop> = ({ navigation }) => {
               <View
                 className="bg-transparent rounded-md p-2 w-[120px]"
                 style={{
-                  borderColor: appTheme.colors.tertiary,
+                  borderColor: appTheme.colors?.textColor,
                   borderWidth: 2,
                 }}
               >
@@ -237,7 +246,7 @@ const ListCategories: React.FC<prop> = ({ navigation }) => {
           <View className="mt-[5%]">
             <SelectList
               setSelected={(val: string) => setPosition(val)}
-              data={dataDummy ? data : [{ key: 0, value: "First" }]}
+              data={data.length > 0 ? data : [{ key: 0, value: "First" }]}
               save="value"
               inputStyles={styles.text}
               dropdownTextStyles={styles.text}

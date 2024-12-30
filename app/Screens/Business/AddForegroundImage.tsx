@@ -24,8 +24,9 @@ const AddForegroundImage: React.FC<Props> = ({ navigation }) => {
   const { appTheme } = useStates();
   const [img, setImg] = useState<string>();
   const { width } = Dimensions.get("screen");
+  console.log('addforeground scrren called')
   const handleImageUpload = async () => {
-    console.log(img);
+    
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       alert("Sorry, we need camera roll permissions to make this   work!");
@@ -78,9 +79,6 @@ const AddForegroundImage: React.FC<Props> = ({ navigation }) => {
                 source={{ uri: img }}
                 resizeMode="cover"
               />
-              <View className="absolute  top-36 w-full">
-                <SearchBar />
-              </View>
             </View>
           ) : (
             <View
@@ -89,9 +87,7 @@ const AddForegroundImage: React.FC<Props> = ({ navigation }) => {
                 height: 230,
                 backgroundColor: appTheme.colors?.tertiary,
               }}
-            >
-              <SearchBar />
-            </View>
+            ></View>
           )}
         </View>
         <View className="mt-5">

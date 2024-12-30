@@ -8,7 +8,14 @@ import {
   FlatList,
   TouchableOpacity,
 } from "react-native";
-import React, { useMemo, useRef, useState } from "react";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import Screen from "../../utilities/Screen";
@@ -33,22 +40,43 @@ import { useStates } from "../../utilities/States";
 import { useDynamicStyles } from "../../utilities/Styles";
 import OutlineBtn from "../../components/OutlineBtn";
 import ClickableBtn from "../../components/ClickableBtn";
+
 type Props = BottomTabScreenProps<TabParamList, "addProduct">;
 const AddProduct: React.FC<Props> = ({ navigation }) => {
+  const [categoryData, setCategoryData] = useState<
+    { key: string; value: string }[]
+  >([]);
+  console.log("add produc scrren called");
   const styles = useDynamicStyles();
   const { appTheme, businessState } = useStates();
+  const [category, setCategory] = useState("");
   const businessData = businessState.userBusiness;
-  let dataDummy: { key: string; value: string }[] = [];
-  businessData.sections.length > 0 ? [] : null;
-  businessData.sections.map((item, idx) => {
-    if (dataDummy) {
-      if (item.type === "Section") {
-        dataDummy.push({ key: item.name, value: item.name });
+  let [dataDummy, setdataDummy] = useState<{ key: string; value: string }[]>(
+    []
+  );
+  useMemo(() => {
+    businessData.sections.length > 0 ? [] : null;
+    businessData.sections.map((item, idx) => {
+      if (dataDummy) {
+        if (item.type === "Section") {
+          setdataDummy((prev) => [
+            ...prev,
+            { key: item.name, value: item.name },
+          ]);
+        }
       }
-    }
-  });
+      if (item.type === "categories") {
+        const catData: { key: string; value: string }[] = [];
+        if (item.categoryList?.categories)
+          item.categoryList?.categories.map((category) => {
+            catData.push({ key: category.name!!, value: category.name!! });
+          });
+      }
+    });
+  }, [businessData.sections]);
 
   let [d, setD] = useState([0]);
+
   let [inputs, setInputs] = useState<{ property?: string; info?: string }[]>(
     []
   );
@@ -154,7 +182,6 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
       }
       return updatedInputs; // Return the updated state
     });
-    console.log(inputs);
   };
   const handleAddProduct = () => {
     let sum = 0;
@@ -173,7 +200,7 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
         return bid;
       }
     });
-    console.log("bid winner :", bidWinner[0]);
+
     const sectionInfo: product = {
       delivery_cost: Number(deliverPrice),
       descriptions: description,
@@ -181,7 +208,7 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
       imgs: img,
       name: name,
       rating: rating,
-
+      ...(category ? { category: category } : {}),
       reviews: r,
       ...(auction === "yes"
         ? {
@@ -223,7 +250,7 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
       allowsEditing: true,
-      aspect: [16, 9],
+      // aspect: [16, 9],
       quality: 1,
     });
 
@@ -232,7 +259,7 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
       data.assets.map((img) => {
         uris.push(img.uri);
       });
-      console.log(data.assets);
+
       setImg((prev) => [...prev, ...uris]);
     }
   };
@@ -258,12 +285,13 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
     setD((prev) => [...prev, counter]);
     setCounter((prev) => prev + 1);
     ScrollViewref.current?.scrollToEnd({ animated: true });
-
-    console.log(d);
   };
 
   return (
-    <View className="w-full h-full  ">
+    <View
+      style={{ backgroundColor: appTheme.colors?.background }}
+      className="w-full h-full  "
+    >
       <View style={styles.sections}>
         <Text style={styles.text} className={`text-[24px] `}>
           Add Product
@@ -329,7 +357,7 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
             <View
               className="bg-transparent rounded-md p-2 w-fit"
               style={{
-                borderColor: appTheme.colors.tertiary,
+                borderColor: appTheme.colors?.textColor,
                 borderWidth: 2,
               }}
             >
@@ -337,7 +365,7 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
             </View>
           </TouchableNativeFeedback>
           <Text
-            style={{ color: appTheme.colors.tertiary }}
+            style={styles.text}
             className="text-[10px] font-semibold w-[150px] "
           >
             nb : the first picture would be the cover picture
@@ -607,6 +635,28 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
             ></TextInput>
           </View>
         </View>
+        {categoryData.length > 0 && (
+          <View style={styles.sections} className="mt-2">
+            <View>
+              <Text style={styles.text} className="text-[18px] font-semibold">
+                Category
+              </Text>
+            </View>
+            <View className="mt-[5%]">
+              <SelectList
+                setSelected={(s: string) => {
+                  setCategory(s);
+                }}
+                data={categoryData}
+                save="value"
+                inputStyles={styles.text}
+                dropdownTextStyles={styles.text}
+                placeholder="Choose Product Section"
+                search={false}
+              />
+            </View>
+          </View>
+        )}
         <View style={styles.sections} className="mt-2">
           <View>
             <Text style={styles.text} className="text-[18px] font-semibold">
@@ -779,4 +829,4 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
     </View>
   );
 };
-export default AddProduct;
+export default memo(AddProduct);

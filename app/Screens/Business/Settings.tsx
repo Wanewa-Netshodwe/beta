@@ -14,6 +14,7 @@ import { StackScreenProps } from "@react-navigation/stack";
 type Props = StackScreenProps<StackSettingsParamList, "home">;
 
 const Settings: React.FC<Props> = ({ navigation }: Props) => {
+  console.log("setting scrren called");
   const { appTheme } = useStates();
   const font = appTheme.fonts?.primary!!;
   const [loaded] = Font.useFonts({

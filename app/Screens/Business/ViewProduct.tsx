@@ -40,6 +40,7 @@ import { useDynamicStyles } from "../../utilities/Styles";
 type Props = BottomTabScreenProps<StackShopLayoutParamList, "viewProduct">;
 
 const ViewProduct: React.FC<Props> = ({ route }) => {
+  console.log("view scrren called");
   const styles = useDynamicStyles();
   const { product } = route.params;
   const [Video, setVideo] = useState("");
@@ -104,7 +105,6 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
         },
       });
     }
-    console.log(starsInfo);
 
     setReviewStarsInfo(starsInfo);
     setLoading(false);
@@ -150,7 +150,7 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
       </View>
       <ScrollView>
         <View
-          style={{ width: width, backgroundColor: appTheme.colors?.primary }}
+          style={{ width: width, backgroundColor: appTheme.colors?.background }}
           className="mt-1"
         >
           {product.imgs && product.imgs?.length > 1 ? (

@@ -8,7 +8,7 @@ import {
   FlatList,
   Dimensions,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import Screen from "../../utilities/Screen";
@@ -28,9 +28,11 @@ import { StackScreenProps } from "@react-navigation/stack";
 import OutlineBtn from "../../components/OutlineBtn";
 import { useDynamicStyles } from "../../utilities/Styles";
 import ClickableBtn from "../../components/ClickableBtn";
+import { errorMsg } from "../../errors/catchErrors";
 
 type Prop = StackScreenProps<StackShopLayoutParamList, "carousel">;
 const AddCarousel: React.FC<Prop> = ({ navigation }: Prop) => {
+  console.log("addcarousel scrren called");
   const { width } = Dimensions.get("window");
   const styles = useDynamicStyles();
   const dispatch = useDispatch();
@@ -44,33 +46,47 @@ const AddCarousel: React.FC<Prop> = ({ navigation }: Prop) => {
   const [carouselSpeed, setCarouselSpeed] = useState(3);
   const [carouselType, setCarouselType] = useState("horizantal");
   const [loading, setLoading] = useState(false);
-  let dataDummy: { key: string; index: number }[] | null =
-    businessData.sections.length > 0 ? [] : null;
-  businessData.sections.map((item, idx) => {
-    if (item.valid)
-      if (dataDummy) dataDummy.push({ key: item.name, index: idx });
-  });
-  let d: { key: string; value: number }[] = [];
-  let data: { key: number; value: string }[] = [];
-  dataDummy?.map((item) => {
-    data.push({ key: item.index, value: "Before " + item.key });
-    d.push({ key: "Before " + item.key, value: item.index });
-  });
-  dataDummy?.map((item) => {
-    data.push({ key: item.index + 1, value: "After " + item.key });
-    d.push({ key: "After " + item.key, value: item.index + 1 });
-  });
-  console.log(d);
+  const [data, setData] = useState<{ key: number; value: string }[]>([]);
+  const [d, setD] = useState<{ key: string; value: number }[]>([]);
+  useMemo(() => {
+    let dataDummy: { key: string; index: number }[] | null =
+      businessData.sections.length > 0 ? [] : null;
+    businessData.sections.map((item, idx) => {
+      if (item.valid)
+        if (dataDummy) dataDummy.push({ key: item.name, index: idx });
+    });
+    dataDummy?.map((item) => {
+      setData((prev) => [
+        ...prev,
+        { key: item.index, value: "Before " + item.key },
+      ]);
+      setD((prev) => [
+        ...prev,
+        { key: "Before " + item.key, value: item.index },
+      ]);
+      setData((prev) => [
+        ...prev,
+        { key: item.index + 1, value: "After " + item.key },
+      ]);
+      setD((prev) => [
+        ...prev,
+        { key: "After " + item.key, value: item.index + 1 },
+      ]);
+    });
+  }, [businessState.userBusiness.sections]);
+
   const handleSubmit = () => {
-    console.log(d.length < 1);
+    if (!name || !img || !Position) {
+      errorMsg("Fill in all fields to Continue");
+      return;
+    }
+
     const r =
       d.length < 1
         ? [0]
         : d.filter((item) => item.key === Position).map((item) => item.value);
 
-    console.log(r);
     let num = r[0];
-    console.log("number : ", num);
     if (num !== undefined || num === 0) {
       const sectionData: sectionData = {
         valid: true,
@@ -199,17 +215,14 @@ const AddCarousel: React.FC<Prop> = ({ navigation }: Prop) => {
               Carousel Preview
             </Text>
           </View>
-          <View
-            style={{ width: width  }}
-            className="   h-fit "
-          >
+          <View style={{ width: width }} className="   h-fit ">
             {img.length > 0 && (
               <Carousel
                 loop={true}
                 {...(carouselType === "vertical" ? { vertical: true } : {})}
                 autoPlayInterval={speed * 1000}
                 style={{ marginTop: 10 }}
-                width={width }
+                width={width}
                 height={height}
                 data={img}
                 autoPlay={true}
@@ -239,7 +252,7 @@ const AddCarousel: React.FC<Prop> = ({ navigation }: Prop) => {
           <View className="mt-[5%]">
             <SelectList
               setSelected={(val: string) => setPosition(val)}
-              data={dataDummy ? data : [{ key: 0, value: "First" }]}
+              data={data.length > 0 ? data : [{ key: 0, value: "First" }]}
               save="value"
               inputStyles={styles.text}
               dropdownTextStyles={styles.text}

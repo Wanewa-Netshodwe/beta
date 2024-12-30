@@ -8,16 +8,12 @@ import {
   Animated,
   StyleSheet,
 } from "react-native";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import Screen from "../../utilities/Screen";
 import * as ImagePicker from "expo-image-picker";
-import {
-  BusRegData,
-  sectionData,
-  StackShopLayoutParamList,
-} from "../../utilities/Types";
+import { sectionData, StackShopLayoutParamList } from "../../utilities/Types";
 import { useNavigation } from "expo-router";
 import { useAnimatedStyle, withSpring } from "react-native-reanimated";
 import RadioGroup from "react-native-radio-buttons-group";
@@ -38,24 +34,29 @@ const AddSection: React.FC<Prop> = ({ navigation }) => {
   const [title, setTitle] = useState("");
   const [layout, setLayout] = useState("grid");
   const [loading, setLoading] = useState(false);
-  let dataDummy: { key: string; index: number }[] | null =
-    businessData.sections.length > 0 ? [] : null;
-  businessData.sections.map((item, idx) => {
-    if (item.valid)
-      if (dataDummy) dataDummy.push({ key: item.name, index: idx });
-  });
-  let d: { key: string; value: number }[] = [];
-  let data: { key: number; value: string }[] = [];
-  dataDummy?.map((item) => {
-    data.push({ key: item.index, value: "Before " + item.key });
-    d.push({ key: "Before " + item.key, value: item.index });
-  });
-  dataDummy?.map((item) => {
-    data.push({ key: item.index + 1, value: "After " + item.key });
-    d.push({ key: "After " + item.key, value: item.index + 1 });
-  });
-  console.log(d);
-  console.log(layout);
+  const [data, setData] = useState<{ key: number; value: string }[]>([]);
+  const [d, setD] = useState<{ key: string; value: number }[]>([]);
+  useMemo(() => {
+    if (businessData.sections.length > 0) {
+      const dataDummy = businessData.sections
+        .filter((item) => item.valid)
+        .map((item, idx) => ({ key: item.name, index: idx }));
+
+      const newData: { key: number; value: string }[] = [];
+      const newD: { key: string; value: number }[] = [];
+
+      dataDummy.forEach((item) => {
+        newData.push({ key: item.index, value: "Before " + item.key });
+        newData.push({ key: item.index + 1, value: "After " + item.key });
+        newD.push({ key: "Before " + item.key, value: item.index });
+        newD.push({ key: "After " + item.key, value: item.index + 1 });
+      });
+
+      setData(newData);
+      setD(newD);
+    }
+  }, [businessData.sections]);
+
   const handleSubmit = () => {
     console.log(d.length < 1);
     const r =
@@ -63,9 +64,7 @@ const AddSection: React.FC<Prop> = ({ navigation }) => {
         ? [0]
         : d.filter((item) => item.key === Position).map((item) => item.value);
 
-    console.log(r);
     let num = r[0];
-    console.log("number : ", num);
     if (num !== undefined || num === 0) {
       const sectionData: sectionData = {
         name: title,
@@ -277,7 +276,7 @@ const AddSection: React.FC<Prop> = ({ navigation }) => {
           <View className="mt-[5%]">
             <SelectList
               setSelected={(val: string) => setPosition(val)}
-              data={dataDummy ? data : [{ key: 0, value: "First" }]}
+              data={data.length > 0 ? data : [{ key: 0, value: "First" }]}
               save="value"
               inputStyles={styles2.text}
               dropdownTextStyles={styles2.text}
@@ -286,24 +285,12 @@ const AddSection: React.FC<Prop> = ({ navigation }) => {
             />
           </View>
         </View>
-        <View
-          className="p-[5%]  justify-between  flex-row"
-        >
-   <ClickableBtn 
-   title="Save"
-   onPress={handleSubmit}
-   width={120}
-
-   />
-    <ClickableBtn 
-    width={120}
-   title="Cancel"
-   onPress={cancel}
-
-   />
+        <View className="p-[5%]  justify-between  flex-row">
+          <ClickableBtn title="Save" onPress={handleSubmit} width={120} />
+          <ClickableBtn width={120} title="Cancel" onPress={cancel} />
         </View>
       </ScrollView>
     </View>
   );
 };
-export default AddSection;
+export default memo(AddSection);

@@ -87,17 +87,16 @@ const BusinessNav = () => {
         name="Layout"
         component={ShopLayoutNavigator}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => {
-            console.log("size icon :", size);
             return <Entypo name="wallet" color={color} size={30} />;
           },
         }}
         name="Wallet"
-        component={ShopLayoutNavigator}
-      />
+        component={}
+      /> */}
       <Tab.Screen
         options={{
           headerShown: false,
@@ -108,7 +107,7 @@ const BusinessNav = () => {
         name="addProduct"
         component={AddProduct}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
@@ -121,7 +120,7 @@ const BusinessNav = () => {
         }}
         name="Orders"
         component={SettingsNavigator}
-      />
+      /> */}
       <Tab.Screen
         options={{
           headerShown: false,

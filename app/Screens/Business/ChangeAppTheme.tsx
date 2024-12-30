@@ -27,6 +27,7 @@ import { ChangeThemeLoader } from "../../utilities/Loaders";
 type Props = BottomTabScreenProps<TabParamList, "settings">;
 
 const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
+  console.log('change app scrren called')
   const dispatch = useDispatch();
   const { appTheme } = useStates();
   const styles = useDynamicStyles();
@@ -84,15 +85,12 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
   );
   const [isFontLoaded, setIsFontLoaded] = useState(true);
   const handleBtn = async () => {
-    console.log("called");
-
-    // Simulate a long-running operation but break it into smaller chunks
+  
     const operation = (): Promise<boolean> => {
       return new Promise((resolve) => {
         let count = 0;
-        const maxCount = 10000;
+        const maxCount = 50000;
 
-        // Breaking the operation into smaller chunks using setTimeout
         const run = () => {
           for (let i = 0; i < 1000; i++) {
             count++;
@@ -101,7 +99,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
               return;
             }
           }
-          setTimeout(run, 0); // Yield control back to the event loop
+          setTimeout(run, 0); 
         };
 
         run();
@@ -111,22 +109,21 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
     try {
       const result = await operation();
       setIsValid(result);
-      console.log("result set");
     } catch (err) {
       console.log(err);
     }
   };
 
-  // Function to load fonts asynchronously
+  
   const loadFont = async (fontName: string) => {
     if (fontMap[fontName]) {
-      setIsFontLoaded(false); // Set loading state
+      setIsFontLoaded(false); 
       await Font.loadAsync({ [fontName]: fontMap[fontName] });
-      setIsFontLoaded(true); // Set font loaded
+      setIsFontLoaded(true);
     }
   };
 
-  // Load the selected font whenever it changes
+  
   useEffect(() => {
     const delay = async () => {
       await handleBtn();
@@ -135,10 +132,10 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
     if (selectedFont) loadFont(selectedFont);
   }, [selectedFont]);
 
-  // Handle font selection
+ 
   const handleFontChange = (font: string) => {
     setSelectedFont(font);
-    dispatch(setFont(font)); // Update Redux store
+    dispatch(setFont(font)); 
   };
   if (isValid) {
     return (

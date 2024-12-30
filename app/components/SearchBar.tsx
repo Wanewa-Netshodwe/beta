@@ -1,5 +1,5 @@
 import { View, Text, TextInput } from "react-native";
-import React, { useEffect } from "react";
+import React, { memo, useEffect } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
@@ -9,10 +9,10 @@ import { StackShopLayoutParamList } from "../utilities/Types";
 import { Keyboard } from "react-native";
 type Props = {
   className?: string;
-  nav: StackNavigationProp<StackShopLayoutParamList, "home", undefined>;
+  nav: StackNavigationProp<StackShopLayoutParamList>;
 };
 
-const SearchBar = ({ className, nav }: Props) => {
+const SearchBar = memo(({ className, nav }: Props) => {
   const styles = useDynamicStyles();
   const appTheme = useSelector((state: RootState) => state.appTheme.appTheme);
 
@@ -30,7 +30,6 @@ const SearchBar = ({ className, nav }: Props) => {
         />
         <TextInput
           onPress={() => {
-            
             nav.navigate("searchModal");
           }}
           style={styles.text}
@@ -41,6 +40,6 @@ const SearchBar = ({ className, nav }: Props) => {
       </View>
     </View>
   );
-};
+});
 
 export default SearchBar;

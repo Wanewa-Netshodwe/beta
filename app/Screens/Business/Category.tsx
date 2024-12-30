@@ -28,6 +28,7 @@ import { useDynamicStyles } from "../../utilities/Styles";
 import ClickableBtn from "../../components/ClickableBtn";
 type prop = StackScreenProps<StackShopLayoutParamList, "category">;
 const Category: React.FC<prop> = ({ route, navigation }) => {
+  console.log('category scrren called')
   const styles = useDynamicStyles();
   const { id } = route.params;
   const { appTheme } = useStates();
@@ -129,21 +130,7 @@ const Category: React.FC<prop> = ({ route, navigation }) => {
          width={120}
          onPress={handleSubmit}
          />
-          <TouchableNativeFeedback
-            onPress={() => {
-              handleSubmit();
-            }}
-          >
-            <View
-              style={{ backgroundColor: appTheme.colors.tertiary }}
-              className=" py-2 mt-[15%]  rounded-md  w-[50%] self-center "
-            >
-              <Text className="text-[25px] w-fit font-bold text-center">
-                {" "}
-                Cancel
-              </Text>
-            </View>
-          </TouchableNativeFeedback>
+          
         </View>
       </ScrollView>
     </View>

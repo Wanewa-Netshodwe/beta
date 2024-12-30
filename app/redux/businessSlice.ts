@@ -65,7 +65,6 @@ const businessSlice = createSlice({
     },
     addSection: (state, action) => {
       const section: sectionData = action.payload;
-      console.log("section to be added :", section);
 
       let sec = state.userBusiness.sections;
       let sections = [...sec];
@@ -77,7 +76,6 @@ const businessSlice = createSlice({
       let sec = state.userBusiness.sections;
       let sections = [...sec];
       const idx = sections.findIndex((item) => item.name === section.name);
-
       if (idx !== -1) {
         sections.splice(idx, 1);
       }
@@ -151,23 +149,31 @@ const businessSlice = createSlice({
     },
     saveCategoryList: (state, action) => {
       const cat: { id: string; name: string; postion: number } = action.payload;
-
-      state.userBusiness.sections = state.userBusiness.sections.map(
-        (section) => {
-          if (section.type === "categories" && !section.valid) {
-            if (section.categoryList?.id === cat.id) {
-              return {
-                ...section,
-                name: cat.name,
-                postion: cat.postion,
-                valid: true,
-              };
-            }
+      const dummySections = state.userBusiness.sections.map((section) => {
+        if (section.type === "categories" && !section.valid) {
+          if (section.categoryList?.id === cat.id) {
+            return {
+              ...section,
+              name: cat.name,
+              postion: cat.postion,
+              valid: true,
+            };
           }
-
-          return section;
         }
+        return section;
+      });
+      const notCategories = dummySections.filter(
+        (section) => section.type !== "categories"
       );
+      const allCategories = dummySections.filter((section) => {
+        if (section.type === "categories") {
+          if (section.valid) {
+            return section;
+          }
+        }
+      });
+      const updatedSections = notCategories.concat(allCategories);
+      state.userBusiness.sections = updatedSections;
     },
 
     setProducts: (state, action) => {

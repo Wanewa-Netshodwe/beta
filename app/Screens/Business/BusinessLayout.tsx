@@ -8,14 +8,13 @@ import {
   RefreshControl,
   ImageBackground,
   Image,
+  ListRenderItemInfo,
 } from "react-native";
 import * as Font from "expo-font";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
-
 import {
   BottomSheetModal,
   BottomSheetModalProvider,
@@ -23,10 +22,8 @@ import {
 } from "@gorhom/bottom-sheet";
 import MySection from "../../components/MySection";
 import { Dimensions } from "react-native";
-import Carousel from "react-native-reanimated-carousel";
 import { StackShopLayoutParamList, sectionData } from "../../utilities/Types";
 import { BE_deleteSection } from "../../backend/Queries";
-import { useNavigation } from "expo-router";
 import { StackScreenProps } from "@react-navigation/stack";
 import CategoryView from "../../components/CatogoryView";
 import { TextLoader } from "../../utilities/Loaders";
@@ -38,42 +35,28 @@ import CarouselSection from "../../components/CarouselSection";
 import { useDynamicStyles } from "../../utilities/Styles";
 import LoadingComp from "../../utilities/LoadingComp";
 import { removeForeground } from "../../redux/businessSlice";
+import { useStates } from "../../utilities/States";
 
 type prop = StackScreenProps<StackShopLayoutParamList, "home">;
 const BusinessLayout: React.FC<prop> = ({ navigation }) => {
   const styles = useDynamicStyles();
+  const { appTheme, businessState } = useStates();
   const handleDeleteSection = (sectionInfo: sectionData) => {
     BE_deleteSection({ dispatch, sectionInfo });
   };
   const [isLoading, setLoading] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const { width } = Dimensions.get("screen");
-  const appTheme = useSelector((state: RootState) => state.appTheme.appTheme);
-  const font = useSelector(
-    (state: RootState) => state.appTheme.appTheme.fonts!!.primary
-  );
-  console.log("font in redux : ", font);
-
-  const BusinessInfo = useSelector(
-    (state: RootState) => state.business.userBusiness
-  );
-  // console.log(fontMap[font]);
-  // useEffect(() => {
-
-  //   setLoading(loaded);
-  // }, [font]);
-  // const [loaded] = Font.useFonts({
-  //   font: fontMap[font], // Map Redux font name to the correct font file
-  // });
+  const font = appTheme.fonts?.primary;
+  const BusinessInfo = businessState.userBusiness;
+  console.log("business layout screen called");
   const [selectedFont, setSelectedFont] = useState(
     appTheme.fonts?.primary || ""
   );
-  const [isFontLoaded, setIsFontLoaded] = useState(true);
+
   const loadFont = async (fontName: string) => {
     if (fontMap[fontName]) {
-      setIsFontLoaded(false); // Set loading state
       await Font.loadAsync({ [fontName]: fontMap[fontName] });
-      setIsFontLoaded(true); // Set font loaded
     }
   };
   useEffect(() => {
@@ -82,32 +65,79 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
       setLoading(true);
     }
   }, [selectedFont]);
-
-  console.log("selected fonts :", font);
   const dispatch = useDispatch();
-  console.log("font loaded :", isLoading, " the font is : ", font);
-
-  // console.log("business :", BusinessInfo);
-  console.log("business :", BusinessInfo.sections);
   const [editmode, setEditMode] = useState(true);
   const bottomSheetModalRef = useRef(null);
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
-  }, []);
+  const handleSheetChanges = useCallback((index: number) => {}, []);
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<sectionData>) => {
+      if (item.type === "Banner" && item.imgs && item.height) {
+        return <BannerSection item={item} editmode={editmode} />;
+      }
+      if (item.type === "Carousel" && item.imgs && item.height) {
+        return <CarouselSection editmode={editmode} item={item} />;
+      }
+      if (item.type === "Section") {
+        return (
+          <View className="relative">
+            {editmode && (
+              <AntDesign
+                onPress={() => handleDeleteSection(item)}
+                size={20}
+                style={{ color: appTheme.colors?.textColor }}
+                className="absolute z-40 left-[200px] top-[37px]"
+                name="delete"
+              />
+            )}
+            <MySection
+              edit={editmode}
+              name={item.name}
+              section={item}
+              products={item.products ? item.products : undefined}
+              nav={navigation}
+            />
+          </View>
+        );
+      }
+      if (item.type === "categories") {
+        return (
+          <View
+            style={{
+              backgroundColor: appTheme.colors!!.primary,
+              height: 148,
+            }}
+            className="px-5 mt-2"
+          >
+            <View className="flex-row items-center mt-2">
+              <Text className="text-[25px] w-[80%]" style={styles.text}>
+                {item.name}
+              </Text>
+            </View>
+            <FlatList
+              horizontal
+              data={item.categoryList?.categories}
+              keyExtractor={(item) => item.id.toString()} // Assuming categories have a unique id
+              renderItem={({ item }) => (
+                <CategoryView name={item.name!!} img={item.img!!} />
+              )}
+            />
+          </View>
+        );
+      }
+      return null;
+    },
+    []
+  );
 
-  console.log("app theme : ", appTheme);
   return (
     <GestureHandlerRootView>
       <BottomSheetModalProvider>
         <View
           style={{
             backgroundColor: appTheme.colors?.background,
-
-            // borderColor:'green',
-            // borderWidth:1,
             height: "100%",
           }}
         >
@@ -280,72 +310,8 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
             {BusinessInfo.sections.length > 0 && (
               <FlatList
                 data={BusinessInfo.sections}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => {
-                  if (item.type === "Banner" && item.imgs && item.height) {
-                    return <BannerSection item={item} editmode={editmode} />;
-                  }
-
-                  if (item.type === "Carousel" && item.imgs && item.height) {
-                    return <CarouselSection editmode={editmode} item={item} />;
-                  }
-
-                  if (item.type === "Section") {
-                    console.log("products : ", item.products);
-                    return (
-                      <View className="relative ">
-                        {editmode && (
-                          <AntDesign
-                            onPress={() => handleDeleteSection(item)}
-                            size={20}
-                            style={{ color: appTheme.colors?.textColor }}
-                            className="absolute z-40 left-[200px] top-[37px] "
-                            name="delete"
-                          />
-                        )}
-
-                        <MySection
-                          edit={editmode}
-                          name={item.name}
-                          section={item}
-                          products={item.products ? item.products : undefined}
-                          nav={navigation}
-                        />
-                      </View>
-                    );
-                  }
-                  if (item.type === "categories") {
-                    console.log("products : ", item.categoryList);
-                    return (
-                      <View
-                        style={{
-                          backgroundColor: appTheme.colors!!.primary,
-                          height: 148,
-                        }}
-                        className="px-5  mt-2"
-                      >
-                        <View className="flex-row items-center mt-2">
-                          <Text
-                            className="text-[25px] w-[80%]"
-                            style={styles.text}
-                          >
-                            {item.name}
-                          </Text>
-                        </View>
-                        <FlatList
-                          horizontal
-                          data={item.categoryList?.categories}
-                          keyExtractor={(item, index) => index.toString()}
-                          renderItem={({ item }) => (
-                            <CategoryView name={item.name!!} img={item.img!!} />
-                          )}
-                        />
-                      </View>
-                    );
-                  }
-
-                  return null;
-                }}
+                keyExtractor={(item, index) => item.name}
+                renderItem={renderItem}
               />
             )}
 
@@ -445,4 +411,4 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
     </GestureHandlerRootView>
   );
 };
-export default BusinessLayout;
+export default memo(BusinessLayout);
