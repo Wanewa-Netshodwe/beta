@@ -8,7 +8,7 @@ import {
   Dimensions,
   Pressable,
 } from "react-native";
-import React, { memo, useEffect, useMemo, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import Screen from "../../utilities/Screen";
@@ -31,6 +31,7 @@ import { StackScreenProps } from "@react-navigation/stack";
 import { StackShopLayoutParamList } from "../../utilities/Types";
 import OutlineBtn from "../../components/OutlineBtn";
 import { errorMsg } from "../../errors/catchErrors";
+import { useFocusEffect } from "@react-navigation/native";
 type prop = StackScreenProps<StackShopLayoutParamList, "banner">;
 const AddBanner: React.FC<prop> = ({ navigation }) => {
   const { width } = Dimensions.get("screen");
@@ -39,6 +40,7 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
   const businessData = businessState.userBusiness;
   const [img, setImg] = useState<string[]>([]);
   const [name, setName] = useState("");
+  const [show, setShow] = useState(false);
   const [Position, setPosition] = useState("");
   const [height, setHeight] = useState(200);
   const [loading, setLoading] = useState(false);
@@ -48,33 +50,37 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
   const [textPostion, setTextPostion] = useState({ x: 0, y: 0 });
   const [newText, setText] = useState("");
   console.log("add baanner scrren called");
-  useMemo(() => {
-    let dataDummy: { key: string; index: number }[] | null =
-      businessData.sections.length > 0 ? [] : null;
-    businessData.sections.map((item, idx) => {
-      if (item.valid)
-        if (dataDummy) dataDummy.push({ key: item.name, index: idx });
-    });
-    dataDummy?.map((item) => {
-      setData((prev) => [
-        ...prev,
+
+  useFocusEffect(
+    useCallback(() => {
+      setShow(true);
+      // Prepare data for SelectList
+      const dataDummy: { key: string; index: number }[] = businessData.sections
+        .filter((item, idx) => item.valid)
+        .map((item, idx) => ({ key: item.name, index: idx }));
+
+      const updatedData = dataDummy.flatMap((item) => [
         { key: item.index, value: "Before " + item.key },
-      ]);
-      setData((prev) => [
-        ...prev,
         { key: item.index + 1, value: "After " + item.key },
       ]);
-      setD((prev) => [
-        ...prev,
+
+      const updatedD = dataDummy.flatMap((item) => [
         { key: "Before " + item.key, value: item.index },
+        { key: "After " + item.key, value: item.index + 1 },
       ]);
-      setD((prev) => [
-        ...prev,
-        { key: "AFter " + item.key, value: item.index + 1 },
-      ]);
-    });
-  }, [businessData]);
-  useEffect(() => {}, []);
+
+      setData(updatedData);
+      setD(updatedD);
+
+      // Cleanup function when screen is unfocused
+      return () => {
+        // Optionally reset state if needed
+        // setData([]);
+        // setD([]);
+        // setCategories([]);
+      };
+    }, [businessData, dispatch])
+  );
 
   const handleSubmit = () => {
     if (!name || !img || !Position) {
@@ -128,186 +134,188 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
       setImg((prev) => [...prev, ...newImages]); // Append new images to the existing state
     }
   };
-  return (
-    <View
-      style={{ backgroundColor: appTheme.colors?.background }}
-      className="w-full h-full  "
-    >
+  if (show) {
+    return (
       <View
-        style={{ backgroundColor: appTheme.colors?.primary }}
-        className=" p-[5%]"
+        style={{ backgroundColor: appTheme.colors?.background }}
+        className="w-full h-full  "
       >
-        <Text style={[styles.text]} className={`text-[25px] `}>
-          Add Banner
-        </Text>
-      </View>
-      <ScrollView className=" ">
         <View
           style={{ backgroundColor: appTheme.colors?.primary }}
-          className="flex-row  p-[5%]  mt-1 items-center  gap-4"
+          className=" p-[5%]"
         >
-          <View>
-            <TouchableNativeFeedback>
-              <OutlineBtn
-                onPress={handleImageUpload}
-                width={120}
-                title="Upload Image "
+          <Text style={[styles.text]} className={`text-[25px] `}>
+            Add Banner
+          </Text>
+        </View>
+        <ScrollView className=" ">
+          <View
+            style={{ backgroundColor: appTheme.colors?.primary }}
+            className="flex-row  p-[5%]  mt-1 items-center  gap-4"
+          >
+            <View>
+              <TouchableNativeFeedback>
+                <OutlineBtn
+                  onPress={handleImageUpload}
+                  width={120}
+                  title="Upload Image "
+                />
+              </TouchableNativeFeedback>
+            </View>
+            <View
+              className="bg-transparent rounded-md p-1  w-[20%] relative"
+              style={{
+                borderColor: appTheme.colors?.secondary,
+                borderWidth: 2,
+                height: 50,
+              }}
+            >
+              <Text
+                style={styles.text}
+                className="text-[9px] text-center w-[60px] absolute -bottom-4 left-0        font-bold"
+              >
+                Banner height
+              </Text>
+              <TextInput
+                className="text-center w-full h-full"
+                placeholder="Enter Height"
+                keyboardType={"number-pad"}
+                onChangeText={(t) => {
+                  setHeight(Number(t));
+                }}
+                value={height.toString()}
+                style={styles.text}
               />
+            </View>
+          </View>
+
+          <View
+            style={{ backgroundColor: appTheme.colors?.primary }}
+            className=" mt-2 p-[5%]"
+          >
+            <View>
+              <Text style={styles.text} className="text-[18px] font-semibold">
+                Banner Preview
+              </Text>
+            </View>
+            <TouchableNativeFeedback>
+              <View style={{ width: "auto" }} className="mt-[5%] relative ">
+                {img && (
+                  <>
+                    <Pressable
+                      onPress={(e) => {
+                        const { locationX, locationY } = e.nativeEvent;
+                        setTextPostion({ x: locationX, y: locationY });
+                      }}
+                    >
+                      <Image
+                        // className="relative"
+                        width={width - 30}
+                        height={height}
+                        borderRadius={5}
+                        source={{
+                          uri: img[0],
+                        }}
+                      />
+                    </Pressable>
+                  </>
+                )}
+              </View>
             </TouchableNativeFeedback>
           </View>
           <View
-            className="bg-transparent rounded-md p-1  w-[20%] relative"
-            style={{
-              borderColor: appTheme.colors?.secondary,
-              borderWidth: 2,
-              height: 50,
-            }}
+            style={{ backgroundColor: appTheme.colors?.primary }}
+            className=" mt-2 p-[5%]"
           >
-            <Text
-              style={styles.text}
-              className="text-[9px] text-center w-[60px] absolute -bottom-4 left-0        font-bold"
-            >
-              Banner height
-            </Text>
-            <TextInput
-              className="text-center w-full h-full"
-              placeholder="Enter Height"
-              keyboardType={"number-pad"}
-              onChangeText={(t) => {
-                setHeight(Number(t));
-              }}
-              value={height.toString()}
-              style={styles.text}
-            />
-          </View>
-        </View>
-
-        <View
-          style={{ backgroundColor: appTheme.colors?.primary }}
-          className=" mt-2 p-[5%]"
-        >
-          <View>
-            <Text style={styles.text} className="text-[18px] font-semibold">
-              Banner Preview
-            </Text>
-          </View>
-          <TouchableNativeFeedback>
-            <View style={{ width: "auto" }} className="mt-[5%] relative ">
-              {img && (
-                <>
-                  <Pressable
-                    onPress={(e) => {
-                      const { locationX, locationY } = e.nativeEvent;
-                      setTextPostion({ x: locationX, y: locationY });
-                    }}
-                  >
-                    <Image
-                      // className="relative"
-                      width={width - 30}
-                      height={height}
-                      borderRadius={5}
-                      source={{
-                        uri: img[0],
-                      }}
-                    />
-                  </Pressable>
-                </>
-              )}
+            <View className="mt-[5%] ">
+              <Text style={styles.text} className="text-[18px] font-semibold">
+                Position
+              </Text>
             </View>
-          </TouchableNativeFeedback>
-        </View>
-        <View
-          style={{ backgroundColor: appTheme.colors?.primary }}
-          className=" mt-2 p-[5%]"
-        >
-          <View className="mt-[5%] ">
-            <Text style={styles.text} className="text-[18px] font-semibold">
-              Position
-            </Text>
+            <View className="mt-[5%]">
+              <SelectList
+                setSelected={(val: string) => setPosition(val)}
+                data={data.length > 0 ? data : [{ key: 0, value: "First" }]}
+                save="value"
+                inputStyles={styles.text}
+                dropdownTextStyles={styles.text}
+                placeholder="Postion"
+                search={false}
+              />
+            </View>
           </View>
-          <View className="mt-[5%]">
-            <SelectList
-              setSelected={(val: string) => setPosition(val)}
-              data={data.length > 0 ? data : [{ key: 0, value: "First" }]}
-              save="value"
-              inputStyles={styles.text}
-              dropdownTextStyles={styles.text}
-              placeholder="Postion"
-              search={false}
+          <View
+            style={{ backgroundColor: appTheme.colors?.primary }}
+            className="mt-2 p-[5%]"
+          >
+            <View className="mt-[5%]">
+              <Text style={styles.text} className="text-[18px] font-semibold">
+                Section Name
+              </Text>
+            </View>
+            <View className="mt-[5%]">
+              <TextInput
+                onChangeText={(text) => {
+                  setName(text);
+                }}
+                placeholderTextColor={appTheme.colors?.textColor}
+                placeholder="Section Name"
+                placeholderClassName="font-bold"
+                style={[
+                  {
+                    backgroundColor: "transparent",
+                    borderBottomWidth: 2,
+                    borderBottomColor: appTheme.colors?.background,
+                  },
+                  styles.text,
+                ]}
+                className=" rounded-sm py-3 w-[70%] "
+              ></TextInput>
+            </View>
+          </View>
+          <View className=" flex-row p-[5%] justify-between">
+            {/* <TouchableNativeFeedback
+                onPress={() => {
+                  handleSubmit();
+                }}
+              >
+                <View
+                  style={{ backgroundColor: appTheme.colors?.secondary }}
+                  className=" py-2 mt-[15%]  rounded-md  w-[50%] self-center "
+                >
+                  <Text className="text-[25px] w-fit font-bold text-center">
+                    {" "}
+                    Save
+                  </Text>
+                </View>
+              </TouchableNativeFeedback> */}
+            <ClickableBtn width={125} onPress={handleSubmit} title="Save" />
+            {/* <TouchableNativeFeedback
+                onPress={() => {
+                  cancel();
+                }}
+              >
+                <View
+                  style={{ backgroundColor: appTheme.colors.tertiary }}
+                  className=" py-2 mt-[15%]  rounded-md  w-[50%] self-center "
+                >
+                  <Text className="text-[25px] w-fit font-bold text-center">
+                    {" "}
+                    Cancel
+                  </Text>
+                </View>
+              </TouchableNativeFeedback> */}
+            <ClickableBtn
+              width={125}
+              onPress={() => {
+                navigation.navigate("home");
+              }}
+              title="Cancel"
             />
           </View>
-        </View>
-        <View
-          style={{ backgroundColor: appTheme.colors?.primary }}
-          className="mt-2 p-[5%]"
-        >
-          <View className="mt-[5%]">
-            <Text style={styles.text} className="text-[18px] font-semibold">
-              Section Name
-            </Text>
-          </View>
-          <View className="mt-[5%]">
-            <TextInput
-              onChangeText={(text) => {
-                setName(text);
-              }}
-              placeholderTextColor={appTheme.colors?.textColor}
-              placeholder="Section Name"
-              placeholderClassName="font-bold"
-              style={[
-                {
-                  backgroundColor: "transparent",
-                  borderBottomWidth: 2,
-                  borderBottomColor: appTheme.colors?.background,
-                },
-                styles.text,
-              ]}
-              className=" rounded-sm py-3 w-[70%] "
-            ></TextInput>
-          </View>
-        </View>
-        <View className=" flex-row p-[5%] justify-between">
-          {/* <TouchableNativeFeedback
-              onPress={() => {
-                handleSubmit();
-              }}
-            >
-              <View
-                style={{ backgroundColor: appTheme.colors?.secondary }}
-                className=" py-2 mt-[15%]  rounded-md  w-[50%] self-center "
-              >
-                <Text className="text-[25px] w-fit font-bold text-center">
-                  {" "}
-                  Save
-                </Text>
-              </View>
-            </TouchableNativeFeedback> */}
-          <ClickableBtn width={125} onPress={handleSubmit} title="Save" />
-          {/* <TouchableNativeFeedback
-              onPress={() => {
-                cancel();
-              }}
-            >
-              <View
-                style={{ backgroundColor: appTheme.colors.tertiary }}
-                className=" py-2 mt-[15%]  rounded-md  w-[50%] self-center "
-              >
-                <Text className="text-[25px] w-fit font-bold text-center">
-                  {" "}
-                  Cancel
-                </Text>
-              </View>
-            </TouchableNativeFeedback> */}
-          <ClickableBtn
-            width={125}
-            onPress={() => {
-              navigation.navigate("home");
-            }}
-            title="Cancel"
-          />
-        </View>
-      </ScrollView>
-    </View>
-  );
+        </ScrollView>
+      </View>
+    );
+  }
 };
 export default memo(AddBanner);

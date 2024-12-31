@@ -19,12 +19,16 @@ import {
 import { Vibration } from "react-native";
 import { addProduct } from "../../redux/businessSlice";
 import AddProduct from "../../Screens/Business/AddProduct";
+import Wallet from "../../Screens/Business/Wallet";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 const handleTabPress = () => {
   Vibration.vibrate(100); // Vibrates for 100ms when the tab is pressed
 };
 
 const Tab = createBottomTabNavigator();
 const BusinessNav = () => {
+  
   const { appTheme } = useStates();
   const styles = useDynamicStyles();
   return (
@@ -87,7 +91,7 @@ const BusinessNav = () => {
         name="Layout"
         component={ShopLayoutNavigator}
       />
-      {/* <Tab.Screen
+      <Tab.Screen
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => {
@@ -95,8 +99,8 @@ const BusinessNav = () => {
           },
         }}
         name="Wallet"
-        component={}
-      /> */}
+        component={Wallet}
+      />
       <Tab.Screen
         options={{
           headerShown: false,

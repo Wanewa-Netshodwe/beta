@@ -19,7 +19,13 @@ import {
 } from "firebase/firestore";
 import { convertTime } from "../utilities/convertTime";
 
-import { getCurrentUser, getUserBusiness, RootState } from "../redux/store";
+import {
+  getBusinessCategories,
+  getCurrentUser,
+  getUserBusiness,
+  getValidCategoryLists,
+  RootState,
+} from "../redux/store";
 import { NavigationProp, NavigationState } from "@react-navigation/native";
 import { Dispatch, UnknownAction } from "redux";
 import {
@@ -34,18 +40,20 @@ import { useSelector } from "react-redux";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { defaultUser, setUser } from "../redux/userSlice";
 import {
-  addCat,
-  addCategoryList,
   addProduct,
   addSection,
-  delCat,
   delProduct,
   delSection,
   editProduct,
-  saveCategoryList,
   setBusiness,
 } from "../redux/businessSlice";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import {
+  addCat,
+  addCategoryList,
+  delCat,
+  saveCategoryList,
+} from "../redux/categoryList";
 
 //Collection names
 const USERCOLLECTION = "users";
@@ -347,6 +355,18 @@ export const BE_saveCategory = (
   const d = { id: data.id, name: name, postion: postion };
   dispatch(saveCategoryList(d));
   navigator.navigate("shopLayout");
+  const existingCat = getBusinessCategories();
+  const section = getValidCategoryLists();
+  let validSections: sectionData[] = [];
+  for (let i = 0; i < section.length; i++) {
+    if (existingCat.includes(section[i])) {
+    } else {
+      validSections.push(section[i]);
+    }
+  }
+  validSections.forEach((sec) => {
+    dispatch(addSection(sec));
+  });
 };
 
 export const getBusinessInfo = async (id: string) => {

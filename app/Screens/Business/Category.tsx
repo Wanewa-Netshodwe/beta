@@ -8,7 +8,7 @@ import {
   Animated,
   StyleSheet,
 } from "react-native";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import Screen from "../../utilities/Screen";
@@ -27,8 +27,8 @@ import { useStates } from "../../utilities/States";
 import { useDynamicStyles } from "../../utilities/Styles";
 import ClickableBtn from "../../components/ClickableBtn";
 type prop = StackScreenProps<StackShopLayoutParamList, "category">;
-const Category: React.FC<prop> = ({ route, navigation }) => {
-  console.log('category scrren called')
+const Category: React.FC<prop> = memo(({ route, navigation }) => {
+  console.log("category scrren called");
   const styles = useDynamicStyles();
   const { id } = route.params;
   const { appTheme } = useStates();
@@ -73,14 +73,14 @@ const Category: React.FC<prop> = ({ route, navigation }) => {
       </View>
       <ScrollView>
         <View style={styles.sections} className="mt-1">
-          <View >
+          <View>
             <Text style={styles.text} className="text-[18px] font-semibold">
               Name
             </Text>
           </View>
-          <View >
+          <View>
             <TextInput
-            placeholder="Category name"
+              placeholder="Category name"
               value={title}
               onChangeText={(text) => {
                 setTitle(text);
@@ -92,7 +92,7 @@ const Category: React.FC<prop> = ({ route, navigation }) => {
           </View>
         </View>
         <View style={styles.sections} className="mt-2">
-          <View >
+          <View>
             <Text style={styles.text} className="text-[18px] font-semibold">
               Icon
             </Text>
@@ -125,15 +125,10 @@ const Category: React.FC<prop> = ({ route, navigation }) => {
           </TouchableNativeFeedback>
         </View>
         <View className=" px-[5%] justify-between">
-         <ClickableBtn 
-         title="Save"
-         width={120}
-         onPress={handleSubmit}
-         />
-          
+          <ClickableBtn title="Save" width={120} onPress={handleSubmit} />
         </View>
       </ScrollView>
     </View>
   );
-};
+});
 export default Category;

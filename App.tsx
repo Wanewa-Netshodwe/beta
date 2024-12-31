@@ -8,11 +8,22 @@ import Screen from "./app/utilities/Screen";
 import { useStates } from "./app/utilities/States";
 import "./global.css"; // Ensure this path is correct
 import Toast from "react-native-toast-message";
+import React from "react";
 import AppContent from "./AppContent";
 import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
 } from "react-native-reanimated";
+import whyDidYouRender from "@welldone-software/why-did-you-render";
+
+// Enable only in development mode (no impact in production)
+if (__DEV__) {
+  whyDidYouRender(React, {
+    trackAllPureComponents: false, // Disable tracking for all PureComponent
+    onlyLogs: true, // Optional: Makes logs less intrusive by not throwing errors
+    include: [/^Memo/], // Track components with "Memo" in their name (customize this as needed)
+  });
+}
 
 // This is the default configuration
 configureReanimatedLogger({

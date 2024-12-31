@@ -81,7 +81,7 @@ const businessSlice = createSlice({
       }
       state.userBusiness.sections = sections;
     },
-    addCategoryList: (state, action) => {
+    setCategoryList: (state, action) => {
       const section: sectionData = action.payload;
       state.userBusiness.sections.push(section);
     },
@@ -130,79 +130,9 @@ const businessSlice = createSlice({
         }
       }
     },
-
-    addCat: (state, action) => {
-      const cat: category = action.payload;
-      const sections = state.userBusiness.sections;
-
-      sections.forEach((section) => {
-        if (section.type === "categories" && !section.valid) {
-          if (section.categoryList?.categories) {
-            section.categoryList.categories.push(cat);
-          } else {
-            section.categoryList?.categories?.push(cat);
-          }
-        }
-      });
-
-      state.userBusiness.sections = sections;
-    },
-    saveCategoryList: (state, action) => {
-      const cat: { id: string; name: string; postion: number } = action.payload;
-      const dummySections = state.userBusiness.sections.map((section) => {
-        if (section.type === "categories" && !section.valid) {
-          if (section.categoryList?.id === cat.id) {
-            return {
-              ...section,
-              name: cat.name,
-              postion: cat.postion,
-              valid: true,
-            };
-          }
-        }
-        return section;
-      });
-      const notCategories = dummySections.filter(
-        (section) => section.type !== "categories"
-      );
-      const allCategories = dummySections.filter((section) => {
-        if (section.type === "categories") {
-          if (section.valid) {
-            return section;
-          }
-        }
-      });
-      const updatedSections = notCategories.concat(allCategories);
-      state.userBusiness.sections = updatedSections;
-    },
-
     setProducts: (state, action) => {
       const products = action.payload;
       state.products = products;
-    },
-    delCat: (state, action) => {
-      const cat: { id: string; name: string; position: number } =
-        action.payload;
-
-      state.userBusiness.sections = state.userBusiness.sections.map(
-        (section) => {
-          if (section.type === "categories" && !section.valid) {
-            if (section.categoryList?.id === cat.id) {
-              const updatedCategories = section.categoryList.categories?.filter(
-                (c) => c.name !== cat.name
-              );
-              return {
-                ...section,
-                categoryList: {
-                  ...section.categoryList,
-                  categories: updatedCategories,
-                },
-              };
-            }
-          }
-          return section;
-        }
-      );
     },
 
     setWallets: (state, action) => {
@@ -220,10 +150,7 @@ export const {
   addSection,
   delSection,
   addProduct,
-  addCategoryList,
-  addCat,
-  saveCategoryList,
-  delCat,
+  setCategoryList,
   setForegroundImg,
   removeForeground,
   editProduct,

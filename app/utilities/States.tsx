@@ -8,14 +8,18 @@ export const useStates = () => {
   const businessState = useSelector((state: RootState) => state.business);
   const userState = useSelector((state: RootState) => state.user);
   const walletState = useSelector((state: RootState) => state.wallet);
+  const CategoryListState = useSelector(
+    (state: RootState) => state.categoryLists
+  );
   const states = useMemo(
     () => ({
       appTheme,
       businessState,
       userState,
       walletState,
+      CategoryListState,
     }),
-    [appTheme, businessState, userState, walletState]
+    [appTheme, businessState, userState, walletState, CategoryListState]
   );
   return states;
 };

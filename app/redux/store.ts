@@ -3,6 +3,7 @@ import userSlice from "./userSlice";
 import appSlice from "./appSlice";
 import businessSlice from "./businessSlice";
 import walletSlice from "./walletSlice";
+import categoryListSlice from "./categoryList";
 
 export const store = configureStore({
   reducer: {
@@ -10,11 +11,27 @@ export const store = configureStore({
     appTheme: appSlice,
     business: businessSlice,
     wallet: walletSlice,
+    categoryLists: categoryListSlice,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false, 
+    }),
 });
 export const getCurrentUser = () => {
   const state = store.getState();
   return state.user.currentUser;
+};
+export const getBusinessCategories = () => {
+  const state = store.getState();
+  const categories = state.business.userBusiness.sections.filter(
+    (section) => section.type === "categories"
+  );
+  return categories;
+};
+export const getValidCategoryLists = () => {
+  const state = store.getState();
+  return state.categoryLists.SectionList;
 };
 export const getUserBusiness = () => {
   const state = store.getState();

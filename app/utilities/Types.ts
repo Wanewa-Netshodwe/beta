@@ -77,7 +77,7 @@ export type sectionData = {
     carouselSpeed?: number;
   };
 };
-type categoryList = {
+export type categoryList = {
   saved?: boolean;
   id?: string;
   categories?: category[];

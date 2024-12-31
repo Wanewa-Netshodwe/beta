@@ -22,7 +22,11 @@ import {
 } from "@gorhom/bottom-sheet";
 import MySection from "../../components/MySection";
 import { Dimensions } from "react-native";
-import { StackShopLayoutParamList, sectionData } from "../../utilities/Types";
+import {
+  StackShopLayoutParamList,
+  category,
+  sectionData,
+} from "../../utilities/Types";
 import { BE_deleteSection } from "../../backend/Queries";
 import { StackScreenProps } from "@react-navigation/stack";
 import CategoryView from "../../components/CatogoryView";
@@ -36,11 +40,27 @@ import { useDynamicStyles } from "../../utilities/Styles";
 import LoadingComp from "../../utilities/LoadingComp";
 import { removeForeground } from "../../redux/businessSlice";
 import { useStates } from "../../utilities/States";
+import { RootState } from "../../redux/store";
 
 type prop = StackScreenProps<StackShopLayoutParamList, "home">;
 const BusinessLayout: React.FC<prop> = ({ navigation }) => {
+  const sections = useSelector(
+    (state: RootState) => state.business.userBusiness.sections
+  );
+  const Businessforeground = useSelector(
+    (state: RootState) => state.business.userBusiness.foregroundImg
+  );
+  const store_pic = useSelector(
+    (state: RootState) => state.business.userBusiness.store_pic
+  );
+  const store_name = useSelector(
+    (state: RootState) => state.business.userBusiness.store_name
+  );
+  const verified = useSelector(
+    (state: RootState) => state.business.userBusiness.verified
+  );
   const styles = useDynamicStyles();
-  const { appTheme, businessState } = useStates();
+  const { appTheme } = useStates();
   const handleDeleteSection = (sectionInfo: sectionData) => {
     BE_deleteSection({ dispatch, sectionInfo });
   };
@@ -48,10 +68,16 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
   const [showSearch, setShowSearch] = useState(false);
   const { width } = Dimensions.get("screen");
   const font = appTheme.fonts?.primary;
-  const BusinessInfo = businessState.userBusiness;
+
   console.log("business layout screen called");
   const [selectedFont, setSelectedFont] = useState(
     appTheme.fonts?.primary || ""
+  );
+  const renderItemCategory = useCallback(
+    ({ item }: { item: category }) => (
+      <CategoryView name={item.name!!} img={item.img!!} />
+    ),
+    []
   );
 
   const loadFont = async (fontName: string) => {
@@ -59,6 +85,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
       await Font.loadAsync({ [fontName]: fontMap[fontName] });
     }
   };
+  console.log("sections : log : ", sections);
   useEffect(() => {
     if (selectedFont) {
       loadFont(selectedFont);
@@ -119,10 +146,8 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
             <FlatList
               horizontal
               data={item.categoryList?.categories}
-              keyExtractor={(item) => item.id.toString()} // Assuming categories have a unique id
-              renderItem={({ item }) => (
-                <CategoryView name={item.name!!} img={item.img!!} />
-              )}
+              keyExtractor={(item) => item.name!!.toString()}
+              renderItem={renderItemCategory}
             />
           </View>
         );
@@ -153,10 +178,10 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
               />
             }
           >
-            {BusinessInfo.foregroundImg ? (
+            {Businessforeground ? (
               <>
                 <ImageBackground
-                  source={{ uri: BusinessInfo.foregroundImg }}
+                  source={{ uri: Businessforeground }}
                   resizeMethod="resize"
                   style={{ height: 180 }}
                   width={width}
@@ -184,7 +209,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
                             }}
                             resizeMethod="resize"
                             resizeMode="cover"
-                            source={{ uri: BusinessInfo.store_pic }}
+                            source={{ uri: store_pic }}
                             height={35}
                             width={35}
                           />
@@ -196,13 +221,11 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
                               ]}
                               className={`text-[22px] h-fit   `}
                             >
-                              {editmode
-                                ? "Shop Layout"
-                                : BusinessInfo.store_name}
+                              {editmode ? "Shop Layout" : store_name}
                             </Text>
                             {!editmode && (
                               <>
-                                {BusinessInfo.verified && (
+                                {verified && (
                                   <MaterialIcons
                                     name="verified"
                                     size={25}
@@ -307,10 +330,10 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
               </>
             )}
 
-            {BusinessInfo.sections.length > 0 && (
+            {sections.length > 0 && (
               <FlatList
-                data={BusinessInfo.sections}
-                keyExtractor={(item, index) => item.name}
+                data={sections}
+                keyExtractor={(item, index) => index.toString()}
                 renderItem={renderItem}
               />
             )}

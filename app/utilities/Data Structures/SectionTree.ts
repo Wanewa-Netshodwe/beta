@@ -1,9 +1,8 @@
 import { sectionData } from "../Types";
-
-class TNode {
+class Node {
   value: sectionData | number;
-  left: TNode;
-  right: TNode;
+  left: Node;
+  right: Node;
 
   constructor(val: sectionData | number) {
     this.value = val;
@@ -12,8 +11,8 @@ class TNode {
       this.left = this;
       this.right = this;
     } else {
-      this.left = new TNode(0);
-      this.right = new TNode(0);
+      this.left = new Node(0);
+      this.right = new Node(0);
     }
   }
 
@@ -23,66 +22,129 @@ class TNode {
 }
 
 export class SectionTree {
-  root: TNode;
+  root: Node;
 
   constructor() {
-    this.root = new TNode(0);
+    this.root = new Node(0);
   }
 
   insert(val: sectionData) {
     if (val.type === "banner" || val.type === "carousel") {
-      let currentNode = this.root.left;
+      let currenNode = this.root.left;
 
-      if (currentNode.isPlaceHolder()) {
+      if (currenNode.isPlaceHolder()) {
         if (val.type === "banner") {
-          this.root.left = new TNode(val);
-        } else if (currentNode.right.isPlaceHolder()) {
-          currentNode.right = new TNode(val);
+          this.root.left = new Node(val);
+        } else if (currenNode.right.isPlaceHolder()) {
+          currenNode.right = new Node(val);
         }
       } else {
         while (true) {
           if (val.type === "banner") {
-            if (currentNode.left.isPlaceHolder()) {
-              currentNode.left = new TNode(val);
+            if (currenNode.left.isPlaceHolder()) {
+              currenNode.left = new Node(val);
               break;
             }
-            currentNode = currentNode.left;
+            currenNode = currenNode.left;
           }
           if (val.type === "carousel") {
-            if (currentNode.right.isPlaceHolder()) {
-              currentNode.right = new TNode(val);
+            if (currenNode.right.isPlaceHolder()) {
+              currenNode.right = new Node(val);
               break;
             }
-            currentNode = currentNode.right;
+            currenNode = currenNode.right;
           }
         }
       }
     }
     if (val.type === "section" || val.type === "categories") {
-      let currentNode = this.root.right;
+      let currenNode = this.root.right;
 
-      if (currentNode.isPlaceHolder()) {
+      if (currenNode.isPlaceHolder()) {
         if (val.type === "section") {
-          this.root.right = new TNode(val);
-        } else if (currentNode.right.isPlaceHolder()) {
-          currentNode.right.left = new TNode(val);
+          this.root.right = new Node(val);
+        } else if (currenNode.right.isPlaceHolder()) {
+          currenNode.right.left = new Node(val);
         }
       } else {
         while (true) {
           if (val.type === "section") {
-            if (currentNode.right.isPlaceHolder()) {
-              currentNode.right = new TNode(val);
+            if (currenNode.right.isPlaceHolder()) {
+              currenNode.right = new Node(val);
               break;
             }
-            currentNode = currentNode.right;
+            currenNode = currenNode.right;
           }
           if (val.type === "categories") {
-            if (currentNode.left.isPlaceHolder()) {
-              currentNode.left = new TNode(val);
+            if (currenNode.left.isPlaceHolder()) {
+              currenNode.left = new Node(val);
               break;
             }
-            currentNode = currentNode.left;
+            currenNode = currenNode.left;
           }
+        }
+      }
+    }
+  }
+  delete(val: sectionData) {
+    if (val.type === "banner" || val.type === "carousel") {
+      let currentNode = this.root.left;
+      let prevNode = this.root;
+      if (val.type === "banner") {
+        while (currentNode && !currentNode.isPlaceHolder()) {
+          if (
+            typeof currentNode.value !== "number" &&
+            val.name === currentNode.value.name
+          ) {
+            if (prevNode.left === currentNode) {
+              prevNode.left = currentNode.left;
+            }
+          }
+          prevNode = currentNode;
+          currentNode = currentNode.left;
+        }
+      } else {
+        while (currentNode && !currentNode.isPlaceHolder()) {
+          if (
+            typeof currentNode.value !== "number" &&
+            val.name === currentNode.value.name
+          ) {
+            if (prevNode.left === currentNode) {
+              prevNode.right = currentNode.right;
+            }
+          }
+          prevNode = currentNode;
+          currentNode = currentNode.right;
+        }
+      }
+    } else {
+      let currentNode = this.root.right;
+      let prevNode = this.root;
+      if (val.type === "section") {
+        while (currentNode && !currentNode.isPlaceHolder()) {
+          if (
+            typeof currentNode.value !== "number" &&
+            val.name === currentNode.value.name
+          ) {
+            if (prevNode.right === currentNode) {
+              prevNode.right = currentNode.right;
+            }
+          }
+          prevNode = currentNode;
+          currentNode = currentNode.right;
+        }
+      } else {
+        while (currentNode && !currentNode.isPlaceHolder()) {
+          if (
+            typeof currentNode.value !== "number" &&
+            val.name === currentNode.value.name
+          ) {
+            if (prevNode.left === currentNode) {
+              prevNode.left = currentNode.left;
+            }
+          }
+          prevNode = currentNode;
+          currentNode = currentNode.left;
         }
       }
     }
@@ -91,7 +153,7 @@ export class SectionTree {
   GetBanners(): sectionData[] {
     const values: sectionData[] = [];
 
-    const traverseLeftSide = (node: TNode) => {
+    const traverseLeftSide = (node: Node) => {
       if (node.isPlaceHolder()) {
         return;
       }
@@ -107,7 +169,7 @@ export class SectionTree {
   getCarousels(): sectionData[] {
     const values: sectionData[] = [];
 
-    const traverseRightSide = (node: TNode) => {
+    const traverseRightSide = (node: Node) => {
       if (node.isPlaceHolder()) {
         return;
       }
@@ -123,7 +185,7 @@ export class SectionTree {
   GetCategories(): sectionData[] {
     const values: sectionData[] = [];
 
-    const traverseLeftSide = (node: TNode) => {
+    const traverseLeftSide = (node: Node) => {
       if (node.isPlaceHolder()) {
         return;
       }
@@ -139,7 +201,7 @@ export class SectionTree {
   getSections(): sectionData[] {
     const values: sectionData[] = [];
 
-    const traverseRightSide = (node: TNode) => {
+    const traverseRightSide = (node: Node) => {
       if (node.isPlaceHolder()) {
         return;
       }

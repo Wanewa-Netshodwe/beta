@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useCallback, memo } from "react";
 import {
   View,
   Text,
@@ -5,249 +6,232 @@ import {
   TouchableNativeFeedback,
   Image,
   ScrollView,
-  Animated,
-  StyleSheet,
+  FlatList,
 } from "react-native";
-import React, { useState, useMemo, useEffect, useCallback } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
-import Screen from "../../utilities/Screen";
-import * as ImagePicker from "expo-image-picker";
+import { useFocusEffect } from "@react-navigation/native";
+import { SelectList } from "react-native-dropdown-select-list";
+import { AntDesign } from "@expo/vector-icons";
+import { useDispatch } from "react-redux";
+import { StackScreenProps } from "@react-navigation/stack";
 import {
-  BusRegData,
   category,
-  StackShopLayoutParamList,
   sectionData,
+  StackShopLayoutParamList,
 } from "../../utilities/Types";
-
 import {
   BE_addCategory,
   BE_delC,
   BE_saveCategory,
   getUid,
 } from "../../backend/Queries";
-import { SelectList } from "react-native-dropdown-select-list";
-import { StackScreenProps } from "@react-navigation/stack";
-import { FlatList } from "react-native-gesture-handler";
-import { AntDesign } from "@expo/vector-icons";
 import { useStates } from "../../utilities/States";
-import { styles } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetScrollable/BottomSheetFlashList";
 import { useDynamicStyles } from "../../utilities/Styles";
 import ClickableBtn from "../../components/ClickableBtn";
-type prop = StackScreenProps<StackShopLayoutParamList, "categoryList">;
-const ListCategories: React.FC<prop> = ({ navigation }) => {
-  console.log("catgorylist scrren called");
+
+type Prop = StackScreenProps<StackShopLayoutParamList, "categoryList">;
+
+const ListCategories: React.FC<Prop> = memo(({ navigation, route }) => {
   const styles = useDynamicStyles();
-  const { businessState, appTheme } = useStates();
-  const businessData = businessState.userBusiness;
+  const { businessState, appTheme, CategoryListState } = useStates();
+  const dispatch = useDispatch();
+  const businessData = businessState.userBusiness.sections;
+  console.log("catetrory list called");
+
   const [data, setData] = useState<{ key: number; value: string }[]>([]);
   const [d, setD] = useState<{ key: string; value: number }[]>([]);
-  useMemo(() => {
-    let dataDummy: { key: string; index: number }[] | null =
-      businessData.sections.length > 0 ? [] : null;
-    businessData.sections.map((item, idx) => {
-      if (item.valid)
-        if (dataDummy) dataDummy.push({ key: item.name, index: idx });
-    });
+  const [categories, setCategories] = useState<(category | undefined)[]>([]);
+  const [img, setImg] = useState("");
+  const [position, setPosition] = useState("");
+  const [title, setTitle] = useState("");
 
-    dataDummy?.map((item) => {
-      setData((prev) => [
-        ...prev,
-        { key: item.index, value: "Before " + item.key },
-      ]);
-      setData((prev) => [
-        ...prev,
-        { key: item.index + 1, value: "After " + item.key },
-      ]);
-      setD((prev) => [
-        ...prev,
-        { key: "Before " + item.key, value: item.index },
-      ]);
-      setD((prev) => [
-        ...prev,
-        { key: "AFter " + item.key, value: item.index + 1 },
-      ]);
-    });
-  }, [businessData.sections]);
-  const handleDelCatogory = (item: category) => {
-    BE_delC(item, dispatch);
-  };
-  const cat = businessData.sections
-    .filter((section) => {
-      if (section.type === "Categories" && !section.valid) {
-        return section.categoryList?.categories;
-      }
-    })
-    .flatMap((section) => section.categoryList?.categories);
-
-  let id: string;
-
-  useEffect(() => {
-    // Find an existing unsaved section
-    let section = businessData.sections.find(
-      (sec) => sec.type === "Categories" && !sec.valid
-    );
-
-    if (!section) {
-      // If no unsaved section exists, create a new one
-      const id = createRandomId();
-
-      const section: sectionData = {
-        name: "kk",
-        type: "categories",
-        valid: false,
-        categoryList: { saved: false, id, categories: [] },
-        postion: 0,
-      };
-      BE_addCategory({ dispatch, sectionInfo: section, id });
-    } else {
-      id = section.categoryList?.id!!;
-    }
+  // Function to create a random ID
+  const createRandomId = useCallback(() => {
+    return Math.random().toString(36).substring(2, 27);
   }, []);
 
-  const createRandomId = () => {
-    let str = "";
-    for (let i = 0; i < 25; i++) {
-      const s = String.fromCharCode(
-        Math.ceil(65 + Math.random() * 25) // Uppercase letters
-      );
-      str += s;
-    }
-    return str;
-  };
+  // Initialize data when the screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      // Prepare data for SelectList
+      const dataDummy: { key: string; index: number }[] = businessData
+        .filter((item, idx) => item.valid)
+        .map((item, idx) => ({ key: item.name, index: idx }));
 
-  const dispatch = useDispatch();
+      const updatedData = dataDummy.flatMap((item) => [
+        { key: item.index, value: "Before " + item.key },
+        { key: item.index + 1, value: "After " + item.key },
+      ]);
 
-  const [img, setImg] = useState("");
-  const [Position, setPosition] = useState("");
-  const [title, setTitle] = useState("");
-  const handleSubmit = () => {
-    const category: category = {
-      img: img,
-      name: title,
-    };
-    // BE_addCategory({ id });
-  };
-  id = getUid();
+      const updatedD = dataDummy.flatMap((item) => [
+        { key: "Before " + item.key, value: item.index },
+        { key: "After " + item.key, value: item.index + 1 },
+      ]);
 
-  const handleSave = () => {
-    const category: category = {
-      id: id,
-    };
+      setData(updatedData);
+      setD(updatedD);
 
-    BE_saveCategory(category, dispatch, title, Number(Position), navigation);
+      // Filter categories
+      const filteredCategories = CategoryListState.SectionList.filter(
+        (section) => !section.valid
+      ).flatMap((section) => section.categoryList?.categories || []);
+
+      setCategories(filteredCategories);
+
+      // Check for existing unsaved section
+      let section = CategoryListState.SectionList.find((sec) => !sec.valid);
+      console.log("cat list section : ", section);
+
+      if (!section) {
+        const id = createRandomId();
+        const newSection: sectionData = {
+          name: "New Section",
+          type: "categories",
+          valid: false,
+          categoryList: { saved: false, id, categories: [] },
+          postion: 0,
+        };
+        BE_addCategory({ dispatch, sectionInfo: newSection, id });
+      }
+
+      // Cleanup function when screen is unfocused
+      return () => {
+        // Optionally reset state if needed
+        // setData([]);
+        // setD([]);
+        // setCategories([]);
+      };
+    }, [businessData, CategoryListState.SectionList, dispatch, createRandomId])
+  );
+
+  // Handle saving the category
+  const handleSave = useCallback(() => {
+    const id = getUid();
+    BE_saveCategory(
+      { id }, // Assuming category requires an ID; adjust as needed
+      dispatch,
+      title,
+      Number(position),
+      navigation
+    );
     navigation.navigate("home");
-  };
+  }, [dispatch, navigation, title, position]);
+
+  // Handle deleting a category
+  const handleDeleteCategory = useCallback(
+    (item: category) => {
+      BE_delC(item, dispatch);
+    },
+    [dispatch]
+  );
+
+  // Render item for FlatList
+  const renderItemCategory = useCallback(
+    ({ item }: { item: category }) => (
+      <View
+        style={{
+          borderColor: appTheme.colors?.textColor,
+          borderWidth: 1,
+          borderRadius: 2,
+        }}
+        className="mt-3 p-1 flex-row items-center gap-5"
+      >
+        <Image
+          source={{ uri: item?.img }}
+          className="rounded-sm"
+          style={{ width: 30, height: 30 }}
+        />
+        <Text className="text-[14px] font-semibold" style={styles.text}>
+          {item?.name}
+        </Text>
+        <AntDesign
+          size={20}
+          style={{ color: appTheme.colors?.textColor }}
+          name="delete"
+          onPress={() => handleDeleteCategory(item!!)}
+        />
+      </View>
+    ),
+    [appTheme.colors?.textColor, handleDeleteCategory, styles.text]
+  );
+
   return (
-    <View className="w-full h-full  ">
+    <View className="w-full h-full">
       <View style={styles.sections} className="">
-        <Text style={styles.text} className={`text-[24px] `}>
+        <Text style={styles.text} className="text-[24px]">
           Add Categories
         </Text>
       </View>
       <ScrollView>
+        {/* Add Categories Title */}
+
+        {/* Title Input */}
         <View style={styles.sections} className="mt-1">
-          <View>
-            <Text style={styles.text} className="text-[18px] font-semibold">
-              Title
-            </Text>
-          </View>
-          <View>
-            <TextInput
-              placeholder="Categories Titles"
-              placeholderTextColor={appTheme.colors?.textColor}
-              value={title}
-              onChangeText={(text) => {
-                setTitle(text);
-              }}
-              style={styles.inputs}
-              className=" rounded-sm py-3 w-[70%] "
-            ></TextInput>
-          </View>
+          <Text style={styles.text} className="text-[18px] font-semibold">
+            Title
+          </Text>
+          <TextInput
+            placeholder="Category Title"
+            placeholderTextColor={appTheme.colors?.textColor}
+            value={title}
+            onChangeText={setTitle}
+            style={styles.inputs}
+            className="rounded-sm py-3 w-[70%]"
+          />
         </View>
+
+        {/* Add Category Button */}
         <View style={styles.sections} className="mt-1">
-          <View>
-            <TouchableNativeFeedback
-              onPress={() => {
-                navigation.navigate("category", { id: id });
+          <TouchableNativeFeedback
+            onPress={() => {
+              navigation.navigate("category", { id: getUid() });
+            }}
+          >
+            <View
+              className="bg-transparent rounded-md p-2 w-[120px]"
+              style={{
+                borderColor: appTheme.colors?.textColor,
+                borderWidth: 2,
               }}
             >
-              <View
-                className="bg-transparent rounded-md p-2 w-[120px]"
-                style={{
-                  borderColor: appTheme.colors?.textColor,
-                  borderWidth: 2,
-                }}
-              >
-                <Text style={styles.text} className="font-semibold text-center">
-                  Add category
-                </Text>
-              </View>
-            </TouchableNativeFeedback>
-          </View>
+              <Text style={styles.text} className="font-semibold text-center">
+                Add category
+              </Text>
+            </View>
+          </TouchableNativeFeedback>
         </View>
+
+        {/* Category List */}
         <View style={styles.sections} className="mt-1">
-          <View>
-            <Text style={styles.text} className="text-[18px] font-semibold">
-              Category List
-            </Text>
-          </View>
+          <Text style={styles.text} className="text-[18px] font-semibold">
+            Category List
+          </Text>
           <View
             style={{
               backgroundColor: appTheme.colors?.background,
+              height: 180,
+              marginTop: 20,
+              width: "75%",
             }}
-            className="  h-[180px] mt-[5%]  w-[75%] "
           >
             <FlatList
               nestedScrollEnabled={true}
-              style={{ height: 180 }}
-              data={cat}
+              data={categories}
               keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <View
-                  style={{
-                    borderColor: appTheme.colors?.textColor,
-                    borderWidth: 1,
-                    borderRadius: 2,
-                  }}
-                  className="mt-3 p-1 flex-row items-center gap-5"
-                >
-                  <Image
-                    width={30}
-                    height={30}
-                    source={{ uri: item?.img }}
-                    className="rounded-sm"
-                  ></Image>
-                  <Text
-                    className="text-[14px] font-semibold "
-                    style={styles.text}
-                  >
-                    {item?.name}
-                  </Text>
-                  <AntDesign
-                    size={20}
-                    style={{ color: appTheme.colors?.textColor }}
-                    name="delete"
-                    onPress={() => {
-                      handleDelCatogory(item!!);
-                    }}
-                  />
-                </View>
-              )}
+              renderItem={renderItemCategory}
             />
           </View>
         </View>
+
+        {/* Position Selector */}
         <View style={styles.sections} className="mt-1">
-          <View>
-            <Text style={styles.text} className="text-[18px] font-semibold">
-              Position
-            </Text>
-          </View>
+          <Text style={styles.text} className="text-[18px] font-semibold">
+            Position
+          </Text>
           <View className="mt-[5%]">
             <SelectList
-              setSelected={(val: string) => setPosition(val)}
+              setSelected={setPosition}
               data={data.length > 0 ? data : [{ key: 0, value: "First" }]}
-              save="value"
+              save="key"
               inputStyles={styles.text}
               dropdownTextStyles={styles.text}
               placeholder="Position"
@@ -255,11 +239,14 @@ const ListCategories: React.FC<prop> = ({ navigation }) => {
             />
           </View>
         </View>
-        <View className=" p-[5%]">
+
+        {/* Save Button */}
+        <View className="p-[5%]">
           <ClickableBtn title="Save" width={140} onPress={handleSave} />
         </View>
       </ScrollView>
     </View>
   );
-};
+});
+
 export default ListCategories;
