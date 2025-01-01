@@ -29,6 +29,7 @@ import {
 import { NavigationProp, NavigationState } from "@react-navigation/native";
 import { Dispatch, UnknownAction } from "redux";
 import {
+  BusinessAccount,
   BusRegData,
   category,
   product,
@@ -207,14 +208,12 @@ export const BE_signup_Business = async (
       docRef = await addDoc(collection(db, BUSINESSCOLLECTION), {
         userId: getCurrentUser().id,
         verified: false,
-        font: "",
         store_name: data.name,
         followers: [],
         following: [],
         sections: [],
         hasWallet: false,
         password: data.password,
-        edit: true,
         wallet: "",
         offering: data.offering,
         store_pic: imageurl,
@@ -224,6 +223,7 @@ export const BE_signup_Business = async (
         has_subscription: false,
         business_hours: data.business_hours,
         social_media_links: [],
+        foregroundImg: "",
       });
     } catch (error) {
       console.error("Error creating business document:", error);
@@ -297,12 +297,11 @@ export const BE_addProduct = (data: {
   const { dispatch, sectionInfo, navigator, loading } = data;
   loading(true);
   console.log("add product called");
-  dispatch(addProduct(sectionInfo));
-
   setTimeout(() => {
+    dispatch(addProduct(sectionInfo));
     loading(false);
     navigator.navigate("Layout");
-  }, 7000);
+  }, 6000);
 };
 export const BE_EditProduct = (data: {
   // loading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -423,23 +422,143 @@ export const BE_login = (data: {
   if (!(email && password)) {
     errorMsg("Fields Can Not be Empty");
   } else {
-    signInWithEmailAndPassword(auth, email, password).then(async ({ user }) => {
-      await updateUserinfo({ id: user.uid, isOnline: true });
-      const userinfo = await getUserInfo(user.uid);
-      console.log(userinfo);
-      dispatch(setUser(userinfo));
+    try {
+      signInWithEmailAndPassword(auth, email, password).then(
+        async ({ user }) => {
+          await updateUserinfo({ id: user.uid, isOnline: true });
+          const userinfo = await getUserInfo(user.uid);
+          console.log(userinfo);
+          dispatch(setUser(userinfo));
 
-      if (userinfo.has_business) {
-        console.log("has busniesss");
-        const business = await getBusinessInfo(userinfo.businessid);
-        console.log("business", business);
-        dispatch(setBusiness(business));
-      }
-      console.log("done");
-    });
+          if (userinfo.has_business) {
+            console.log("has busniesss");
+            const business = await getBusinessInfo(userinfo.businessid);
+            console.log("business", business);
+            dispatch(setBusiness(business));
+          }
+          console.log("done");
+        }
+      );
+    } catch (err) {
+      console.log(err);
+    }
     // .catch((err) => {
     //   console.log(err);
     //   catchError(err.code);
     // });
   }
+};
+const UploadBusinessMedia = async (BusinessInfo: BusinessAccount) => {
+  const { foregroundImg, sections } = BusinessInfo;
+
+  let updatedBusinessInfo = { ...BusinessInfo }; // Create a mutable copy
+
+  try {
+    // Upload foreground image
+    if (foregroundImg) {
+      updatedBusinessInfo.foregroundImg = foregroundImg.includes(
+        "firebasestorage"
+      )
+        ? await uploadImage(
+            foregroundImg,
+            `images/${getCurrentUser().id}/business`,
+            `ForegroundImage`
+          )
+        : foregroundImg;
+    }
+
+    // Process sections
+    if (sections) {
+      updatedBusinessInfo.sections = await Promise.all(
+        sections.map(async (sec) => {
+          let updatedSection = { ...sec };
+
+          if (sec.type === "Banner" || sec.type === "Carousel") {
+            if (sec.imgs) {
+              updatedSection.imgs = await Promise.all(
+                sec.imgs.map((img, index) =>
+                  !img.includes("firebasestorage")
+                    ? uploadImage(
+                        img,
+                        `images/${getCurrentUser().id}/business/${sec.name}`,
+                        `${sec.name}${index + 1}`
+                      )
+                    : img
+                )
+              );
+            }
+          }
+
+          if (sec.type === "Section" && sec.products) {
+            updatedSection.products = await Promise.all(
+              sec.products.map(async (pro) => {
+                let updatedProduct = { ...pro };
+
+                if (pro.imgs) {
+                  updatedProduct.imgs = await Promise.all(
+                    pro.imgs.map((img, index) => {
+                      if (!img.includes("firebasestorage")) {
+                        return uploadImage(
+                          img,
+                          `images/${getCurrentUser().id}/business/${
+                            sec.name
+                          }/products/${pro.name}/`,
+                          `${pro.name}${index + 1}`
+                        );
+                      } else {
+                        return img;
+                      }
+                    })
+                  );
+                }
+
+                return updatedProduct;
+              })
+            );
+          }
+
+          if (sec.type === "Categories" && sec.categoryList?.categories) {
+            updatedSection.categoryList = {
+              ...sec.categoryList,
+              categories: await Promise.all(
+                sec.categoryList.categories.map(async (cat) => {
+                  let updatedCategory = { ...cat };
+
+                  if (cat.img) {
+                    updatedCategory.img = !cat.img.includes("firebasestorage")
+                      ? await uploadImage(
+                          cat.img,
+                          `images/${getCurrentUser().id}/business/${sec.name}/${
+                            cat.name
+                          }/`,
+                          `${cat.name}$`
+                        )
+                      : cat.img;
+                  }
+
+                  return updatedCategory;
+                })
+              ),
+            };
+          }
+
+          return updatedSection;
+        })
+      );
+    }
+
+    return updatedBusinessInfo; // Return the updated copy
+  } catch (error) {
+    console.error("Error uploading business media:", error);
+    throw error; // Propagate the error
+  }
+};
+export const BE_PublishStore = async (BusinessInfo: BusinessAccount) => {
+  console.log("called publish store");
+  const { id } = BusinessInfo;
+  const BusinessRef = doc(db, BUSINESSCOLLECTION, id);
+  await UploadBusinessMedia(BusinessInfo).then(async (Bus: BusinessAccount) => {
+    await updateDoc(BusinessRef, { ...Bus });
+    console.log("businesss Updated");
+  });
 };

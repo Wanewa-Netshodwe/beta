@@ -32,6 +32,9 @@ import { errorMsg } from "../../errors/catchErrors";
 
 type Prop = StackScreenProps<StackShopLayoutParamList, "carousel">;
 const AddCarousel: React.FC<Prop> = ({ navigation }: Prop) => {
+  const createRandomId = useCallback(() => {
+    return Math.random().toString(36).substring(2, 27);
+  }, []);
   console.log("addcarousel scrren called");
   const { width } = Dimensions.get("window");
   const styles = useDynamicStyles();
@@ -89,6 +92,7 @@ const AddCarousel: React.FC<Prop> = ({ navigation }: Prop) => {
     let num = r[0];
     if (num !== undefined || num === 0) {
       const sectionData: sectionData = {
+        id: createRandomId(),
         valid: true,
         name: name,
         postion: num,

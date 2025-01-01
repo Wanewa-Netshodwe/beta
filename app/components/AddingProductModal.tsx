@@ -15,18 +15,18 @@ const AddingProductModal = (props: Props) => {
       className="p-[5%] w-full h-full items-center"
     >
       {/* <Text>Wallet</Text> */}
-      <View style={{ top: 123 }} className="left-56 ">
+      <View style={{ top: 123 }} >
         <AnimatedText
           size={18}
-          letterDelay={125}
+          letterDelay={155}
           gap={7}
           title="Adding Product "
         />
       </View>
 
-      <View className="absolute">
+      {/* <View className="absolute">
         <AnimatedCart />
-      </View>
+      </View> */}
       <View>
         <AnimatedText
           direction={"flex-start"}

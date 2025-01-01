@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { personalAccount } from "../utilities/Types";
+import { BusRegData, personalAccount } from "../utilities/Types";
 
 export const defaultUser: personalAccount = {
   businessid: "hjoZMJGDpAe802w4SDEw",
@@ -18,8 +18,10 @@ export const defaultUser: personalAccount = {
   email: "Waneex@gamil.com",
   username: "Carl Johnson",
 };
+const defaultBusRegData: BusRegData = {};
 const initialState = {
   currentUser: defaultUser,
+  busRegData: defaultBusRegData,
 };
 
 const userSlice = createSlice({
@@ -30,8 +32,12 @@ const userSlice = createSlice({
       const user = action.payload;
       state.currentUser = user;
     },
+    setRegData: (state, action) => {
+      const data: BusRegData = action.payload;
+      state.busRegData = { ...data };
+    },
   },
 });
 
-export const { setUser } = userSlice.actions;
+export const {setRegData, setUser } = userSlice.actions;
 export default userSlice.reducer;

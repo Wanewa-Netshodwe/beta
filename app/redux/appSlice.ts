@@ -32,6 +32,7 @@ const appSlice = createSlice({
         state.appTheme.fonts = { primary: action.payload };
       }
     },
+    
     setColor: (state, action) => {
       state.appTheme = action.payload;
     },

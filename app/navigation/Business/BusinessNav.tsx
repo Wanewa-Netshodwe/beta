@@ -22,13 +22,16 @@ import AddProduct from "../../Screens/Business/AddProduct";
 import Wallet from "../../Screens/Business/Wallet";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
+import SignUp from "../../Screens/Users/onBoarding/Signup";
+import Start from "../../Screens/Business/onBoarding/Start";
+import BusinessInfo from "../../Screens/Business/onBoarding/BusinessInfo";
+import Summary from "../../Screens/Business/onBoarding/Summary";
 const handleTabPress = () => {
   Vibration.vibrate(100); // Vibrates for 100ms when the tab is pressed
 };
 
 const Tab = createBottomTabNavigator();
 const BusinessNav = () => {
-  
   const { appTheme } = useStates();
   const styles = useDynamicStyles();
   return (
@@ -134,6 +137,36 @@ const BusinessNav = () => {
         }}
         name="settings"
         component={SettingsNavigator}
+      />
+      
+      <Tab.Screen
+        options={{
+          headerShown: false,
+        }}
+        name="signup"
+        component={SignUp}
+      />
+      <Tab.Screen
+        options={{
+          headerShown: false,
+        }}
+        name="start"
+        component={Start}
+      />
+      <Tab.Screen
+        options={{
+          headerShown: false,
+        }}
+        name="BusInfo"
+        component={BusinessInfo}
+      />
+
+      <Tab.Screen
+        options={{
+          headerShown: false,
+        }}
+        name="Sumary"
+        component={Summary}
       />
     </Tab.Navigator>
   );

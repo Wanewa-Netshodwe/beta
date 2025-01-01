@@ -57,6 +57,10 @@ const AddSection: React.FC<Prop> = ({ navigation }) => {
     }
   }, [businessData.sections]);
 
+  const createRandomId = useCallback(() => {
+      return Math.random().toString(36).substring(2, 27);
+    }, []);
+
   const handleSubmit = () => {
     console.log(d.length < 1);
     const r =
@@ -67,6 +71,7 @@ const AddSection: React.FC<Prop> = ({ navigation }) => {
     let num = r[0];
     if (num !== undefined || num === 0) {
       const sectionData: sectionData = {
+        id:createRandomId(),
         name: title,
         postion: num,
         businessid: businessData.id,

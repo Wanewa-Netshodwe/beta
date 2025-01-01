@@ -50,7 +50,9 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
   const [textPostion, setTextPostion] = useState({ x: 0, y: 0 });
   const [newText, setText] = useState("");
   console.log("add baanner scrren called");
-
+  const createRandomId = useCallback(() => {
+    return Math.random().toString(36).substring(2, 27);
+  }, []);
   useFocusEffect(
     useCallback(() => {
       setShow(true);
@@ -96,6 +98,7 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
     let num = r[0];
     if (num !== undefined || num === 0) {
       const sectionData: sectionData = {
+        id: createRandomId(),
         valid: true,
         name: name,
         postion: num,

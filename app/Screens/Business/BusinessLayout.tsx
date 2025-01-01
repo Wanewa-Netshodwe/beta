@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import * as Font from "expo-font";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import {
@@ -27,7 +27,7 @@ import {
   category,
   sectionData,
 } from "../../utilities/Types";
-import { BE_deleteSection } from "../../backend/Queries";
+import { BE_deleteSection, BE_PublishStore } from "../../backend/Queries";
 import { StackScreenProps } from "@react-navigation/stack";
 import CategoryView from "../../components/CatogoryView";
 import { TextLoader } from "../../utilities/Loaders";
@@ -41,11 +41,13 @@ import LoadingComp from "../../utilities/LoadingComp";
 import { removeForeground } from "../../redux/businessSlice";
 import { useStates } from "../../utilities/States";
 import { RootState } from "../../redux/store";
+import OutlineBtn from "../../components/OutlineBtn";
 
 type prop = StackScreenProps<StackShopLayoutParamList, "home">;
 const BusinessLayout: React.FC<prop> = ({ navigation }) => {
   const sections = useSelector(
-    (state: RootState) => state.business.userBusiness.sections
+    (state: RootState) => state.business.userBusiness.sections,
+    shallowEqual
   );
   const Businessforeground = useSelector(
     (state: RootState) => state.business.userBusiness.foregroundImg
@@ -68,8 +70,9 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
   const [showSearch, setShowSearch] = useState(false);
   const { width } = Dimensions.get("screen");
   const font = appTheme.fonts?.primary;
-
+  const { businessState } = useStates();
   console.log("business layout screen called");
+  console.log("business state :", businessState.userBusiness);
   const [selectedFont, setSelectedFont] = useState(
     appTheme.fonts?.primary || ""
   );
@@ -373,6 +376,13 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
                 >
                   Edit
                 </Text>
+
+                <OutlineBtn
+                  onPress={() => {
+                    BE_PublishStore(businessState.userBusiness);
+                  }}
+                  title="publish store"
+                ></OutlineBtn>
               </View>
             )}
             <View className="h-[50px]"></View>

@@ -57,6 +57,9 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
   let [dataDummy, setdataDummy] = useState<{ key: string; value: string }[]>(
     []
   );
+  const createRandomId = useCallback(() => {
+    return Math.random().toString(36).substring(2, 27);
+  }, []);
   useMemo(() => {
     businessData.sections.length > 0 ? [] : null;
     businessData.sections.map((item, idx) => {
@@ -205,6 +208,7 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
     });
 
     const sectionInfo: product = {
+      id: createRandomId(),
       delivery_cost: Number(deliverPrice),
       descriptions: description,
       free_delivery: delivery,
