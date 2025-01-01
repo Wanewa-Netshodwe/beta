@@ -27,7 +27,7 @@ import { ChangeThemeLoader } from "../../utilities/Loaders";
 type Props = BottomTabScreenProps<TabParamList, "settings">;
 
 const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
-  console.log('change app scrren called')
+  console.log("change app scrren called");
   const dispatch = useDispatch();
   const { appTheme } = useStates();
   const styles = useDynamicStyles();
@@ -85,7 +85,6 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
   );
   const [isFontLoaded, setIsFontLoaded] = useState(true);
   const handleBtn = async () => {
-  
     const operation = (): Promise<boolean> => {
       return new Promise((resolve) => {
         let count = 0;
@@ -99,7 +98,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
               return;
             }
           }
-          setTimeout(run, 0); 
+          setTimeout(run, 0);
         };
 
         run();
@@ -114,16 +113,14 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  
   const loadFont = async (fontName: string) => {
     if (fontMap[fontName]) {
-      setIsFontLoaded(false); 
+      setIsFontLoaded(false);
       await Font.loadAsync({ [fontName]: fontMap[fontName] });
       setIsFontLoaded(true);
     }
   };
 
-  
   useEffect(() => {
     const delay = async () => {
       await handleBtn();
@@ -132,10 +129,9 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
     if (selectedFont) loadFont(selectedFont);
   }, [selectedFont]);
 
- 
   const handleFontChange = (font: string) => {
     setSelectedFont(font);
-    dispatch(setFont(font)); 
+    dispatch(setFont(font));
   };
   if (isValid) {
     return (

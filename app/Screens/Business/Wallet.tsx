@@ -1,16 +1,15 @@
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import React from "react";
-import { useStates } from "../../utilities/States";
+import Svg, { G, Path } from "react-native-svg";
+import AnimatedCart from "../../components/AnimatedCart";
 
 type Props = {};
 
 const Wallet = (props: Props) => {
-  const { businessState } = useStates();
-  const businessData = businessState.userBusiness;
-  console.log("Waletttt called ");
   return (
-    <View>
-      <Text>Wallet</Text>
+    <View className="p[5%]">
+      {/* <Text>Wallet</Text> */}
+      <AnimatedCart/>
     </View>
   );
 };

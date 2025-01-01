@@ -96,6 +96,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
   const [editmode, setEditMode] = useState(true);
   const bottomSheetModalRef = useRef(null);
   const handlePresentModalPress = useCallback(() => {
+    //@ts-ignore
     bottomSheetModalRef.current?.present();
   }, []);
   const handleSheetChanges = useCallback((index: number) => {}, []);

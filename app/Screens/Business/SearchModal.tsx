@@ -24,7 +24,7 @@ const SearchModal = ({ navigation }: Props) => {
   const [products, setProducts] = useState<product[]>([]);
   const [productCount, setProductCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  console.log('seacrch scrren called')
+  console.log("seacrch scrren called");
   const [isEnterPressed, setIsEnterPressed] = useState(false);
   const styles = useDynamicStyles();
   const SearchProducts = () => {
@@ -55,13 +55,11 @@ const SearchModal = ({ navigation }: Props) => {
   const HighestToLowest = () => {
     const sortedProducts = [...products].sort((a, b) => b.price!! - a.price!!);
     setProducts(sortedProducts);
-    
   };
 
   const LowestToHighest = () => {
     const sortedProducts = [...products].sort((a, b) => a.price!! - b.price!!);
     setProducts(sortedProducts);
-   
   };
 
   return (
@@ -146,7 +144,6 @@ const SearchModal = ({ navigation }: Props) => {
                             navigation.navigate("viewProduct", {
                               product: item,
                             });
-                           
                           }}
                         >
                           <View

@@ -24,9 +24,8 @@ const AddForegroundImage: React.FC<Props> = ({ navigation }) => {
   const { appTheme } = useStates();
   const [img, setImg] = useState<string>();
   const { width } = Dimensions.get("screen");
-  console.log('addforeground scrren called')
+  console.log("addforeground scrren called");
   const handleImageUpload = async () => {
-    
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       alert("Sorry, we need camera roll permissions to make this   work!");
