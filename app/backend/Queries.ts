@@ -292,11 +292,17 @@ export const BE_addProduct = (data: {
   dispatch: Dispatch<UnknownAction>;
   sectionInfo: product;
   navigator: BottomTabNavigationProp<TabParamList>;
+  loading: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const { dispatch, sectionInfo, navigator } = data;
+  const { dispatch, sectionInfo, navigator, loading } = data;
+  loading(true);
   console.log("add product called");
   dispatch(addProduct(sectionInfo));
-  navigator.navigate("Layout");
+
+  setTimeout(() => {
+    loading(false);
+    navigator.navigate("Layout");
+  }, 7000);
 };
 export const BE_EditProduct = (data: {
   // loading: React.Dispatch<React.SetStateAction<boolean>>;

@@ -1,17 +1,14 @@
-import { View, Text, ScrollView } from "react-native";
-import React from "react";
-import Svg, { G, Path } from "react-native-svg";
-import AnimatedCart from "../../components/AnimatedCart";
+import { View, Text } from 'react-native'
+import React from 'react'
 
-type Props = {};
+type Props = {}
 
 const Wallet = (props: Props) => {
   return (
-    <View className="p[5%]">
-      {/* <Text>Wallet</Text> */}
-      <AnimatedCart/>
+    <View>
+      <Text>Wallet</Text>
     </View>
-  );
-};
+  )
+}
 
-export default Wallet;
+export default Wallet

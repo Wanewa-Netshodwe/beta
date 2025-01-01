@@ -188,7 +188,7 @@ const AnimatedCart = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setFrame((prev) => (prev + 1) % frames.length);
-    }, 40);
+    }, 45);
 
     return () => clearInterval(interval);
   }, []);
@@ -196,13 +196,8 @@ const AnimatedCart = () => {
   const currentFrame = frames[frame];
 
   return (
-    <View>
-      <Svg
-        width={536}
-        height={536}
-        className="border-2"
-        viewBox="30 -30 236 236"
-      >
+    <View className=" items-start " style={{width:166,height:356,top:96}}>
+      <Svg width={536} height={536}  viewBox="30 -30 236 236">
         {/* Main cart body */}
         <G transform={`${currentFrame.cart}`}>
           <Path

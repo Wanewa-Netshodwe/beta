@@ -7,6 +7,7 @@ import {
   ScrollView,
   FlatList,
   TouchableOpacity,
+  Modal,
 } from "react-native";
 import React, {
   memo,
@@ -40,6 +41,7 @@ import { useStates } from "../../utilities/States";
 import { useDynamicStyles } from "../../utilities/Styles";
 import OutlineBtn from "../../components/OutlineBtn";
 import ClickableBtn from "../../components/ClickableBtn";
+import AddingProductModal from "../../components/AddingProductModal";
 
 type Props = BottomTabScreenProps<TabParamList, "addProduct">;
 const AddProduct: React.FC<Props> = ({ navigation }) => {
@@ -50,6 +52,7 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
   const styles = useDynamicStyles();
   const { appTheme, businessState } = useStates();
   const [category, setCategory] = useState("");
+  const [loading, setLoading] = useState(false);
   const businessData = businessState.userBusiness;
   let [dataDummy, setdataDummy] = useState<{ key: string; value: string }[]>(
     []
@@ -237,7 +240,12 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
     };
     // console.log("product: ", sectionInfo);
 
-    BE_addProduct({ dispatch, sectionInfo, navigator: navigation });
+    BE_addProduct({
+      dispatch,
+      sectionInfo,
+      navigator: navigation,
+      loading: setLoading,
+    });
   };
   const handleImageUpload = async () => {
     setImg([]);
@@ -284,6 +292,7 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
   const addRow = () => {
     setD((prev) => [...prev, counter]);
     setCounter((prev) => prev + 1);
+    //@ts-ignore
     ScrollViewref.current?.scrollToEnd({ animated: true });
   };
 
@@ -292,6 +301,12 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
       style={{ backgroundColor: appTheme.colors?.background }}
       className="w-full h-full  "
     >
+      {loading && (
+        <Modal>
+          <AddingProductModal />
+        </Modal>
+      )}
+
       <View style={styles.sections}>
         <Text style={styles.text} className={`text-[24px] `}>
           Add Product
