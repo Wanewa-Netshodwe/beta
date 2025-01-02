@@ -44,7 +44,7 @@ const Category: React.FC<prop> = memo(({ route, navigation }) => {
       name: title,
     };
     BE_addC(category, dispatch);
-    navigation.navigate("categoryList");
+    navigation.popTo("categoryList");
   };
   const handleImageUpload = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -65,7 +65,7 @@ const Category: React.FC<prop> = memo(({ route, navigation }) => {
   };
 
   return (
-    <View className="w-full h-full ">
+    <View style={{backgroundColor:appTheme.colors?.background}} className="w-full h-full ">
       <View style={styles.sections} className="">
         <Text style={styles.text} className={`text-[24px] font-bold`}>
           Add Category

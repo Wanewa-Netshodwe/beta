@@ -23,43 +23,51 @@ import { useStates } from "../../utilities/States";
 import { StackScreenProps } from "@react-navigation/stack";
 import { useDynamicStyles } from "../../utilities/Styles";
 import ClickableBtn from "../../components/ClickableBtn";
+import { useFocusEffect } from "@react-navigation/native";
 type Prop = StackScreenProps<StackShopLayoutParamList, "section">;
 const AddSection: React.FC<Prop> = ({ navigation }) => {
   const styles2 = useDynamicStyles();
   const dispatch = useDispatch();
-  const { appTheme, businessState } = useStates();
-  const businessData = businessState.userBusiness;
+  const { appTheme, businessSections, businessId } = useStates();
+  const businessData = businessSections;
   const [img, setImg] = useState("");
   const [Position, setPosition] = useState("");
   const [title, setTitle] = useState("");
   const [layout, setLayout] = useState("grid");
   const [loading, setLoading] = useState(false);
+  const [show, setShow] = useState(false);
   const [data, setData] = useState<{ key: number; value: string }[]>([]);
   const [d, setD] = useState<{ key: string; value: number }[]>([]);
-  useMemo(() => {
-    if (businessData.sections.length > 0) {
-      const dataDummy = businessData.sections
-        .filter((item) => item.valid)
+  useFocusEffect(
+    useCallback(() => {
+      setShow(true);
+      const dataDummy: { key: string; index: number }[] = businessData
+        .filter((item, idx) => item.valid)
         .map((item, idx) => ({ key: item.name, index: idx }));
 
-      const newData: { key: number; value: string }[] = [];
-      const newD: { key: string; value: number }[] = [];
+      const updatedData = dataDummy.flatMap((item) => [
+        { key: item.index, value: "Before " + item.key },
+        { key: item.index + 1, value: "After " + item.key },
+      ]);
 
-      dataDummy.forEach((item) => {
-        newData.push({ key: item.index, value: "Before " + item.key });
-        newData.push({ key: item.index + 1, value: "After " + item.key });
-        newD.push({ key: "Before " + item.key, value: item.index });
-        newD.push({ key: "After " + item.key, value: item.index + 1 });
-      });
+      const updatedD = dataDummy.flatMap((item) => [
+        { key: "Before " + item.key, value: item.index },
+        { key: "After " + item.key, value: item.index + 1 },
+      ]);
 
-      setData(newData);
-      setD(newD);
-    }
-  }, [businessData.sections]);
+      setData(updatedData);
+      setD(updatedD);
+
+      return () => {
+        setData([]);
+        setD([]);
+      };
+    }, [businessData])
+  );
 
   const createRandomId = useCallback(() => {
-      return Math.random().toString(36).substring(2, 27);
-    }, []);
+    return Math.random().toString(36).substring(2, 27);
+  }, []);
 
   const handleSubmit = () => {
     console.log(d.length < 1);
@@ -71,10 +79,10 @@ const AddSection: React.FC<Prop> = ({ navigation }) => {
     let num = r[0];
     if (num !== undefined || num === 0) {
       const sectionData: sectionData = {
-        id:createRandomId(),
+        id: createRandomId(),
         name: title,
         postion: num,
-        businessid: businessData.id,
+        businessid: businessId,
         type: "Section",
         layout: layout,
         valid: true,
@@ -90,7 +98,7 @@ const AddSection: React.FC<Prop> = ({ navigation }) => {
   };
 
   const cancel = () => {
-    navigation.navigate("home");
+    navigation.popTo("home");
   };
   const radioButtons = useMemo(
     () => [
@@ -135,7 +143,7 @@ const AddSection: React.FC<Prop> = ({ navigation }) => {
     },
   });
   return (
-    <View className="w-full h-full  ">
+    <View style={{backgroundColor:appTheme.colors?.background}} className="w-full h-full  ">
       <View
         style={{ backgroundColor: appTheme.colors?.primary }}
         className="p-[5%] "
@@ -292,7 +300,13 @@ const AddSection: React.FC<Prop> = ({ navigation }) => {
         </View>
         <View className="p-[5%]  justify-between  flex-row">
           <ClickableBtn title="Save" onPress={handleSubmit} width={120} />
-          <ClickableBtn width={120} title="Cancel" onPress={cancel} />
+          <ClickableBtn
+            width={125}
+            onPress={() => {
+              navigation.popTo("home");
+            }}
+            title="Cancel"
+          />
         </View>
       </ScrollView>
     </View>

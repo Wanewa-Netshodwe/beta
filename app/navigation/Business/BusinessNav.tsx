@@ -42,6 +42,7 @@ const BusinessNav = () => {
           <Pressable
             {...props}
             onPress={() => {
+              //@ts-ignore
               props.onPress();
               handleTabPress();
             }}
@@ -112,6 +113,7 @@ const BusinessNav = () => {
           },
         }}
         name="addProduct"
+        //@ts-ignore
         component={AddProduct}
       />
       {/* <Tab.Screen

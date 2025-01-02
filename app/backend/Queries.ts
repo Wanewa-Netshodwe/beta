@@ -274,7 +274,7 @@ export const BE_addSection = (data: {
   loading(true);
   dispatch(addSection(sectionInfo));
   loading(false);
-  navigator.navigate("home");
+  navigator.popTo("home");
 };
 export const BE_deleteSection = (data: {
   // loading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -323,7 +323,7 @@ export const BE_delProduct = (data: {
   const { dispatch, sectionInfo, navigator } = data;
   console.log("add product called");
   dispatch(delProduct(sectionInfo));
-  navigator.navigate("home");
+  navigator.popTo("home");
 };
 let uidg: string;
 export const getUid = () => {
@@ -359,7 +359,7 @@ export const BE_saveCategory = (
 ) => {
   const d = { id: data.id, name: name, postion: postion };
   dispatch(saveCategoryList(d));
-  navigator.navigate("shopLayout");
+  navigator.popTo("shopLayout");
   const existingCat = getBusinessCategories();
   const section = getValidCategoryLists();
   let validSections: sectionData[] = [];

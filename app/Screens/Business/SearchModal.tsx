@@ -20,7 +20,7 @@ import MySection from "../../components/MySection";
 type Props = {} & StackScreenProps<StackShopLayoutParamList, "searchModal">;
 
 const SearchModal = ({ navigation }: Props) => {
-  const { appTheme, businessState } = useStates();
+  const { appTheme, businessSections } = useStates();
   const [products, setProducts] = useState<product[]>([]);
   const [productCount, setProductCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,14 +28,12 @@ const SearchModal = ({ navigation }: Props) => {
   const [isEnterPressed, setIsEnterPressed] = useState(false);
   const styles = useDynamicStyles();
   const SearchProducts = () => {
-    const Section_products = businessState.userBusiness.sections.filter(
-      (section) => {
-        if (section.products)
-          if (section.products?.length > 0) {
-            return section.products;
-          }
-      }
-    );
+    const Section_products = businessSections.filter((section) => {
+      if (section.products)
+        if (section.products?.length > 0) {
+          return section.products;
+        }
+    });
     const List_products = Section_products.flatMap((type_product) => {
       if (type_product.products && type_product.products.length > 0) {
         return type_product.products;
@@ -63,7 +61,7 @@ const SearchModal = ({ navigation }: Props) => {
   };
 
   return (
-    <View>
+    <View className="w-full h-full" style={{backgroundColor:appTheme.colors?.background}}>
       <View style={styles.sections}>
         <View className="flex-row items-center top-1 gap-4">
           <MaterialIcons

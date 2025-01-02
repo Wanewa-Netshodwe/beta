@@ -32,9 +32,9 @@ type Prop = StackScreenProps<StackShopLayoutParamList, "categoryList">;
 
 const ListCategories: React.FC<Prop> = memo(({ navigation, route }) => {
   const styles = useDynamicStyles();
-  const { businessState, appTheme, CategoryListState } = useStates();
+  const { appTheme, CategoryListState, businessSections } = useStates();
   const dispatch = useDispatch();
-  const businessData = businessState.userBusiness.sections;
+  const businessData = businessSections;
   console.log("catetrory list called");
 
   const [data, setData] = useState<{ key: number; value: string }[]>([]);
@@ -113,7 +113,7 @@ const ListCategories: React.FC<Prop> = memo(({ navigation, route }) => {
       Number(position),
       navigation
     );
-    navigation.navigate("home");
+    navigation.popTo("home");
   }, [dispatch, navigation, title, position]);
 
   // Handle deleting a category
@@ -155,7 +155,7 @@ const ListCategories: React.FC<Prop> = memo(({ navigation, route }) => {
   );
 
   return (
-    <View className="w-full h-full">
+    <View style={{backgroundColor:appTheme.colors?.background}} className="w-full h-full">
       <View style={styles.sections} className="">
         <Text style={styles.text} className="text-[24px]">
           Add Categories
@@ -215,6 +215,7 @@ const ListCategories: React.FC<Prop> = memo(({ navigation, route }) => {
           >
             <FlatList
               nestedScrollEnabled={true}
+              //@ts-ignore
               data={categories}
               keyExtractor={(item, index) => index.toString()}
               renderItem={renderItemCategory}
@@ -241,8 +242,15 @@ const ListCategories: React.FC<Prop> = memo(({ navigation, route }) => {
         </View>
 
         {/* Save Button */}
-        <View className="p-[5%]">
+        <View className="p-[5%]  justify-between  flex-row">
           <ClickableBtn title="Save" width={140} onPress={handleSave} />
+          <ClickableBtn
+            width={125}
+            onPress={() => {
+              navigation.popTo("home");
+            }}
+            title="Cancel"
+          />
         </View>
       </ScrollView>
     </View>

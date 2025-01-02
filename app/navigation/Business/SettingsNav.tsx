@@ -6,15 +6,20 @@ import BusinessLayout from "../../Screens/Business/BusinessLayout";
 
 const Stack = createStackNavigator();
 const SettingsNavigator = () => (
-  <Stack.Navigator initialRouteName="Home" screenOptions={{animation:'fade'}}>
+  <Stack.Navigator
+    initialRouteName="Home"
+    screenOptions={{ animation: "fade" }}
+  >
     <Stack.Screen
       options={{ headerShown: false }}
       name="Home"
+      //@ts-ignore
       component={Settings}
     />
     <Stack.Screen
       options={{ headerShown: false }}
       name="AppTheme"
+      //@ts-ignore
       component={ChangeAppTheme}
     />
 

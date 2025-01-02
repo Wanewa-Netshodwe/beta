@@ -11,9 +11,8 @@ type Props = {
 };
 
 const CategoryView = (props: Props) => {
-  const appTheme = useSelector((state: RootState) => state.appTheme.appTheme);
+  
   const { text } = useDynamicStyles();
-  console.log("categorey view called ");
   const [show, setshow] = useState(false);
   useFocusEffect(() => {
     setshow(true);

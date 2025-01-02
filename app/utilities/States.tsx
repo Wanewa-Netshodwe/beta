@@ -5,7 +5,28 @@ import { useMemo } from "react";
 
 export const useStates = () => {
   const appTheme = useSelector((state: RootState) => state.appTheme.appTheme);
-  const businessState = useSelector((state: RootState) => state.business);
+  const businessSections = useSelector(
+    (state: RootState) => state.business.userBusiness.sections
+  );
+  const businessId = useSelector(
+    (state: RootState) => state.business.userBusiness.id
+  );
+  const businessName = useSelector(
+    (state: RootState) => state.business.userBusiness.store_name
+  );
+  const businessPic = useSelector(
+    (state: RootState) => state.business.userBusiness.store_pic
+  );
+  const businessVerified = useSelector(
+    (state: RootState) => state.business.userBusiness.verified
+  );
+  const businessForeground = useSelector(
+    (state: RootState) => state.business.userBusiness.foregroundImg
+  );
+  const businessState = useSelector(
+    (state: RootState) => state.business.userBusiness
+  );
+
   const userState = useSelector((state: RootState) => state.user);
   const walletState = useSelector((state: RootState) => state.wallet);
   const CategoryListState = useSelector(
@@ -15,11 +36,28 @@ export const useStates = () => {
     () => ({
       appTheme,
       businessState,
+      businessSections,
       userState,
       walletState,
       CategoryListState,
+      businessForeground,
+      businessName,
+      businessPic,
+      businessVerified,
+      businessId,
     }),
-    [appTheme, businessState, userState, walletState, CategoryListState]
+    [
+      appTheme,
+      businessState,
+      businessForeground,
+      businessName,
+      businessPic,
+      businessVerified,
+      businessSections,
+      userState,
+      walletState,
+      CategoryListState,
+    ]
   );
   return states;
 };

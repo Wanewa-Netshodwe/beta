@@ -188,7 +188,7 @@ const AnimatedCart = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setFrame((prev) => (prev + 1) % frames.length);
-    }, 30);
+    }, 50);
 
     return () => clearInterval(interval);
   }, []);

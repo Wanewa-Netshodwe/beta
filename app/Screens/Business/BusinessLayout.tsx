@@ -27,7 +27,11 @@ import {
   category,
   sectionData,
 } from "../../utilities/Types";
-import { BE_deleteSection, BE_PublishStore } from "../../backend/Queries";
+import {
+  BE_deleteSection,
+  BE_PublishStore,
+  getBusinessInfo,
+} from "../../backend/Queries";
 import { StackScreenProps } from "@react-navigation/stack";
 import CategoryView from "../../components/CatogoryView";
 import { TextLoader } from "../../utilities/Loaders";
@@ -40,27 +44,25 @@ import { useDynamicStyles } from "../../utilities/Styles";
 import LoadingComp from "../../utilities/LoadingComp";
 import { removeForeground } from "../../redux/businessSlice";
 import { useStates } from "../../utilities/States";
-import { RootState } from "../../redux/store";
+import { getUserBusiness, RootState } from "../../redux/store";
 import OutlineBtn from "../../components/OutlineBtn";
 
 type prop = StackScreenProps<StackShopLayoutParamList, "home">;
 const BusinessLayout: React.FC<prop> = ({ navigation }) => {
-  const sections = useSelector(
-    (state: RootState) => state.business.userBusiness.sections,
-    shallowEqual
-  );
-  const Businessforeground = useSelector(
-    (state: RootState) => state.business.userBusiness.foregroundImg
-  );
+  const {
+    businessSections,
+    businessForeground,
+    businessPic,
+    businessName,
+    businessVerified,
+  } = useStates();
+  const sections = businessSections;
+  const Businessforeground = businessForeground;
   const store_pic = useSelector(
     (state: RootState) => state.business.userBusiness.store_pic
   );
-  const store_name = useSelector(
-    (state: RootState) => state.business.userBusiness.store_name
-  );
-  const verified = useSelector(
-    (state: RootState) => state.business.userBusiness.verified
-  );
+  const store_name = businessName;
+  const verified = businessVerified;
   const styles = useDynamicStyles();
   const { appTheme } = useStates();
   const handleDeleteSection = (sectionInfo: sectionData) => {
@@ -70,9 +72,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
   const [showSearch, setShowSearch] = useState(false);
   const { width } = Dimensions.get("screen");
   const font = appTheme.fonts?.primary;
-  const { businessState } = useStates();
   console.log("business layout screen called");
-  console.log("business state :", businessState.userBusiness);
   const [selectedFont, setSelectedFont] = useState(
     appTheme.fonts?.primary || ""
   );
@@ -379,7 +379,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
 
                 <OutlineBtn
                   onPress={() => {
-                    BE_PublishStore(businessState.userBusiness);
+                    BE_PublishStore(getUserBusiness());
                   }}
                   title="publish store"
                 ></OutlineBtn>
@@ -410,31 +410,31 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
                 <ClickableBtn
                   title="Banner"
                   onPress={() => {
-                    navigation.navigate("banner");
+                    navigation.popTo("banner");
                   }}
                 />
                 <ClickableBtn
                   title="Foreground Image"
                   onPress={() => {
-                    navigation.navigate("foregroundImg");
+                    navigation.popTo("foregroundImg");
                   }}
                 />
                 <ClickableBtn
                   title="Carousel"
                   onPress={() => {
-                    navigation.navigate("carousel");
+                    navigation.popTo("carousel");
                   }}
                 />
                 <ClickableBtn
                   title="Section"
                   onPress={() => {
-                    navigation.navigate("section");
+                    navigation.popTo("section");
                   }}
                 />
                 <ClickableBtn
                   title="Categories"
                   onPress={() => {
-                    navigation.navigate("categoryList");
+                    navigation.popTo("categoryList");
                   }}
                 />
               </ScrollView>

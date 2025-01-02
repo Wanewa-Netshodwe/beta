@@ -36,8 +36,8 @@ type prop = StackScreenProps<StackShopLayoutParamList, "banner">;
 const AddBanner: React.FC<prop> = ({ navigation }) => {
   const { width } = Dimensions.get("screen");
   const dispatch = useDispatch();
-  const { businessState, appTheme } = useStates();
-  const businessData = businessState.userBusiness;
+  const { businessSections, appTheme, businessId } = useStates();
+  const businessData = businessSections;
   const [img, setImg] = useState<string[]>([]);
   const [name, setName] = useState("");
   const [show, setShow] = useState(false);
@@ -56,8 +56,7 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       setShow(true);
-      // Prepare data for SelectList
-      const dataDummy: { key: string; index: number }[] = businessData.sections
+      const dataDummy: { key: string; index: number }[] = businessData
         .filter((item, idx) => item.valid)
         .map((item, idx) => ({ key: item.name, index: idx }));
 
@@ -74,14 +73,11 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
       setData(updatedData);
       setD(updatedD);
 
-      // Cleanup function when screen is unfocused
       return () => {
-        // Optionally reset state if needed
-        // setData([]);
-        // setD([]);
-        // setCategories([]);
+        setData([]);
+        setD([]);
       };
-    }, [businessData, dispatch])
+    }, [businessData])
   );
 
   const handleSubmit = () => {
@@ -103,7 +99,7 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
         name: name,
         postion: num,
         imgs: img,
-        businessid: businessData.id,
+        businessid: businessId,
         type: "Banner",
         height: height,
       };
@@ -117,7 +113,7 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
     }
   };
   const cancel = () => {
-    navigation.navigate("home");
+    navigation.popToTop();
   };
   const handleImageUpload = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -311,7 +307,7 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
             <ClickableBtn
               width={125}
               onPress={() => {
-                navigation.navigate("home");
+                navigation.popTo("home");
               }}
               title="Cancel"
             />

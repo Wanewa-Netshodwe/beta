@@ -6,7 +6,7 @@ import {
   ScrollView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import { useStates } from "../../utilities/States";
 import { useDynamicStyles } from "../../utilities/Styles";
 import { StackScreenProps } from "@react-navigation/stack";
@@ -93,13 +93,13 @@ const AddForegroundImage: React.FC<Props> = ({ navigation }) => {
           <ClickableBtn
             onPress={() => {
               dispatch(setForegroundImg(img));
-              navigation.navigate("home");
+              navigation.popTo("home");
             }}
             title="Save"
           />
           <ClickableBtn
             onPress={() => {
-              navigation.navigate("home");
+              navigation.popTo("home");
             }}
             title="Cancel"
           />
@@ -111,4 +111,4 @@ const AddForegroundImage: React.FC<Props> = ({ navigation }) => {
   );
 };
 
-export default AddForegroundImage;
+export default memo(AddForegroundImage);
