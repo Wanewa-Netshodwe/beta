@@ -48,7 +48,9 @@ export default function BusinessInfo() {
       location: {
         address: query,
         coord: {
+          //@ts-ignore
           latitude: selectedPlace.Latitude,
+          //@ts-ignore
           longtitude: selectedPlace.Longitude,
         },
       },
@@ -223,6 +225,7 @@ export default function BusinessInfo() {
                 <FlatList
                   style={{ height: 100 }}
                   data={predictions}
+                  //@ts-ignore
                   keyExtractor={(item) => item.place_id}
                   renderItem={({ item }) => (
                     <TouchableOpacity
@@ -234,13 +237,18 @@ export default function BusinessInfo() {
                       }}
                       onPress={() => {
                         setisOpen(false);
+                        //@ts-ignore
                         setQuery(item.description);
                         setPredictions([]);
+                        //@ts-ignore
                         fetchPlaceDetails(item.place_id);
                       }}
                     >
                       <Text style={{ color: appTheme.colors?.tertiary }}>
-                        {item.description}
+                        {
+                          //@ts-ignore
+                          item.description
+                        }
                       </Text>
                     </TouchableOpacity>
                   )}

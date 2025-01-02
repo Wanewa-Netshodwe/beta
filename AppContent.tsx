@@ -12,11 +12,10 @@ import Toast from "react-native-toast-message";
 LogBox.ignoreAllLogs(true);
 
 export default function AppContent() {
-  const { appTheme, businessState } = useStates();
+  const { appTheme, businessState, businessForeground } = useStates();
 
   const shouldRenderScreen =
-    appTheme.current_screen === "layout" &&
-    businessState.userBusiness?.foregroundImg;
+    appTheme.current_screen === "layout" && businessForeground;
 
   return (
     <NavigationContainer>

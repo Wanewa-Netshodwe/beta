@@ -118,9 +118,7 @@ const AddCarousel: React.FC<Prop> = ({ navigation }: Prop) => {
       BE_addSection(data);
     }
   };
-  const cancel = () => {
-    navigation.navigate("home");
-  };
+ 
 
   const handleImageUpload = async () => {
     setImg([]);

@@ -14,7 +14,7 @@ export const defaultUser: personalAccount = {
   password: "Wanewa@12",
   phonenumber: "0839795056",
   profile_pic:
-    "https://firebasestorage.googleapis.com/v0/b/pocketpal-509a5.firebasestorage.app/o/images%2FHd81oqoxT0NDLs80xJY33Vlwbs23%2FProfilePic.png?alt=media&token=fe2c1158-f757-4691-aa41-73a768b61bc6",
+    "https://1000logos.net/wp-content/uploads/2017/05/Color-PUMA-Logo.jpg",
   email: "Waneex@gamil.com",
   username: "Carl Johnson",
 };

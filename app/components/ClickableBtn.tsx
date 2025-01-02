@@ -3,6 +3,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { useDynamicStyles } from "../utilities/Styles";
+import Spinner from "./Spinner";
 
 type Props = {
   onPress?: (e: any) => void;
@@ -10,9 +11,17 @@ type Props = {
   width?: number;
   font?: string;
   className?: string;
+  loading?: boolean;
 };
 
-const ClickableBtn = ({ onPress, title, width, font, className }: Props) => {
+const ClickableBtn = ({
+  onPress,
+  title,
+  width,
+  font,
+  className,
+  loading,
+}: Props) => {
   const styles = useDynamicStyles();
   const appTheme = useSelector((state: RootState) => state.appTheme.appTheme);
   return (
@@ -20,7 +29,7 @@ const ClickableBtn = ({ onPress, title, width, font, className }: Props) => {
       <View
         style={{
           backgroundColor: appTheme.colors!!.primary,
-
+          ...(loading && { flexDirection: "row" }),
           width: width || "50%",
         }}
         className={`rounded-md p-3 mt-5  items-center  ${className} `}
@@ -31,6 +40,7 @@ const ClickableBtn = ({ onPress, title, width, font, className }: Props) => {
         >
           {title}
         </Text>
+        {loading && <Spinner />}
       </View>
     </TouchableNativeFeedback>
   );

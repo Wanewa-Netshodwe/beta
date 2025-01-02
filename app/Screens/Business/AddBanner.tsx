@@ -79,7 +79,7 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
       };
     }, [businessData])
   );
-
+  console.log("loading .... : ", loading);
   const handleSubmit = () => {
     if (!name || !img || !Position) {
       errorMsg("Fill in all fields to Continue");
@@ -288,7 +288,12 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
                   </Text>
                 </View>
               </TouchableNativeFeedback> */}
-            <ClickableBtn width={125} onPress={handleSubmit} title="Save" />
+            <ClickableBtn
+              loading={loading}
+              width={125}
+              onPress={handleSubmit}
+              title="Save"
+            />
             {/* <TouchableNativeFeedback
                 onPress={() => {
                   cancel();
@@ -306,8 +311,11 @@ const AddBanner: React.FC<prop> = ({ navigation }) => {
               </TouchableNativeFeedback> */}
             <ClickableBtn
               width={125}
+              loading={loading}
               onPress={() => {
+                setLoading(true);
                 navigation.popTo("home");
+                setLoading(false);
               }}
               title="Cancel"
             />

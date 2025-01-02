@@ -30,31 +30,31 @@ export default function Summary() {
     <Screen>
       <View className="w-full h-full  p-[5%]">
         <Text
-          style={{ color: appTheme.colors.tertiary }}
+          style={{ color: appTheme.colors?.textColor }}
           className={`text-[24px] font-bold`}
         >
           Create Business
         </Text>
         <View className="mt-[5%]">
           <Text
-            style={{ color: appTheme.colors.tertiary }}
+            style={{ color: appTheme.colors?.textColor }}
             className="text-[20px] font-semibold"
           >
             Summary
           </Text>
           <View
-            style={{ backgroundColor: appTheme.colors.secondary }}
+            style={{ backgroundColor: appTheme.colors?.secondary }}
             className="w-[100%] gap-1 p-2 mt-[4%] rounded-md"
           >
             <View className="flex-row gap-4 items-center  ">
               <Text
-                style={{ color: appTheme.colors.tertiary, width: "auto" }}
+                style={{ color: appTheme.colors?.textColor, width: "auto" }}
                 className="text-[17px] font-bold  "
               >
                 Business Name :
               </Text>
               <Text
-                style={{ color: appTheme.colors.tertiary }}
+                style={{ color: appTheme.colors?.textColor }}
                 className="text-[17px] font-semibold w-fit"
               >
                 {busRegData.name}
@@ -63,7 +63,7 @@ export default function Summary() {
 
             <View className="flex-row gap-4 items-center  ">
               <Text
-                style={{ color: appTheme.colors.tertiary }}
+                style={{ color: appTheme.colors?.textColor }}
                 className="text-[17px] font-bold border-2 border-transparent"
               >
                 Business Logo :
@@ -77,13 +77,13 @@ export default function Summary() {
             </View>
             <View className="flex-row gap-4 items-center  ">
               <Text
-                style={{ color: appTheme.colors.tertiary }}
+                style={{ color: appTheme.colors?.textColor }}
                 className="text-[17px] font-bold border-2 border-transparent"
               >
                 Admin Password :
               </Text>
               <Text
-                style={{ color: appTheme.colors.tertiary }}
+                style={{ color: appTheme.colors?.textColor }}
                 className="text-[17px] font-semibold "
               >
                 {busRegData.password}
@@ -91,13 +91,13 @@ export default function Summary() {
             </View>
             <View className="flex-row gap-4 items-center  ">
               <Text
-                style={{ color: appTheme.colors.tertiary }}
+                style={{ color: appTheme.colors?.textColor }}
                 className="text-[17px] font-bold border-2 border-transparent"
               >
                 opening time :
               </Text>
               <Text
-                style={{ color: appTheme.colors.tertiary }}
+                style={{ color: appTheme.colors?.textColor }}
                 className="text-[17px] font-semibold"
               >
                 {busRegData.business_hours?.opening}
@@ -105,13 +105,13 @@ export default function Summary() {
             </View>
             <View className="flex-row gap-4 items-center  ">
               <Text
-                style={{ color: appTheme.colors.tertiary }}
+                style={{ color: appTheme.colors?.textColor }}
                 className="text-[17px] font-bold border-2 border-transparent"
               >
                 closing time :
               </Text>
               <Text
-                style={{ color: appTheme.colors.tertiary }}
+                style={{ color: appTheme.colors?.textColor }}
                 className="text-[17px] font-semibold"
               >
                 {busRegData.business_hours?.closing}
@@ -119,13 +119,13 @@ export default function Summary() {
             </View>
             <View className="flex-row gap-4 items-center  ">
               <Text
-                style={{ color: appTheme.colors.tertiary }}
+                style={{ color: appTheme.colors?.textColor }}
                 className="text-[17px] font-bold border-2 border-transparent"
               >
                 Location :
               </Text>
               <Text
-                style={{ color: appTheme.colors.tertiary }}
+                style={{ color: appTheme.colors?.textColor }}
                 className="text-[17px] font-semibold"
               >
                 {busRegData.location?.address.slice(0, 20) + "..."}
@@ -133,13 +133,13 @@ export default function Summary() {
             </View>
             <View className="flex-row gap-2 items-center  ">
               <Text
-                style={{ color: appTheme.colors.tertiary }}
+                style={{ color: appTheme.colors?.textColor }}
                 className="text-[17px] font-bold border-2 border-transparent"
               >
                 Business Offering :
               </Text>
               <Text
-                style={{ color: appTheme.colors.tertiary }}
+                style={{ color: appTheme.colors?.textColor }}
                 className="text-[17px] font-semibold"
               >
                 {busRegData.offering}
@@ -149,7 +149,7 @@ export default function Summary() {
         </View>
         <TouchableNativeFeedback onPress={handleSubmit}>
           <View
-            style={{ backgroundColor: appTheme.colors.tertiary }}
+            style={{ backgroundColor: appTheme.colors?.textColor }}
             className={` p-3  mt-[15%]  rounded-md  ${
               loading ? "w-[46%]" : "w-[40%]"
             }  flex-row gap-3 items-center`}
