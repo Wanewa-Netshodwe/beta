@@ -29,6 +29,9 @@ export const useStates = () => {
 
   const userState = useSelector((state: RootState) => state.user);
   const walletState = useSelector((state: RootState) => state.wallet);
+  const AllBusiness = useSelector(
+    (state: RootState) => state.business.allBusinesses
+  );
   const CategoryListState = useSelector(
     (state: RootState) => state.categoryLists
   );
@@ -45,8 +48,10 @@ export const useStates = () => {
       businessPic,
       businessVerified,
       businessId,
+      AllBusiness,
     }),
     [
+      AllBusiness,
       appTheme,
       businessState,
       businessForeground,

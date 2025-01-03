@@ -47,6 +47,7 @@ import {
   delSection,
   editProduct,
   setBusiness,
+  setBusinesses,
 } from "../redux/businessSlice";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import {
@@ -133,6 +134,20 @@ export const getUserInfo = async (id: string) => {
     errorMsg("User Not Found");
     return defaultUser;
   }
+};
+
+const uploadVideo = async (uri: string, path: string, fileName: string) => {
+  const storage = getStorage();
+  const storageRef = ref(storage);
+  const ImageRef = ref(storageRef, `${path}/${fileName}.mp4`);
+
+  // 'file' comes from the Blob or File API
+  const ur = await fetch(uri);
+  const blob = await ur.blob();
+  const snapshot = await uploadBytes(ImageRef, blob, { contentType: "video" });
+  if (snapshot) console.log("file uplaoded");
+  const videoUrl = await getDownloadURL(snapshot.ref);
+  return videoUrl;
 };
 
 const uploadImage = async (uri: string, path: string, fileName: string) => {
@@ -448,6 +463,28 @@ export const BE_login = (data: {
     // });
   }
 };
+export const BE_getAllBusinesses = async (
+  dispatch: Dispatch<UnknownAction>
+) => {
+  let businesses: any = [];
+  console.log("fetching businesses data");
+  try {
+    const querySnapshot = await getDocs(collection(db, BUSINESSCOLLECTION));
+    if (querySnapshot) {
+      console.log("found");
+      querySnapshot.forEach((doc) => {
+        businesses.push(doc.data());
+      });
+    }
+    if (querySnapshot.empty) {
+      console.log("no data found");
+    }
+    dispatch(setBusinesses(businesses));
+    console.log("done");
+  } catch (err) {
+    console.log(err);
+  }
+};
 const UploadBusinessMedia = async (BusinessInfo: BusinessAccount) => {
   const { foregroundImg, sections } = BusinessInfo;
 
@@ -511,17 +548,33 @@ const UploadBusinessMedia = async (BusinessInfo: BusinessAccount) => {
                     })
                   );
                 }
+                if (pro.video) {
+                  if (pro.video.type === "web") {
+                  } else {
+                    updatedProduct.video = updatedProduct.video || undefined;
+                    const uploadResult = await uploadVideo(
+                      pro.video.uri,
+                      `videos/${getCurrentUser().id}/business/${
+                        sec.name
+                      }/products/${pro.name}/`,
+                      `${pro.name}`
+                    );
+                    if (updatedProduct.video)
+                      updatedProduct.video.uri = uploadResult;
+                  }
+                }
 
                 return updatedProduct;
               })
             );
           }
 
-          if (sec.type === "Categories" && sec.categoryList?.categories) {
+          if (sec.type === "categories" && sec.categoryList?.categories) {
             updatedSection.categoryList = {
               ...sec.categoryList,
               categories: await Promise.all(
                 sec.categoryList.categories.map(async (cat) => {
+                  console.log(cat);
                   let updatedCategory = { ...cat };
 
                   if (cat.img) {

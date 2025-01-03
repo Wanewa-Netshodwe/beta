@@ -23,7 +23,11 @@ const ShopLayoutNavigator = () => (
       name="banner"
       component={AddBanner}
     />
-    <Stack.Screen name="foregroundImg" component={AddForegroundImage} />
+    <Stack.Screen
+      name="foregroundImg"
+      options={{ headerShown: false }}
+      component={AddForegroundImage}
+    />
     <Stack.Screen
       name="carousel"
       options={{ headerShown: false }}

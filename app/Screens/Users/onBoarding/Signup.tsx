@@ -4,7 +4,11 @@ import * as ImagePicker from "expo-image-picker";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
-import { BE_login, BE_signup } from "../../../backend/Queries";
+import {
+  BE_getAllBusinesses,
+  BE_login,
+  BE_signup,
+} from "../../../backend/Queries";
 import { BusRegData } from "../../../utilities/Types";
 
 export default function SignUp() {
@@ -15,7 +19,7 @@ export default function SignUp() {
   const [password, setPassword] = useState("");
   const [phonenumber, setPhonenumber] = useState("");
   const [img, setImg] = useState("");
-
+  
   const handleSignup = () => {
     const data = {
       image: img,

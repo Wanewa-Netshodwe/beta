@@ -26,11 +26,11 @@ type Props = {
   name: string;
   products?: product[];
   section: sectionData;
-  nav: StackNavigationProp<StackShopLayoutParamList>;
+  nav: StackNavigationProp<StackStoreListParamList>;
   edit?: boolean;
 };
 
-const MySection = (props: Props) => {
+const MySectionStore = (props: Props) => {
   const dispatch = useDispatch();
   const styles2 = useDynamicStyles();
   const { nav } = props;
@@ -71,11 +71,7 @@ const MySection = (props: Props) => {
                 renderItem={({ item }) => (
                   <TouchableNativeFeedback
                     onPress={() => {
-                      if (!props.edit) {
-                        nav.navigate("viewProduct", { product: item });
-                      }
-
-                      console.log("prssed");
+                      nav.navigate("viewProduct", { product: item });
                     }}
                   >
                     <View
@@ -99,32 +95,6 @@ const MySection = (props: Props) => {
                             className=" absolute -top-2 z-50 -left-3    p-2 rounded-full"
                           />
                         )}
-                        {props.edit ? (
-                          <>
-                            <AntDesign
-                              name="edit"
-                              onPress={() => {
-                                nav.navigate("editProduct", { product: item });
-                              }}
-                              size={18}
-                              color={appTheme.colors?.textColor}
-                              className="right-14  top-4 z-20 absolute"
-                            />
-                            <AntDesign
-                              color={appTheme.colors?.textColor}
-                              onPress={() => {
-                                BE_delProduct({
-                                  dispatch: dispatch,
-                                  sectionInfo: item,
-                                  navigator: nav,
-                                });
-                              }}
-                              name="delete"
-                              size={18}
-                              className="left-1  bottom-1 z-20 absolute"
-                            />
-                          </>
-                        ) : null}
 
                         <Image
                           width={120}
@@ -187,11 +157,7 @@ const MySection = (props: Props) => {
                       <TouchableNativeFeedback
                         key={index}
                         onPress={() => {
-                          if (!props.edit) {
-                            nav.navigate("viewProduct", { product: item });
-                          }
-
-                          console.log("prssed");
+                          nav.navigate("viewProduct", { product: item });
                         }}
                       >
                         <View
@@ -215,34 +181,6 @@ const MySection = (props: Props) => {
                                 className=" absolute -top-2 z-50 -left-3    p-2 rounded-full"
                               />
                             )}
-                            {props.edit ? (
-                              <>
-                                <AntDesign
-                                  name="edit"
-                                  onPress={() => {
-                                    nav.navigate("editProduct", {
-                                      product: item,
-                                    });
-                                  }}
-                                  size={18}
-                                  color={appTheme.colors?.textColor}
-                                  className="right-14  top-2 z-20 absolute"
-                                />
-                                <AntDesign
-                                  color={appTheme.colors?.textColor}
-                                  onPress={() => {
-                                    BE_delProduct({
-                                      dispatch: dispatch,
-                                      sectionInfo: item,
-                                      navigator: nav,
-                                    });
-                                  }}
-                                  name="delete"
-                                  size={18}
-                                  className="left-1  bottom-1 z-20 absolute"
-                                />
-                              </>
-                            ) : null}
 
                             <Image
                               width={120}
@@ -320,4 +258,4 @@ const MySection = (props: Props) => {
   );
 };
 
-export default MySection;
+export default MySectionStore;

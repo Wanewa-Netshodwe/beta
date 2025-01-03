@@ -18,13 +18,14 @@ import { ScrollView } from "react-native-gesture-handler";
 import ClickableBtn from "../../components/ClickableBtn";
 import {
   AppTheme,
+  RootTabParamList,
   StackSettingsParamList,
   TabParamList,
 } from "../../utilities/Types";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { ChangeThemeLoader } from "../../utilities/Loaders";
 
-type Props = BottomTabScreenProps<TabParamList, "settings">;
+type Props = BottomTabScreenProps<TabParamList,"settings">;
 
 const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
   console.log("change app scrren called");

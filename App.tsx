@@ -33,6 +33,7 @@ configureReanimatedLogger({
 LogBox.ignoreAllLogs(true);
 
 export default function App() {
+  
   return (
     <Provider store={store}>
       <AppContent />

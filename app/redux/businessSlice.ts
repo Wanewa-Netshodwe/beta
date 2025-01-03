@@ -38,7 +38,9 @@ export const defaultBusiness: BusinessAccount = {
   verified: true,
 };
 const products: product[] = [];
+const AllBusinesses: BusinessAccount[] = [];
 const initialState = {
+  allBusinesses: AllBusinesses,
   userBusiness: defaultBusiness,
   products: products,
   wallets: [],
@@ -63,9 +65,12 @@ const businessSlice = createSlice({
     setForegroundImg: (state, action) => {
       state.userBusiness.foregroundImg = action.payload;
     },
+    setBusinesses: (state, action) => {
+      const businesses = action.payload;
+      state.allBusinesses = businesses;
+    },
     addSection: (state, action) => {
       const section: sectionData = action.payload;
-
       let sec = state.userBusiness.sections;
       let sections = [...sec];
       sections.splice(section.postion, 0, section);
@@ -149,6 +154,7 @@ export const {
   setRegData,
   addSection,
   delSection,
+  setBusinesses,
   addProduct,
   setCategoryList,
   setForegroundImg,

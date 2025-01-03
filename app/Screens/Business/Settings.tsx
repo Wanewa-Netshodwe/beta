@@ -63,6 +63,32 @@ const Settings: React.FC<Props> = ({ navigation }: Props) => {
               </Text>
             </View>
           </TouchableNativeFeedback>
+          <TouchableNativeFeedback
+            onPress={() => {
+              navigation.popTo("User");
+            }}
+          >
+            <View
+              className=" mt-5 flex-row p-4 items-center gap-3"
+              style={{
+                borderBottomColor: appTheme.colors?.quaternarySup,
+                borderTopColor: appTheme.colors?.quaternarySup,
+                borderLeftWidth: 0,
+                borderTopWidth: 0,
+                borderRightWidth: 0,
+                borderWidth: 1,
+              }}
+            >
+              <Entypo
+                name="user"
+                size={30}
+                color={appTheme.colors?.secondary}
+              />
+              <Text style={styles.text} className="text-[18px] font-semibold">
+                User
+              </Text>
+            </View>
+          </TouchableNativeFeedback>
         </ScrollView>
       </View>
     </View>

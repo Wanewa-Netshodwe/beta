@@ -1,5 +1,10 @@
+export type RootTabParamList = {
+  Business: undefined;
+  UserPage: undefined;
+};
 export type TabParamList = {
   Layout: undefined;
+  wallet: undefined;
   addProduct: undefined;
   settings: undefined;
 };
@@ -15,9 +20,16 @@ export type StackShopLayoutParamList = {
   viewProduct: { product: product };
   category: { id: string };
 };
+export type StackStoreListParamList = {
+  stores: undefined;
+  viewStore: { business: BusinessAccount };
+  viewProduct: { product: product };
+};
+
 export type StackSettingsParamList = {
   home: undefined;
   AppTheme: undefined;
+  User: undefined;
 };
 
 export type BusinessAccount = {

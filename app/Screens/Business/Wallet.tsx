@@ -10,10 +10,12 @@ import { AntDesign } from "@expo/vector-icons";
 import { ScrollView } from "react-native";
 import OutlineBtn from "../../components/OutlineBtn";
 import TransactionHolder from "../../components/TransactionHolder";
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import { TabParamList } from "../../utilities/Types";
 
-type Props = {};
+type Props = BottomTabScreenProps<TabParamList, "wallet">;
 
-const Wallet = (props: Props) => {
+const Wallet: React.FC<Props> = (props: Props) => {
   const { appTheme, userState } = useStates();
   const styles = useDynamicStyles();
   return (
@@ -80,7 +82,6 @@ const Wallet = (props: Props) => {
           <View className="mt-2 gap-3">
             <TransactionHolder />
             <TransactionHolder />
-            
           </View>
         </ScrollView>
       </View>

@@ -17,10 +17,10 @@ const WalletHeader = (props: Props) => {
         borderRadius={75}
       />
       <View className="p-1">
-        <Text className="text-[13px] top-1 "  style={styles.text}>
+        <Text className="text-[13px] top-1 " style={styles.text}>
           Hello
         </Text>
-        <Text className="text-[14px] "  style={styles.text}>
+        <Text className="text-[14px] " style={styles.text}>
           {userState.currentUser.username}
         </Text>
       </View>

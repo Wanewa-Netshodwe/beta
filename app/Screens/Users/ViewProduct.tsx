@@ -28,6 +28,7 @@ import * as Progress from "react-native-progress";
 import {
   reviews,
   StackShopLayoutParamList,
+  StackStoreListParamList,
   TabParamList,
 } from "../../utilities/Types";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
@@ -37,8 +38,8 @@ import { useStates } from "../../utilities/States";
 import { styles } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetScrollable/BottomSheetFlashList";
 import { useDynamicStyles } from "../../utilities/Styles";
 import { convertT, convertTime } from "../../utilities/convertTime";
+import { StackScreenProps } from "@react-navigation/stack";
 
-type Props = BottomTabScreenProps<StackShopLayoutParamList, "viewProduct">;
 
 const ViewProduct: React.FC<Props> = ({ route }) => {
   console.log("view scrren called");

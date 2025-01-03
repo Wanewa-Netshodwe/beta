@@ -140,36 +140,6 @@ const BusinessNav = () => {
         name="settings"
         component={SettingsNavigator}
       />
-      
-      <Tab.Screen
-        options={{
-          headerShown: false,
-        }}
-        name="signup"
-        component={SignUp}
-      />
-      <Tab.Screen
-        options={{
-          headerShown: false,
-        }}
-        name="start"
-        component={Start}
-      />
-      <Tab.Screen
-        options={{
-          headerShown: false,
-        }}
-        name="BusInfo"
-        component={BusinessInfo}
-      />
-
-      <Tab.Screen
-        options={{
-          headerShown: false,
-        }}
-        name="Sumary"
-        component={Summary}
-      />
     </Tab.Navigator>
   );
 };
