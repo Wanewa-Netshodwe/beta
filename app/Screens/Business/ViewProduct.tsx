@@ -44,6 +44,7 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
   console.log("view scrren called");
   const styles = useDynamicStyles();
   const { product } = route.params;
+  
   const [Video, setVideo] = useState("");
   const [loading, setLoading] = useState(true);
   const [ReviewStarsInfo, setReviewStarsInfo] = useState<

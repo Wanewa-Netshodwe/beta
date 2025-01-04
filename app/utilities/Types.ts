@@ -33,10 +33,13 @@ export type StackSettingsParamList = {
   BusinessSetting: undefined;
 };
 export type Cart = {
+  items: CartItem[];
+};
+export type CartItem = {
   product_info: {
-    business: BusinessAccount;
-    product: product;
-  }[];
+    business?: BusinessAccount;
+    product?: product;
+  };
   userId?: string;
 };
 export type BusinessAccount = {

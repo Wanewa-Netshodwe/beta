@@ -15,7 +15,7 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false, 
+      serializableCheck: false,
     }),
 });
 export const getCurrentUser = () => {
@@ -36,6 +36,17 @@ export const getValidCategoryLists = () => {
 export const getUserBusiness = () => {
   const state = store.getState();
   return state.business.userBusiness;
+};
+export const getBusinessById = (id: string) => {
+  const state = store.getState();
+  const targetBusiness = state.business.allBusinesses.filter(
+    (bus) => bus.id === id
+  );
+  return targetBusiness ? targetBusiness[0] : -1;
+};
+export const getUserId = () => {
+  const state = store.getState();
+  return state.user.currentUser.id;
 };
 
 export type RootState = ReturnType<typeof store.getState>;

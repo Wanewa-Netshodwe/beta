@@ -18,7 +18,7 @@ import React, {
   useState,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
+import { getUserBusiness, RootState } from "../../redux/store";
 import Screen from "../../utilities/Screen";
 import * as ImagePicker from "expo-image-picker";
 import {
@@ -165,7 +165,7 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
     }
   });
   const handleRowDelete = (index: number) => {
-    setD((prev) => {
+    setRowData((prev) => {
       let updatedrows = [...prev];
       updatedrows.splice(index, 1);
       return updatedrows;
@@ -210,6 +210,7 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
       delivery_cost: Number(deliverPrice),
       descriptions: description,
       free_delivery: delivery,
+      store_id: getUserBusiness().id,
       imgs: img,
       name: name,
       rating: rating,

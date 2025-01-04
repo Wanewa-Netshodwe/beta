@@ -1,5 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { BusRegData, personalAccount } from "../utilities/Types";
+import {
+  BusRegData,
+  Cart,
+  CartItem,
+  personalAccount,
+} from "../utilities/Types";
 
 export const defaultUser: personalAccount = {
   businessid: "hjoZMJGDpAe802w4SDEw",
@@ -18,10 +23,12 @@ export const defaultUser: personalAccount = {
   email: "Waneex@gamil.com",
   username: "Carl Johnson",
 };
+const defaultCart: Cart = { items: [] };
 const defaultBusRegData: BusRegData = {};
 const initialState = {
   currentUser: defaultUser,
   busRegData: defaultBusRegData,
+  cart: defaultCart,
 };
 
 const userSlice = createSlice({
@@ -36,8 +43,12 @@ const userSlice = createSlice({
       const data: BusRegData = action.payload;
       state.busRegData = { ...data };
     },
+    addCart: (state, action) => {
+      const item: CartItem = action.payload;
+      state.cart.items.push(item);
+    },
   },
 });
 
-export const {setRegData, setUser } = userSlice.actions;
+export const { setRegData, setUser, addCart } = userSlice.actions;
 export default userSlice.reducer;

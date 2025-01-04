@@ -103,6 +103,7 @@ const BusinessNav = () => {
           },
         }}
         name="wallet"
+        //@ts-ignore
         component={Wallet}
       />
       <Tab.Screen

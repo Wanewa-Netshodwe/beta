@@ -12,8 +12,8 @@ import {
 } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import Screen from "../../utilities/Screen";
-import { RootState } from "../../redux/store";
-import { useSelector } from "react-redux";
+import { getBusinessById, getUserId, RootState } from "../../redux/store";
+import { useDispatch, useSelector } from "react-redux";
 import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons";
 import WebView from "react-native-webview";
 import {
@@ -26,6 +26,7 @@ import {
 import StarRating from "react-native-star-rating-widget";
 import * as Progress from "react-native-progress";
 import {
+  CartItem,
   reviews,
   StackShopLayoutParamList,
   StackStoreListParamList,
@@ -39,12 +40,17 @@ import { styles } from "@gorhom/bottom-sheet/lib/typescript/components/bottomShe
 import { useDynamicStyles } from "../../utilities/Styles";
 import { convertT, convertTime } from "../../utilities/convertTime";
 import { StackScreenProps } from "@react-navigation/stack";
-
+import { getUid, getUserInfo } from "../../backend/Queries";
+import { addCart } from "../../redux/userSlice";
+type Props = StackScreenProps<StackStoreListParamList, "viewProduct">;
 
 const ViewProduct: React.FC<Props> = ({ route }) => {
   console.log("view scrren called");
+
   const styles = useDynamicStyles();
   const { product } = route.params;
+  const Business = getBusinessById(product.store_id!!);
+  Business === -1 && console.log("business not found");
   const [Video, setVideo] = useState("");
   const [loading, setLoading] = useState(true);
   const [ReviewStarsInfo, setReviewStarsInfo] = useState<
@@ -64,7 +70,7 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
     info: [],
     property: [],
   });
-
+  const dispatch = useDispatch();
   useEffect(() => {
     if (product.video) {
       setVideo(product.video.uri);
@@ -115,6 +121,16 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
   const player = useVideoPlayer(Video, (player) => {
     player.pause();
   });
+
+  const addToCart = () => {
+    const cartItem: CartItem = {
+      product_info: {
+        ...(Business !== -1 ? { business: Business, product: product } : {}),
+      },
+      userId: getUserId(),
+    };
+    dispatch(addCart(cartItem));
+  };
 
   const [bidPrice, setBidPrice] = useState("16765");
   const currentPrice = 16765;
@@ -281,18 +297,29 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
           style={styles.sections}
           className="mt-2    flex-row items-center justify-between "
         >
-          <View
-            style={{ borderColor: appTheme.colors?.textColor, borderWidth: 2 }}
-            className="p-2 items-center"
+          <TouchableNativeFeedback
+            onPress={() => {
+              addToCart();
+            }}
           >
-            <Text className="text-[23px]  " style={styles.text}>
-              {product.auction
-                ? `Bid R${
-                    product.auction.bidPrice!! + product.auction.bidIncrement!!
-                  }`
-                : `Buy R${product.price}`}
-            </Text>
-          </View>
+            <View
+              style={{
+                borderColor: appTheme.colors?.textColor,
+                borderWidth: 2,
+              }}
+              className="p-2 items-center"
+            >
+              <Text className="text-[23px]  " style={styles.text}>
+                {product.auction
+                  ? `Bid R${
+                      product.auction.bidPrice!! +
+                      product.auction.bidIncrement!!
+                    }`
+                  : `Buy R${product.price}`}
+              </Text>
+            </View>
+          </TouchableNativeFeedback>
+
           {product.auction ? (
             <View className="mr-4 flex-row gap-9">
               <Feather
