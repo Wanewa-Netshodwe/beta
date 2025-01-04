@@ -3,6 +3,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import ChangeAppTheme from "../../Screens/Business/ChangeAppTheme";
 import Settings from "../../Screens/Business/Settings";
 import BusinessLayout from "../../Screens/Business/BusinessLayout";
+import BusinessSettings from "../../Screens/Business/BusinessSettings";
 
 const Stack = createStackNavigator();
 const SettingsNavigator = () => (
@@ -21,6 +22,12 @@ const SettingsNavigator = () => (
       name="AppTheme"
       //@ts-ignore
       component={ChangeAppTheme}
+    />
+    <Stack.Screen
+      options={{ headerShown: false }}
+      name="BusinessSetting"
+      //@ts-ignore
+      component={BusinessSettings}
     />
 
     {/* <Stack.Screen name="Carousel" component={AddCarousel} />

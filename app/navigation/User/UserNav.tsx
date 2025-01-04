@@ -26,6 +26,8 @@ import BusinessInfo from "../../Screens/Business/onBoarding/BusinessInfo";
 import Summary from "../../Screens/Business/onBoarding/Summary";
 import GoToBusiness from "../../Screens/Users/GoToBusiness";
 import ListStoresNav from "./ListStoresNav";
+import BusinessSettings from "../../Screens/Business/BusinessSettings";
+
 const handleTabPress = () => {
   Vibration.vibrate(100); // Vibrates for 100ms when the tab is pressed
 };

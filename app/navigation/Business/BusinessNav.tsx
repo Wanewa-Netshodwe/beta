@@ -102,7 +102,7 @@ const BusinessNav = () => {
             return <Entypo name="wallet" color={color} size={30} />;
           },
         }}
-        name="Wallet"
+        name="wallet"
         component={Wallet}
       />
       <Tab.Screen

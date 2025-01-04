@@ -66,7 +66,6 @@ const TRANSATIONSCOLLECTION = "transactions";
 
 //-------------------------------------User Accounts Section-----------------------
 
-//create a new user and add the user to the User Doc
 export const BE_signup = (data: {
   username: string;
   email: string;
@@ -141,11 +140,10 @@ const uploadVideo = async (uri: string, path: string, fileName: string) => {
   const storageRef = ref(storage);
   const ImageRef = ref(storageRef, `${path}/${fileName}.mp4`);
 
-  // 'file' comes from the Blob or File API
   const ur = await fetch(uri);
   const blob = await ur.blob();
   const snapshot = await uploadBytes(ImageRef, blob, { contentType: "video" });
-  if (snapshot) console.log("file uplaoded");
+  if (snapshot) console.log("video uplaoded");
   const videoUrl = await getDownloadURL(snapshot.ref);
   return videoUrl;
 };
@@ -155,7 +153,6 @@ const uploadImage = async (uri: string, path: string, fileName: string) => {
   const storageRef = ref(storage);
   const ImageRef = ref(storageRef, `${path}/${fileName}.png`);
 
-  // 'file' comes from the Blob or File API
   const ur = await fetch(uri);
   const blob = await ur.blob();
   const snapshot = await uploadBytes(ImageRef, blob, { contentType: "image" });
@@ -201,7 +198,6 @@ export const BE_signup_Business = async (
     console.log("business called");
     console.log("kjjjj ", getCurrentUser());
 
-    // Upload the image and get the URL
     let imageurl;
     loading(true);
 
@@ -217,7 +213,6 @@ export const BE_signup_Business = async (
       throw new Error("Failed to upload business logo.");
     }
 
-    // Add a new document with a generated id.
     let docRef;
     try {
       docRef = await addDoc(collection(db, BUSINESSCOLLECTION), {
@@ -227,6 +222,7 @@ export const BE_signup_Business = async (
         followers: [],
         following: [],
         sections: [],
+        offersDelivery: true,
         hasWallet: false,
         password: data.password,
         wallet: "",
@@ -239,13 +235,13 @@ export const BE_signup_Business = async (
         business_hours: data.business_hours,
         social_media_links: [],
         foregroundImg: "",
+        free_delivery_pro: 0,
       });
     } catch (error) {
       console.error("Error creating business document:", error);
       throw new Error("Failed to create business document.");
     }
 
-    // Update the newly created business document with its id
     try {
       const BusinessRef = doc(db, BUSINESSCOLLECTION, docRef.id);
       await updateDoc(BusinessRef, { id: docRef.id });
@@ -254,7 +250,6 @@ export const BE_signup_Business = async (
       throw new Error("Failed to update business document with ID.");
     }
 
-    // Update the user document with the business id
     try {
       const UserRef = doc(db, USERCOLLECTION, getCurrentUser().id);
       await updateDoc(UserRef, {
@@ -275,7 +270,7 @@ export const BE_signup_Business = async (
     // navigation.navigate("Layout");
   } catch (error) {
     console.error("Error in BE_signup_Business:", error);
-    throw error; // Re-throw the error to be handled by the caller if needed
+    throw error;
   }
 };
 export const BE_addSection = (data: {
@@ -290,6 +285,16 @@ export const BE_addSection = (data: {
   dispatch(addSection(sectionInfo));
   loading(false);
   navigator.popTo("home");
+};
+export const BE_updateBusiness = async (
+  data: BusinessAccount,
+  dispatch: Dispatch<UnknownAction>
+) => {
+  console.log("updating doc");
+  const Businessref = doc(db, BUSINESSCOLLECTION, data.id);
+  await updateDoc(Businessref, { ...data });
+  console.log("done");
+  dispatch(setBusiness(data));
 };
 export const BE_deleteSection = (data: {
   // loading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -311,7 +316,7 @@ export const BE_addProduct = (data: {
 }) => {
   const { dispatch, sectionInfo, navigator, loading } = data;
   loading(true);
-  console.log("add product called");
+  console.log("addding product called");
   setTimeout(() => {
     dispatch(addProduct(sectionInfo));
     loading(false);
@@ -370,11 +375,15 @@ export const BE_saveCategory = (
   dispatch: Dispatch<UnknownAction>,
   name: String,
   postion: number,
-  navigator: StackNavigationProp<RootStackParamList, "categoryList", undefined>
+  navigator: StackNavigationProp<
+    StackShopLayoutParamList,
+    "categoryList",
+    undefined
+  >
 ) => {
   const d = { id: data.id, name: name, postion: postion };
   dispatch(saveCategoryList(d));
-  navigator.popTo("shopLayout");
+  navigator.popTo("home");
   const existingCat = getBusinessCategories();
   const section = getValidCategoryLists();
   let validSections: sectionData[] = [];
@@ -488,10 +497,9 @@ export const BE_getAllBusinesses = async (
 const UploadBusinessMedia = async (BusinessInfo: BusinessAccount) => {
   const { foregroundImg, sections } = BusinessInfo;
 
-  let updatedBusinessInfo = { ...BusinessInfo }; // Create a mutable copy
+  let updatedBusinessInfo = { ...BusinessInfo };
 
   try {
-    // Upload foreground image
     if (foregroundImg) {
       updatedBusinessInfo.foregroundImg = foregroundImg.includes(
         "firebasestorage"
@@ -504,7 +512,6 @@ const UploadBusinessMedia = async (BusinessInfo: BusinessAccount) => {
         : foregroundImg;
     }
 
-    // Process sections
     if (sections) {
       updatedBusinessInfo.sections = await Promise.all(
         sections.map(async (sec) => {
@@ -533,9 +540,9 @@ const UploadBusinessMedia = async (BusinessInfo: BusinessAccount) => {
 
                 if (pro.imgs) {
                   updatedProduct.imgs = await Promise.all(
-                    pro.imgs.map((img, index) => {
+                    pro.imgs.map(async (img, index) => {
                       if (!img.includes("firebasestorage")) {
-                        return uploadImage(
+                        return await uploadImage(
                           img,
                           `images/${getCurrentUser().id}/business/${
                             sec.name
@@ -552,13 +559,18 @@ const UploadBusinessMedia = async (BusinessInfo: BusinessAccount) => {
                   if (pro.video.type === "web") {
                   } else {
                     updatedProduct.video = updatedProduct.video || undefined;
-                    const uploadResult = await uploadVideo(
-                      pro.video.uri,
-                      `videos/${getCurrentUser().id}/business/${
-                        sec.name
-                      }/products/${pro.name}/`,
-                      `${pro.name}`
-                    );
+                    const uploadResult = updatedProduct.video?.uri.includes(
+                      "firebasestorage"
+                    )
+                      ? updatedProduct.video?.uri
+                      : await uploadVideo(
+                          pro.video.uri,
+                          `videos/${getCurrentUser().id}/business/${
+                            sec.name
+                          }/products/${pro.name}/`,
+                          `${pro.name}`
+                        );
+
                     if (updatedProduct.video)
                       updatedProduct.video.uri = uploadResult;
                   }
@@ -600,10 +612,10 @@ const UploadBusinessMedia = async (BusinessInfo: BusinessAccount) => {
       );
     }
 
-    return updatedBusinessInfo; // Return the updated copy
+    return updatedBusinessInfo;
   } catch (error) {
     console.error("Error uploading business media:", error);
-    throw error; // Propagate the error
+    throw error;
   }
 };
 export const BE_PublishStore = async (BusinessInfo: BusinessAccount) => {
@@ -611,7 +623,15 @@ export const BE_PublishStore = async (BusinessInfo: BusinessAccount) => {
   const { id } = BusinessInfo;
   const BusinessRef = doc(db, BUSINESSCOLLECTION, id);
   await UploadBusinessMedia(BusinessInfo).then(async (Bus: BusinessAccount) => {
-    await updateDoc(BusinessRef, { ...Bus });
+    console.log("recived promise");
+    console.log(Bus.sections);
+    try{
+      await updateDoc(BusinessRef, { ...Bus });
+    }
+    catch(err){
+      console.log(err)
+    }
+    
     console.log("businesss Updated");
   });
 };

@@ -30,8 +30,15 @@ export type StackSettingsParamList = {
   home: undefined;
   AppTheme: undefined;
   User: undefined;
+  BusinessSetting: undefined;
 };
-
+export type Cart = {
+  product_info: {
+    business: BusinessAccount;
+    product: product;
+  }[];
+  userId?: string;
+};
 export type BusinessAccount = {
   foregroundImg?: string;
   id: string;
@@ -65,8 +72,9 @@ export type BusinessAccount = {
   store_pic: string;
   userId: string;
   verified: boolean;
-  font: string;
   dis_auth: false;
+  offersDelivery?: boolean;
+  free_delivery_pro?: number;
 };
 export type sectionData = {
   id?: string;

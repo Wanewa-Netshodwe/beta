@@ -8,6 +8,7 @@ import {
 import { useStates } from "../../utilities/States";
 import StoreDisplay from "../../components/StoreDisplay";
 import { FlatList } from "react-native-gesture-handler";
+import CartItem from "../../components/CartItem";
 
 type Props = StackScreenProps<StackStoreListParamList, "stores">;
 
@@ -31,6 +32,10 @@ const StoreList: React.FC<Props> = ({ navigation }) => {
           </TouchableHighlight>
         )}
       />
+      <View className="mt-3 gap-4">
+        <CartItem />
+        <CartItem />
+      </View>
     </View>
   );
 };

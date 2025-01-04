@@ -6,7 +6,7 @@ import * as Font from "expo-font";
 import fontMap from "../../utilities/fontMap";
 import { useStates } from "../../utilities/States";
 import LoadingComp from "../../utilities/LoadingComp";
-import { Entypo } from "@expo/vector-icons";
+import { Entypo, FontAwesome } from "@expo/vector-icons";
 import { StackSettingsParamList, TabParamList } from "../../utilities/Types";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { StackScreenProps } from "@react-navigation/stack";
@@ -86,6 +86,32 @@ const Settings: React.FC<Props> = ({ navigation }: Props) => {
               />
               <Text style={styles.text} className="text-[18px] font-semibold">
                 User
+              </Text>
+            </View>
+          </TouchableNativeFeedback>
+          <TouchableNativeFeedback
+            onPress={() => {
+              navigation.navigate("BusinessSetting");
+            }}
+          >
+            <View
+              className=" mt-5 flex-row p-4 items-center gap-3"
+              style={{
+                borderBottomColor: appTheme.colors?.quaternarySup,
+                borderTopColor: appTheme.colors?.quaternarySup,
+                borderLeftWidth: 0,
+                borderTopWidth: 0,
+                borderRightWidth: 0,
+                borderWidth: 1,
+              }}
+            >
+              <FontAwesome
+                name="gear"
+                size={30}
+                color={appTheme.colors?.secondary}
+              />
+              <Text style={styles.text} className="text-[18px] font-semibold">
+                Settings
               </Text>
             </View>
           </TouchableNativeFeedback>

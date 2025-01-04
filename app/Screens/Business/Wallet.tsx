@@ -16,6 +16,7 @@ import { TabParamList } from "../../utilities/Types";
 type Props = BottomTabScreenProps<TabParamList, "wallet">;
 
 const Wallet: React.FC<Props> = (props: Props) => {
+  console.log('wallet coalled')
   const { appTheme, userState } = useStates();
   const styles = useDynamicStyles();
   return (
