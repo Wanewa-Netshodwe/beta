@@ -74,7 +74,7 @@ const UserNav = () => {
           headerShown: false,
         }}
         name="sumary"
-        component={Cart}
+        component={Summary}
       />
       <Tab.Screen
         options={{
@@ -83,6 +83,15 @@ const UserNav = () => {
         name="UserPage"
         //@ts-ignore
         component={GoToBusiness}
+      />
+
+      <Tab.Screen
+        options={{
+          headerShown: false,
+        }}
+        name="Cart"
+        //@ts-ignore
+        component={Cart}
       />
     </Tab.Navigator>
   );

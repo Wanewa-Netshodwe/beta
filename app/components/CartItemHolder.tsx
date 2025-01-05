@@ -45,7 +45,7 @@ const CartItemHolder = ({ item, cartTotal }: Props) => {
   const styles = useDynamicStyles();
 
   return (
-    <View className="mb-2">
+    <View className="mb-2 ">
       {/* header */}
       <TouchableNativeFeedback
         onPress={() => {
@@ -61,7 +61,7 @@ const CartItemHolder = ({ item, cartTotal }: Props) => {
             borderTopLeftRadius: 5,
             borderBottomWidth: collapse ? 0 : 2,
           }}
-          className="  p-2 items-center justify-between flex-row"
+          className="   p-2 items-center justify-between flex-row"
         >
           <View className="flex-row gap-2 items-center">
             <Image

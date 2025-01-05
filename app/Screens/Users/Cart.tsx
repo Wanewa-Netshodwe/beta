@@ -1,4 +1,4 @@
-import { View, Text, FlatList, ScrollView } from "react-native";
+import { View, Text, FlatList, ScrollView, Button } from "react-native";
 import React, { useState } from "react";
 import { useStates } from "../../utilities/States";
 import { useDynamicStyles } from "../../utilities/Styles";
@@ -13,11 +13,20 @@ const Cart = (props: Props) => {
   const [grandTotal, setCartTotal] = useState(0);
   return (
     <View className="w-full h-full">
-      <View style={style.sections} className="p-[5%]">
-        <Text style={style.text} className="text-[17px]">
+      <View
+        style={style.sections}
+        className="p-[5%] flex-row items-center justify-between "
+      >
+        <Text
+          style={style.text}
+          className="text-[23px] border border-transparent"
+        >
           Cart
         </Text>
-        <Text style={style.text} className="text-[23px]">
+        <Text
+          style={[style.text, { color: "#991b1b" }]}
+          className="text-[26px] text-red-800 border border-transparent"
+        >
           R{grandTotal}
         </Text>
       </View>
@@ -32,6 +41,7 @@ const Cart = (props: Props) => {
           />
         </View>
       </ScrollView>
+     
     </View>
   );
 };
