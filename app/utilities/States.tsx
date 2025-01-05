@@ -35,8 +35,12 @@ export const useStates = () => {
   const CategoryListState = useSelector(
     (state: RootState) => state.categoryLists
   );
+  const CartState = useSelector(
+    (state: RootState) => state.user.cart
+  );
   const states = useMemo(
     () => ({
+      CartState,
       appTheme,
       businessState,
       businessSections,
@@ -51,6 +55,7 @@ export const useStates = () => {
       AllBusiness,
     }),
     [
+      CartState,
       AllBusiness,
       appTheme,
       businessState,

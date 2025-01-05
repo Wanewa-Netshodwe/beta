@@ -45,7 +45,17 @@ const userSlice = createSlice({
     },
     addCart: (state, action) => {
       const item: CartItem = action.payload;
-      state.cart.items.push(item);
+      let found = false;
+      let cartItems = state.cart.items;
+      cartItems = cartItems.map((items) => {
+        if (items.business?.id === item.business?.id) {
+          found = true;
+          items.products.push(item.products[0]);
+          return items;
+        }
+        return items;
+      });
+      found ? (state.cart.items = cartItems) : state.cart.items.push(item);
     },
   },
 });

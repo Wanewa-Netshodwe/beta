@@ -36,10 +36,8 @@ export type Cart = {
   items: CartItem[];
 };
 export type CartItem = {
-  product_info: {
-    business?: BusinessAccount;
-    product?: product;
-  };
+  business?: BusinessAccount;
+  products:product[]
   userId?: string;
 };
 export type BusinessAccount = {

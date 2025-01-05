@@ -9,6 +9,7 @@ import {
   NativeScrollEvent,
   TextInput,
   TouchableNativeFeedback,
+  Animated,
 } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import Screen from "../../utilities/Screen";
@@ -42,6 +43,11 @@ import { convertT, convertTime } from "../../utilities/convertTime";
 import { StackScreenProps } from "@react-navigation/stack";
 import { getUid, getUserInfo } from "../../backend/Queries";
 import { addCart } from "../../redux/userSlice";
+import {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 type Props = StackScreenProps<StackStoreListParamList, "viewProduct">;
 
 const ViewProduct: React.FC<Props> = ({ route }) => {
@@ -122,14 +128,27 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
     player.pause();
   });
 
+  const { width } = Dimensions.get("screen");
+  const { CartState, appTheme } = useStates();
+  const scaleValue = useSharedValue(1);
+  const paddingValue = useSharedValue(8);
+  const animatedStyle = useAnimatedStyle(() => ({
+    backgroundColor: appTheme.colors?.secondary!!,
+    transform: [{ scale: withTiming(scaleValue.value, { duration: 300 }) }],
+    padding: withTiming(paddingValue.value, { duration: 300 }),
+  }));
   const addToCart = () => {
+    console.log("clicked");
+    scaleValue.value = 7;
+    paddingValue.value = 32;
     const cartItem: CartItem = {
-      product_info: {
-        ...(Business !== -1 ? { business: Business, product: product } : {}),
-      },
+      products: [product],
+      ...(Business !== -1 ? { business: Business } : {}),
+
       userId: getUserId(),
     };
     dispatch(addCart(cartItem));
+    // console.log("cart itemsj", CartState.items);
   };
 
   const [bidPrice, setBidPrice] = useState("16765");
@@ -144,8 +163,6 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
       console.log("valid");
     }
   };
-  const { width } = Dimensions.get("screen");
-  const { appTheme } = useStates();
 
   if (loading) {
     return <Text>Loading</Text>;
@@ -153,6 +170,12 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
 
   return (
     <View className="relative">
+      <Animated.View
+        style={[animatedStyle, { transform: [{ scale: 0.7 }] }]}
+        className="p-2 z-50 absolute border top-[14%] rounded-md"
+      >
+        <Text style={styles.text}>Added To Cart</Text>
+      </Animated.View>
       <View
         style={styles.sections}
         className="   p-[2%] gap-5 flex-row items-center "

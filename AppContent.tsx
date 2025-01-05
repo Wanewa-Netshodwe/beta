@@ -15,11 +15,11 @@ import { BE_getAllBusinesses } from "./app/backend/Queries";
 LogBox.ignoreAllLogs(true);
 
 export default function AppContent() {
-  const { appTheme, businessState, businessForeground } = useStates();
+  const { appTheme, AllBusiness, businessForeground } = useStates();
   const dispatch = useDispatch();
-  // useEffect(() => {
-  //   BE_getAllBusinesses(dispatch);
-  // }, []);
+  useEffect(() => {
+    BE_getAllBusinesses(dispatch);
+  }, []);
   const shouldRenderScreen =
     appTheme.current_screen === "layout" && businessForeground;
 

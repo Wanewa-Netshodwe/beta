@@ -1,5 +1,5 @@
 import { View, Text, TouchableHighlight } from "react-native";
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { StackScreenProps } from "@react-navigation/stack";
 import {
   BusinessAccount,
@@ -8,11 +8,14 @@ import {
 import { useStates } from "../../utilities/States";
 import StoreDisplay from "../../components/StoreDisplay";
 import { FlatList } from "react-native-gesture-handler";
-import CartItem from "../../components/CartItem";
+import CartItem from "../../components/CartItemHolder";
+import { useDispatch } from "react-redux";
+import { BE_getAllBusinesses } from "../../backend/Queries";
 
 type Props = StackScreenProps<StackStoreListParamList, "stores">;
 
 const StoreList: React.FC<Props> = ({ navigation }) => {
+  const dispatch = useDispatch();
   const { AllBusiness } = useStates();
 
   return (
@@ -32,10 +35,7 @@ const StoreList: React.FC<Props> = ({ navigation }) => {
           </TouchableHighlight>
         )}
       />
-      <View className="mt-3 gap-4">
-        <CartItem />
-        <CartItem />
-      </View>
+      =
     </View>
   );
 };

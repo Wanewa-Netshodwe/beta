@@ -9,30 +9,68 @@ import React, { useState } from "react";
 import { useStates } from "../utilities/States";
 import { useDynamicStyles } from "../utilities/Styles";
 import { Entypo } from "@expo/vector-icons";
-type Props = {};
+import { product } from "../utilities/Types";
+type Props = {
+  setTotalPrice: React.Dispatch<React.SetStateAction<number>>;
+  setGrandTotal: React.Dispatch<React.SetStateAction<number>>;
+  setDeliveryTotal: React.Dispatch<React.SetStateAction<number>>;
+  product: product;
+};
 
-const ProductItem = (props: Props) => {
+const ProductItem = ({
+  product,
+  setDeliveryTotal,
+  setGrandTotal,
+  setTotalPrice,
+}: Props) => {
   const { appTheme, businessState } = useStates();
   const [counter, setCounter] = useState(1);
   const styles = useDynamicStyles();
+  const handleIncrement = () => {
+    if (!product.free_delivery) {
+      setTotalPrice((prev) => prev + product.price!!);
+      setDeliveryTotal((prev) => prev + product.delivery_cost!!);
+      setGrandTotal((prev) => prev + product.price!!);
+    } else {
+      setGrandTotal((prev) => prev + product.price!!);
+      setTotalPrice((prev) => prev + product.price!!);
+    }
+  };
+  console.log(counter);
+  const handleDecrement = () => {
+    if (!product.free_delivery) {
+      if (counter !== 1) {
+        setTotalPrice((prev) => prev - product.price!!);
+        setDeliveryTotal((prev) => prev - product.delivery_cost!!);
+        setGrandTotal((prev) => prev - product.price!!);
+      }
+    } else {
+      if (counter !== 1) {
+        setGrandTotal((prev) => prev - product.price!!);
+        setTotalPrice((prev) => prev - product.price!!);
+      }
+    }
+  };
   return (
     <View className=" rounded-md  p-2 items-center justify-between flex-row">
       <View className="flex-row gap-2 items-center">
         <Image
-          source={{ uri: businessState.store_pic }}
+          source={{ uri: product.imgs!![0] }}
           width={30}
           height={30}
           borderRadius={5}
         />
         <View>
           <Text className="text-[12px] " style={styles.text}>
-            {businessState.store_name}
+            {product.name!!.length > 13
+              ? product.name?.substring(0, 13) + "..."
+              : product.name}
           </Text>
         </View>
       </View>
       <View>
         <Text className="text-[10px]" style={[styles.text, { color: "red" }]}>
-          -R340 X {counter}
+          {product.price} X {counter}
         </Text>
       </View>
 
@@ -42,6 +80,7 @@ const ProductItem = (props: Props) => {
           color={appTheme.colors?.textColor}
           size={15}
           onPress={() => {
+            handleDecrement();
             setCounter((prev) => {
               return prev - 1 < 1 ? 1 : prev - 1;
             });
@@ -53,6 +92,7 @@ const ProductItem = (props: Props) => {
           color={appTheme.colors?.textColor}
           size={15}
           onPress={() => {
+            handleIncrement();
             setCounter((prev) => prev + 1);
           }}
         />

@@ -4,6 +4,7 @@ import {
   TextInput,
   TouchableNativeFeedback,
   Image,
+  ScrollView
 } from "react-native";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -50,6 +51,7 @@ export default function Start() {
   };
   return (
     <Screen>
+      <ScrollView>
       <View className="w-full h-full  p-[5%]">
         <View className="">
           <Text
@@ -155,6 +157,7 @@ export default function Start() {
           </View>
         </TouchableNativeFeedback>
       </View>
+      </ScrollView>
     </Screen>
   );
 }

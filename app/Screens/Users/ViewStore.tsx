@@ -31,6 +31,7 @@ import {
 } from "../../utilities/Types";
 import {
   BE_deleteSection,
+  BE_getAllBusinesses,
   BE_PublishStore,
   getBusinessInfo,
 } from "../../backend/Queries";
@@ -77,6 +78,7 @@ const ViewStore: React.FC<prop> = ({ navigation, route }) => {
     ),
     []
   );
+
 
   const loadFont = async (fontName: string) => {
     if (fontMap[fontName]) {
