@@ -13,14 +13,7 @@ import {
 import * as Font from "expo-font";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { AntDesign, MaterialIcons } from "@expo/vector-icons";
-import {
-  BottomSheetModal,
-  BottomSheetModalProvider,
-  BottomSheetView,
-} from "@gorhom/bottom-sheet";
-import MySection from "../../components/MySection";
+
 import { Dimensions } from "react-native";
 import {
   BusinessAccount,
@@ -69,6 +62,7 @@ const ViewStore: React.FC<prop> = ({ navigation, route }) => {
   const { width } = Dimensions.get("screen");
   const font = appTheme.fonts?.primary;
   console.log("business layout screen called");
+  console.log(businessData);
   const [selectedFont, setSelectedFont] = useState(
     appTheme.fonts?.primary || ""
   );
@@ -78,7 +72,6 @@ const ViewStore: React.FC<prop> = ({ navigation, route }) => {
     ),
     []
   );
-
 
   const loadFont = async (fontName: string) => {
     if (fontMap[fontName]) {

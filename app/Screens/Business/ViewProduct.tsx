@@ -41,10 +41,14 @@ import { convertT, convertTime } from "../../utilities/convertTime";
 type Props = BottomTabScreenProps<StackShopLayoutParamList, "viewProduct">;
 
 const ViewProduct: React.FC<Props> = ({ route }) => {
+  const { appTheme, discountProducts } = useStates();
   console.log("view scrren called");
   const styles = useDynamicStyles();
   const { product } = route.params;
-  
+  const found = discountProducts.findIndex(
+    (dp) => dp.product.id === product.id
+  );
+
   const [Video, setVideo] = useState("");
   const [loading, setLoading] = useState(true);
   const [ReviewStarsInfo, setReviewStarsInfo] = useState<
@@ -93,6 +97,7 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
     product.reviews?.forEach((review) => {
       let rating = review.rating;
       if (stars.has(rating)) {
+        //@ts-ignore
         stars.set(rating, stars.get(rating) + 1);
       }
     });
@@ -129,7 +134,6 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
     }
   };
   const { width } = Dimensions.get("screen");
-  const { appTheme } = useStates();
 
   if (loading) {
     return <Text>Loading</Text>;
@@ -222,8 +226,19 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
               ? product.auction.started
                 ? product.auction.bidPrice
                 : product.auction.startPrice
+              : found != -1
+              ? discountProducts[found].price
               : product.price}
           </Text>
+          {found != -1 && (
+            <Text
+              className="text-[34px] text-gray-400  w-fit"
+              style={styles.text}
+            >
+              R{discountProducts[found].product.price}
+            </Text>
+          )}
+
           <View className="mr-4 items-end">
             <Text className="text-[12px] font-semibold" style={styles.text}>
               delivery cost
@@ -504,7 +519,7 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
             <Table
               borderStyle={{
                 borderWidth: 1,
-                borderColor: appTheme.colors.tertiary,
+                borderColor: appTheme.colors?.tertiary,
               }}
             >
               <TableWrapper

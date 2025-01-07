@@ -36,9 +36,35 @@ export type Cart = {
   items: CartItem[];
 };
 export type CartItem = {
+  id: string;
   business?: BusinessAccount;
-  products:product[]
+  products: product[];
   userId?: string;
+};
+export type voucherProduct = {
+  quantity: number;
+  id: string;
+  product: product;
+  code: string;
+  action: "Discount" | "Giveaway";
+  discount?: number;
+};
+export type BusinessStatus = {
+  id: string;
+  businessID: string;
+  media: string;
+  uploadDate: Date;
+};
+export type DiscountedProducts = {
+  store_id: string;
+  product: product;
+  discount: number;
+  expDate?: {
+    from?: string;
+    to?: string;
+  };
+  price?: number;
+  name: string;
 };
 export type BusinessAccount = {
   foregroundImg?: string;
@@ -76,6 +102,7 @@ export type BusinessAccount = {
   dis_auth: false;
   offersDelivery?: boolean;
   free_delivery_pro?: number;
+  discountedProducts?: DiscountedProducts[];
 };
 export type sectionData = {
   id?: string;

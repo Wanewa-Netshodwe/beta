@@ -13,6 +13,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import ProductItem from "./ProductItem";
 import { Cart, CartItem } from "../utilities/Types";
 import { ScrollView } from "react-native-gesture-handler";
+import { useSharedValue } from "react-native-reanimated";
+import { getBusinessById } from "../redux/store";
 
 type Props = {
   item: CartItem;
@@ -24,22 +26,42 @@ const CartItemHolder = ({ item, cartTotal }: Props) => {
   const [deliveryTotal, setDeliveryTotal] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
-  const { appTheme } = useStates();
+  const [p, setP] = useState(0);
+  const [operation, setOperation] = useState("add");
+  const { appTheme, businessState } = useStates();
+  const Business = getBusinessById(
+    item.products[item.products.length - 1].store_id!
+  );
+  let discountProducts = businessState.discountedProducts;
+  let found = -1;
+  if (typeof Business != "number") {
+    discountProducts = Business.discountedProducts!!;
+
+    found = discountProducts.findIndex(
+      (dp) => dp.product.id === item.products[item.products.length - 1].id
+    );
+  }
   useEffect(() => {
-    let TotalPrice = 0;
-    let TotalDelivery = 0;
-    item.products.map((productItem) => {
-      TotalPrice += productItem.price!!;
-      if (productItem.free_delivery) {
-        TotalDelivery += productItem.delivery_cost!!;
-      }
+    setTotalPrice((prev) => {
+      const PriceToAdd =
+        found != -1
+          ? discountProducts!![found].price
+          : item.products[item.products.length - 1].price!!;
+      return prev + PriceToAdd!!;
     });
-    setTotalPrice(TotalPrice);
-    setDeliveryTotal(TotalDelivery);
-    setGrandTotal(TotalPrice + TotalDelivery);
+    setDeliveryTotal(
+      (prev) => prev + item.products[item.products.length - 1].delivery_cost!!
+    );
   }, [item.products]);
+
+  useEffect(() => {
+    setGrandTotal(totalPrice + deliveryTotal);
+  }, [totalPrice, deliveryTotal]);
+
   useMemo(() => {
-    cartTotal((prev) => prev + grandTotal);
+    cartTotal((prev) =>
+      operation === "add" ? prev + grandTotal : prev - grandTotal
+    );
   }, [grandTotal]);
 
   const styles = useDynamicStyles();
@@ -114,6 +136,7 @@ const CartItemHolder = ({ item, cartTotal }: Props) => {
                       setGrandTotal={setGrandTotal}
                       setTotalPrice={setTotalPrice}
                       setDeliveryTotal={setDeliveryTotal}
+                      setOperation={setOperation}
                       product={item}
                     />
                   </View>
@@ -128,14 +151,14 @@ const CartItemHolder = ({ item, cartTotal }: Props) => {
             </Text>
 
             <Text style={styles.text} className=" top-1 text-[11px]">
-              Total Price : R {totalPrice}
+              Total Price : R {totalPrice.toFixed(2)}
             </Text>
             <View className="flex-row items-center justify-between">
               <Text
                 style={styles.text}
                 className="text-[15px] border-transparent border"
               >
-                Grand Total : R {grandTotal}
+                Grand Total : R {grandTotal.toFixed(2)}
               </Text>
               <Text
                 style={styles.text}
@@ -143,7 +166,7 @@ const CartItemHolder = ({ item, cartTotal }: Props) => {
               >
                 {item.business?.free_delivery_pro
                   ? `Spend more than ${item.business.free_delivery_pro} for free delivery`
-                  : "no Free Delivery Offered"}
+                  : "Free Delivery Promo  not available"}
               </Text>
             </View>
           </View>

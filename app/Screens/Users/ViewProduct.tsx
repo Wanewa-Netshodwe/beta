@@ -41,7 +41,7 @@ import { styles } from "@gorhom/bottom-sheet/lib/typescript/components/bottomShe
 import { useDynamicStyles } from "../../utilities/Styles";
 import { convertT, convertTime } from "../../utilities/convertTime";
 import { StackScreenProps } from "@react-navigation/stack";
-import { getUid, getUserInfo } from "../../backend/Queries";
+import { createRandomId, getUid, getUserInfo } from "../../backend/Queries";
 import { addCart } from "../../redux/userSlice";
 import {
   useAnimatedStyle,
@@ -129,7 +129,16 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
   });
 
   const { width } = Dimensions.get("screen");
-  const { CartState, appTheme } = useStates();
+  const { CartState, appTheme, businessState } = useStates();
+  let discountProducts = businessState.discountedProducts;
+  let found = -1;
+  if (typeof Business != "number") {
+    discountProducts = Business.discountedProducts!!;
+
+    found = discountProducts.findIndex((dp) => dp.product.id === product.id);
+  }
+  console.log("siscounted products", discountProducts);
+
   const scaleValue = useSharedValue(1);
   const paddingValue = useSharedValue(8);
   const animatedStyle = useAnimatedStyle(() => ({
@@ -142,6 +151,7 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
     scaleValue.value = 7;
     paddingValue.value = 32;
     const cartItem: CartItem = {
+      id: createRandomId(),
       products: [product],
       ...(Business !== -1 ? { business: Business } : {}),
 
@@ -261,8 +271,24 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
               ? product.auction.started
                 ? product.auction.bidPrice
                 : product.auction.startPrice
+              : found != -1
+              ? discountProducts!![found].price
               : product.price}
           </Text>
+          {found != -1 && (
+            <View>
+              <Text
+                className="text-[17px]  -top-1  w-fit"
+                style={[styles.text, { color: "grey" }]}
+              >
+                R{discountProducts!![found].product.price}
+              </Text>
+              <View
+                className="absolute w-[100%] top-[8px]"
+                style={{ borderColor: "grey", borderWidth: 1 }}
+              ></View>
+            </View>
+          )}
           <View className="mr-4 items-end">
             <Text className="text-[12px] font-semibold" style={styles.text}>
               delivery cost
@@ -338,7 +364,9 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
                       product.auction.bidPrice!! +
                       product.auction.bidIncrement!!
                     }`
-                  : `Buy R${product.price}`}
+                  : `Buy R${found != -1
+                  ? discountProducts!![found].price
+                  : product.price}`}
               </Text>
             </View>
           </TouchableNativeFeedback>
@@ -554,7 +582,7 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
             <Table
               borderStyle={{
                 borderWidth: 1,
-                borderColor: appTheme.colors.tertiary,
+                borderColor: appTheme.colors?.tertiary,
               }}
             >
               <TableWrapper

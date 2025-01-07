@@ -34,7 +34,7 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import WebView from "react-native-webview";
 import { SelectList } from "react-native-dropdown-select-list";
 import { RadioGroup } from "react-native-radio-buttons-group";
-import { BE_addProduct } from "../../backend/Queries";
+import { BE_addProduct, createRandomId } from "../../backend/Queries";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { useStates } from "../../utilities/States";
@@ -79,9 +79,7 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
   const [quantity, setQuantity] = useState("");
   const [vd1, setvd1] = useState(true);
   const [vd2, setvd2] = useState(true);
-  const createRandomId = useCallback(() => {
-    return Math.random().toString(36).substring(2, 27);
-  }, []);
+
   let dataDummy: { key: string; value: string }[] = [];
   let categoryData: { key: string; value: string }[] = [];
 

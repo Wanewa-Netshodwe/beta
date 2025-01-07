@@ -3,6 +3,7 @@ import {
   BusinessAccount,
   BusRegData,
   category,
+  DiscountedProducts,
   product,
   sectionData,
 } from "../utilities/Types";
@@ -12,7 +13,7 @@ export const defaultBusiness: BusinessAccount = {
   foregroundImg:
     "https://1000logos.net/wp-content/uploads/2017/05/Color-PUMA-Logo.jpg",
   dis_auth: false,
-  font: "DESIGNER",
+
   has_subscription: false,
   business_hours: {
     closing: "10:00:00",
@@ -39,12 +40,14 @@ export const defaultBusiness: BusinessAccount = {
 };
 const products: product[] = [];
 const AllBusinesses: BusinessAccount[] = [];
+const defaultdiscountedProducts: DiscountedProducts[] = [];
 const initialState = {
   allBusinesses: AllBusinesses,
   userBusiness: defaultBusiness,
   products: products,
   wallets: [],
   busRegData: defaultBusRegData,
+  discountedProducts: defaultdiscountedProducts,
 };
 
 const businessSlice = createSlice({
@@ -54,6 +57,19 @@ const businessSlice = createSlice({
     setRegData: (state, action) => {
       const data: BusRegData = action.payload;
       state.busRegData = { ...data };
+    },
+    setDiscountProduct: (state, action) => {
+      const discountedProduct: DiscountedProducts[] = action.payload;
+      state.discountedProducts = discountedProduct;
+    },
+    addDiscountProduct: (state, action) => {
+      const discountedProduct: DiscountedProducts[] = action.payload;
+      discountedProduct.forEach((dpro) => {
+        const result = state.discountedProducts.findIndex(
+          (dp) => dp.product.id === dpro.product.id
+        );
+        result === -1 && state.discountedProducts.push(dpro);
+      });
     },
     setBusiness: (state, action) => {
       const business = action.payload;
@@ -161,5 +177,7 @@ export const {
   removeForeground,
   editProduct,
   delProduct,
+  addDiscountProduct,
+  setDiscountProduct,
 } = businessSlice.actions;
 export default businessSlice.reducer;

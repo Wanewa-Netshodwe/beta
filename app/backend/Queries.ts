@@ -32,6 +32,7 @@ import {
   BusinessAccount,
   BusRegData,
   category,
+  DiscountedProducts,
   product,
   sectionData,
   StackShopLayoutParamList,
@@ -65,6 +66,9 @@ const WALLETCOLLECTION = "wallets";
 const TRANSATIONSCOLLECTION = "transactions";
 
 //-------------------------------------User Accounts Section-----------------------
+export const createRandomId = () => {
+  return Math.random().toString(36).substring(2, 27);
+};
 
 export const BE_signup = (data: {
   username: string;
@@ -618,20 +622,25 @@ const UploadBusinessMedia = async (BusinessInfo: BusinessAccount) => {
     throw error;
   }
 };
-export const BE_PublishStore = async (BusinessInfo: BusinessAccount) => {
+export const BE_PublishStore = async (
+  BusinessInfo: BusinessAccount,
+  discountedProducts: DiscountedProducts[]
+) => {
   console.log("called publish store");
   const { id } = BusinessInfo;
   const BusinessRef = doc(db, BUSINESSCOLLECTION, id);
   await UploadBusinessMedia(BusinessInfo).then(async (Bus: BusinessAccount) => {
     console.log("recived promise");
     console.log(Bus.sections);
-    try{
-      await updateDoc(BusinessRef, { ...Bus });
+    try {
+      await updateDoc(BusinessRef, {
+        ...Bus,
+        discountedProducts: discountedProducts,
+      });
+    } catch (err) {
+      console.log(err);
     }
-    catch(err){
-      console.log(err)
-    }
-    
+
     console.log("businesss Updated");
   });
 };

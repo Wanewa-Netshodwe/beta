@@ -34,7 +34,9 @@ const MySection = (props: Props) => {
   const dispatch = useDispatch();
   const styles2 = useDynamicStyles();
   const { nav } = props;
-  const appTheme = useSelector((state: RootState) => state.appTheme.appTheme);
+  const { appTheme, discountProducts } = useStates();
+  console.log("discounted products ", discountProducts);
+
   const prod = props.products ? props.products : null;
   return (
     <View
@@ -68,124 +70,140 @@ const MySection = (props: Props) => {
                 horizontal
                 data={prod.slice(0, 4)}
                 keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => (
-                  <TouchableNativeFeedback
-                    onPress={() => {
-                      if (!props.edit) {
-                        nav.navigate("viewProduct", { product: item });
-                      }
+                renderItem={({ item }) => {
+                  const found = discountProducts.findIndex(
+                    (dp) => dp.product.id === item.id
+                  );
+                  console.log("found at : ", found);
+                  return (
+                    <TouchableNativeFeedback
+                      onPress={() => {
+                        if (!props.edit) {
+                          nav.navigate("viewProduct", { product: item });
+                        }
 
-                      console.log("prssed");
-                    }}
-                  >
-                    <View
-                      style={{
-                        backgroundColor: appTheme.colors?.background,
-                        borderColor: appTheme.colors!!.textColor,
-                        borderWidth: 1,
-                        marginRight: 5,
+                        console.log("prssed");
                       }}
-                      className="w-[130px] rounded-sm h-[235px] mb-5  p-1 relative"
                     >
-                      <View className="w-[160px] h-[130px] mb-2">
-                        {item.free_delivery === "yes" && (
-                          <MaterialIcons
-                            name="delivery-dining"
-                            size={20}
-                            style={{
-                              backgroundColor: appTheme.colors?.background,
-                            }}
-                            color={appTheme.colors!!.textColor}
-                            className=" absolute -top-2 z-50 -left-3    p-2 rounded-full"
-                          />
-                        )}
-                        {props.edit ? (
-                          <>
-                            <AntDesign
-                              name="edit"
-                              onPress={() => {
-                                nav.navigate("editProduct", { product: item });
+                      <View
+                        style={{
+                          backgroundColor: appTheme.colors?.background,
+                          borderColor: appTheme.colors!!.textColor,
+                          borderWidth: 1,
+                          marginRight: 5,
+                        }}
+                        className="w-[130px] rounded-sm h-[235px] mb-5  p-1 relative"
+                      >
+                        <View className="w-[160px] h-[130px] mb-2">
+                          {item.free_delivery === "yes" && (
+                            <MaterialIcons
+                              name="delivery-dining"
+                              size={20}
+                              style={{
+                                backgroundColor: appTheme.colors?.background,
                               }}
-                              size={18}
-                              color={appTheme.colors?.textColor}
-                              className="right-14  top-4 z-20 absolute"
+                              color={appTheme.colors!!.textColor}
+                              className=" absolute -top-2 z-50 -left-3    p-2 rounded-full"
                             />
-                            <AntDesign
-                              color={appTheme.colors?.textColor}
-                              onPress={() => {
-                                BE_delProduct({
-                                  dispatch: dispatch,
-                                  sectionInfo: item,
-                                  navigator: nav,
-                                });
-                              }}
-                              name="delete"
-                              size={18}
-                              className="left-1  bottom-1 z-20 absolute"
-                            />
-                          </>
-                        ) : null}
+                          )}
+                          {props.edit ? (
+                            <>
+                              <AntDesign
+                                name="edit"
+                                onPress={() => {
+                                  nav.navigate("editProduct", {
+                                    product: item,
+                                  });
+                                }}
+                                size={18}
+                                color={appTheme.colors?.textColor}
+                                className="right-14  top-4 z-20 absolute"
+                              />
+                              <AntDesign
+                                color={appTheme.colors?.textColor}
+                                onPress={() => {
+                                  BE_delProduct({
+                                    dispatch: dispatch,
+                                    sectionInfo: item,
+                                    navigator: nav,
+                                  });
+                                }}
+                                name="delete"
+                                size={18}
+                                className="left-1  bottom-1 z-20 absolute"
+                              />
+                            </>
+                          ) : null}
 
-                        <Image
-                          width={120}
-                          height={130}
-                          className="rounded-md"
-                          source={{ uri: item.imgs!![0] }}
-                        />
-                      </View>
-                      <View>
-                        <Text
-                          className=" text-[13px] w-[120px] max-h-[48px]  mb-2 "
-                          style={styles2.text}
-                        >
-                          {item.name!!.length > 50
-                            ? item.name?.substring(0, 50) + "..."
-                            : item.name}
-                        </Text>
-                      </View>
-                      <View className="flex-row justify-between items-baseline">
-                        <Text
-                          className="font-semibold relative -top-2 text-[18px] "
-                          style={styles2.text}
-                        >
-                          R{item.auction ? item.auction.startPrice : item.price}
-                        </Text>
-                        {item.auction && (
-                          <Text
-                            className="font-semibold relative -top-2  text-[10px] "
-                            style={styles2.text}
-                          >
-                            {" "}
-                            auction
-                          </Text>
-                        )}
-                      </View>
-                      {item.rating && (
-                        <View className="flex-row -top-3  items-center gap-2">
-                          <Feather
-                            name="star"
-                            size={13}
-                            color={appTheme.colors!!.primary}
+                          <Image
+                            width={120}
+                            height={130}
+                            className="rounded-md"
+                            source={{ uri: item.imgs!![0] }}
                           />
+                        </View>
+                        <View>
                           <Text
-                            className="font-semibold relative  text-[13px] "
+                            className=" text-[13px] w-[120px] max-h-[48px]  mb-2 "
                             style={styles2.text}
                           >
-                            {item.rating}
+                            {item.name!!.length > 50
+                              ? item.name?.substring(0, 50) + "..."
+                              : item.name}
                           </Text>
                         </View>
-                      )}
-                    </View>
-                  </TouchableNativeFeedback>
-                )}
+                        <View className="flex-row justify-between items-baseline">
+                          <Text
+                            className="font-semibold relative -top-2 text-[18px] "
+                            style={styles2.text}
+                          >
+                            R
+                            {item.auction
+                              ? item.auction.startPrice
+                              : found != -1
+                              ? discountProducts[found].price
+                              : item.price}
+                          </Text>
+                          {item.auction && (
+                            <Text
+                              className="font-semibold relative -top-2  text-[10px] "
+                              style={styles2.text}
+                            >
+                              {" "}
+                              auction
+                            </Text>
+                          )}
+                        </View>
+                        {item.rating && (
+                          <View className="flex-row -top-3  items-center gap-2">
+                            <Feather
+                              name="star"
+                              size={13}
+                              color={appTheme.colors!!.primary}
+                            />
+                            <Text
+                              className="font-semibold relative  text-[13px] "
+                              style={styles2.text}
+                            >
+                              {item.rating}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                    </TouchableNativeFeedback>
+                  );
+                }}
               />
             ) : (
               <>
                 <View className=" gap-2  flex-wrap flex-row  ">
                   {prod.slice(0, 4).map((item, index) => {
+                    const found = discountProducts.findIndex(
+                      (dp) => dp.product.id === item.id
+                    );
+                    console.log("found at : ", found);
                     return (
                       <TouchableNativeFeedback
-                        key={index}
                         onPress={() => {
                           if (!props.edit) {
                             nav.navigate("viewProduct", { product: item });
@@ -196,7 +214,7 @@ const MySection = (props: Props) => {
                       >
                         <View
                           style={{
-                            backgroundColor: appTheme.colors!!.background,
+                            backgroundColor: appTheme.colors?.background,
                             borderColor: appTheme.colors!!.textColor,
                             borderWidth: 1,
                             marginRight: 5,
@@ -209,7 +227,7 @@ const MySection = (props: Props) => {
                                 name="delivery-dining"
                                 size={20}
                                 style={{
-                                  backgroundColor: appTheme.colors!!.background,
+                                  backgroundColor: appTheme.colors?.background,
                                 }}
                                 color={appTheme.colors!!.textColor}
                                 className=" absolute -top-2 z-50 -left-3    p-2 rounded-full"
@@ -226,7 +244,7 @@ const MySection = (props: Props) => {
                                   }}
                                   size={18}
                                   color={appTheme.colors?.textColor}
-                                  className="right-14  top-2 z-20 absolute"
+                                  className="right-14  top-4 z-20 absolute"
                                 />
                                 <AntDesign
                                   color={appTheme.colors?.textColor}
@@ -253,7 +271,7 @@ const MySection = (props: Props) => {
                           </View>
                           <View>
                             <Text
-                              className="font-medium text-[13px] w-[120px] max-h-[48px]  mb-2 "
+                              className=" text-[13px] w-[120px] max-h-[48px]  mb-2 "
                               style={styles2.text}
                             >
                               {item.name!!.length > 50
@@ -269,6 +287,8 @@ const MySection = (props: Props) => {
                               R
                               {item.auction
                                 ? item.auction.startPrice
+                                : found != -1
+                                ? discountProducts[found].price
                                 : item.price}
                             </Text>
                             {item.auction && (
@@ -286,7 +306,7 @@ const MySection = (props: Props) => {
                               <Feather
                                 name="star"
                                 size={13}
-                                color={appTheme.colors!!.textColor}
+                                color={appTheme.colors!!.primary}
                               />
                               <Text
                                 className="font-semibold relative  text-[13px] "

@@ -42,7 +42,10 @@ import BannerSection from "../../components/BannerSection";
 import CarouselSection from "../../components/CarouselSection";
 import { useDynamicStyles } from "../../utilities/Styles";
 import LoadingComp from "../../utilities/LoadingComp";
-import { removeForeground } from "../../redux/businessSlice";
+import {
+  removeForeground,
+  setDiscountProduct,
+} from "../../redux/businessSlice";
 import { useStates } from "../../utilities/States";
 import { getUserBusiness, RootState } from "../../redux/store";
 import OutlineBtn from "../../components/OutlineBtn";
@@ -55,6 +58,8 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
     businessPic,
     businessName,
     businessVerified,
+    discountProducts,
+    businessState,
   } = useStates();
   const sections = businessSections;
   const Businessforeground = businessForeground;
@@ -88,6 +93,9 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
       await Font.loadAsync({ [fontName]: fontMap[fontName] });
     }
   };
+  useEffect(() => {
+    dispatch(setDiscountProduct(businessState.discountedProducts));
+  }, []);
   console.log("sections : log : ", sections);
   useEffect(() => {
     if (selectedFont) {
@@ -379,7 +387,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
 
                 <OutlineBtn
                   onPress={() => {
-                    BE_PublishStore(getUserBusiness());
+                    BE_PublishStore(getUserBusiness(), discountProducts);
                   }}
                   title="publish store"
                 ></OutlineBtn>
