@@ -40,6 +40,7 @@ export type CartItem = {
   business?: BusinessAccount;
   products: product[];
   userId?: string;
+  add: boolean;
 };
 export type voucherProduct = {
   quantity: number;

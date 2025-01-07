@@ -34,7 +34,6 @@ const initialState = {
   currentUser: defaultUser,
   busRegData: defaultBusRegData,
   cart: defaultCart,
-
 };
 
 const userSlice = createSlice({
@@ -64,6 +63,7 @@ const userSlice = createSlice({
         })
         .filter((item) => item.products.length > 0);
     },
+
     addCart: (state, action) => {
       const item: CartItem = action.payload;
       let found = false;

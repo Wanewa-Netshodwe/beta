@@ -11,9 +11,9 @@ import { useStates } from "../utilities/States";
 import { useDynamicStyles } from "../utilities/Styles";
 import { MaterialIcons } from "@expo/vector-icons";
 import ProductItem from "./ProductItem";
-import { Cart, CartItem } from "../utilities/Types";
+import { Cart, CartItem, product } from "../utilities/Types";
 import { ScrollView } from "react-native-gesture-handler";
-import { useSharedValue } from "react-native-reanimated";
+import { SharedValue, useSharedValue } from "react-native-reanimated";
 import { getBusinessById } from "../redux/store";
 
 type Props = {
@@ -23,11 +23,12 @@ type Props = {
 
 const CartItemHolder = ({ item, cartTotal }: Props) => {
   const [collapse, setCollapse] = useState(false);
+  const [deleted, setDeleted] = useState<number>();
+  const [deleteOp, setDeleteOp] = useState(item.add);
+  const [deleteProduct, setDelProduct] = useState<product>();
   const [deliveryTotal, setDeliveryTotal] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
-  const [p, setP] = useState(0);
-  const [operation, setOperation] = useState("add");
   const { appTheme, businessState } = useStates();
   const Business = getBusinessById(
     item.products[item.products.length - 1].store_id!
@@ -36,33 +37,47 @@ const CartItemHolder = ({ item, cartTotal }: Props) => {
   let found = -1;
   if (typeof Business != "number") {
     discountProducts = Business.discountedProducts!!;
-
-    found = discountProducts.findIndex(
-      (dp) => dp.product.id === item.products[item.products.length - 1].id
-    );
+    if (discountProducts)
+      found = discountProducts.findIndex(
+        (dp) => dp.product.id === item.products[item.products.length - 1].id
+      );
   }
+
   useEffect(() => {
-    setTotalPrice((prev) => {
-      const PriceToAdd =
-        found != -1
-          ? discountProducts!![found].price
-          : item.products[item.products.length - 1].price!!;
-      return prev + PriceToAdd!!;
-    });
-    setDeliveryTotal(
-      (prev) => prev + item.products[item.products.length - 1].delivery_cost!!
-    );
+    if (!deleteOp) {
+      setTotalPrice((prev) => {
+        const PriceToAdd =
+          found !== -1
+            ? discountProducts!![found].price
+            : item.products[item.products.length - 1].price!!;
+        return prev + PriceToAdd!!;
+      });
+      setDeliveryTotal(
+        (prev) => prev + item.products[item.products.length - 1].delivery_cost!!
+      );
+      cartTotal((prev) => {
+        const PriceToAdd =
+          found !== -1
+            ? discountProducts!![found].price
+            : item.products[item.products.length - 1].price!!;
+        return prev + PriceToAdd!!;
+      });
+    } else {
+      setTotalPrice((prev) => {
+        return prev - deleted!!;
+      });
+      setDeliveryTotal((prev) => prev - deleteProduct?.delivery_cost!!);
+      setDeleteOp(false);
+    }
   }, [item.products]);
 
   useEffect(() => {
     setGrandTotal(totalPrice + deliveryTotal);
   }, [totalPrice, deliveryTotal]);
 
-  useMemo(() => {
-    cartTotal((prev) =>
-      operation === "add" ? prev + grandTotal : prev - grandTotal
-    );
-  }, [grandTotal]);
+  // useMemo(() => {
+  //   cartTotal((prev) => prev + grandTotal);
+  // }, [grandTotal]);
 
   const styles = useDynamicStyles();
 
@@ -129,15 +144,18 @@ const CartItemHolder = ({ item, cartTotal }: Props) => {
             <ScrollView>
               <FlatList
                 data={item.products}
-                keyExtractor={(item, index) => index.toString()}
+                keyExtractor={(item) => item.id!!}
                 renderItem={({ item }) => (
                   <View className=" mb-2">
                     <ProductItem
+                      cartTotal={cartTotal}
+                      setDelProduct={setDelProduct}
                       setGrandTotal={setGrandTotal}
                       setTotalPrice={setTotalPrice}
                       setDeliveryTotal={setDeliveryTotal}
-                      setOperation={setOperation}
                       product={item}
+                      setDeleteOp={setDeleteOp}
+                      setDeleted={setDeleted}
                     />
                   </View>
                 )}

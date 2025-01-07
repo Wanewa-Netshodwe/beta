@@ -27,21 +27,20 @@ const Cart = (props: Props) => {
           style={[style.text, { color: "#991b1b" }]}
           className="text-[26px] text-red-800 border border-transparent"
         >
-          R{grandTotal}
+          R{grandTotal.toFixed(2)}
         </Text>
       </View>
       <ScrollView>
         <View className="p-[5%]">
           <FlatList
             data={CartState.items}
-            keyExtractor={(item, index) => index.toString()}
+            keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <CartItemHolder item={item} cartTotal={setCartTotal} />
             )}
           />
         </View>
       </ScrollView>
-     
     </View>
   );
 };

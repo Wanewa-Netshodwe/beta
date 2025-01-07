@@ -6,7 +6,7 @@ import {
   TouchableNativeFeedback,
   Button,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useStates } from "../utilities/States";
 import { useDynamicStyles } from "../utilities/Styles";
 import { AntDesign, Entypo } from "@expo/vector-icons";
@@ -17,6 +17,7 @@ import {
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
 import Animated, {
+  SharedValue,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -29,16 +30,24 @@ type Props = {
   setTotalPrice: React.Dispatch<React.SetStateAction<number>>;
   setGrandTotal: React.Dispatch<React.SetStateAction<number>>;
   setDeliveryTotal: React.Dispatch<React.SetStateAction<number>>;
-  setOperation: React.Dispatch<React.SetStateAction<string>>;
+
   product: product;
+  setDeleteOp: React.Dispatch<React.SetStateAction<boolean>>;
+  setDeleted: React.Dispatch<React.SetStateAction<number | undefined>>;
+  setDelProduct: React.Dispatch<React.SetStateAction<product | undefined>>;
+  cartTotal: React.Dispatch<React.SetStateAction<number>>;
 };
 
 const ProductItem = ({
+  cartTotal,
   product,
+  setDelProduct,
   setDeliveryTotal,
   setGrandTotal,
   setTotalPrice,
-  setOperation,
+
+  setDeleteOp,
+  setDeleted,
 }: Props) => {
   const dispatch = useDispatch();
   const { appTheme, businessState } = useStates();
@@ -48,27 +57,29 @@ const ProductItem = ({
   let found = -1;
   if (typeof Business != "number") {
     discountProducts = Business.discountedProducts!!;
-
-    found = discountProducts.findIndex((dp) => dp.product.id === product.id);
+    if (discountProducts)
+      found = discountProducts.findIndex((dp) => dp.product.id === product.id);
   }
+  const price = found !== -1 ? discountProducts!![found].price : product.price;
+
+  const [currentPrice, setCurrentPrice] = useState(price);
+
   const styles = useDynamicStyles();
   const TransX = useSharedValue(100);
   const opacityValue = useSharedValue(0);
-
+  console.log("current Price : R", currentPrice);
   const animatedStyles = useAnimatedStyle(() => ({
     transform: [{ translateX: `${TransX.value}%` }],
     opacity: opacityValue.value,
   }));
   const handleIncrement = () => {
-    setOperation("add");
+    setCurrentPrice((prev) => prev!! + price!!);
     setTotalPrice((prev) => {
-      const priceToAdd =
-        discountProducts && found !== -1
-          ? discountProducts[found].price
-          : product.price;
-      return prev + priceToAdd!!;
+      return prev + price!!;
     });
-
+    cartTotal((prev) => {
+      return prev + price!!;
+    });
     setDeliveryTotal((prev) => prev + product.delivery_cost!!);
   };
   const Pan = Gesture.Pan().onEnd((e) => {
@@ -80,14 +91,13 @@ const ProductItem = ({
   });
   console.log(counter);
   const handleDecrement = () => {
-    if (counter !== 1) {
-      setOperation("minus");
+    if (counter > 1) {
+      setCurrentPrice((prev) => prev!! - price!!);
       setTotalPrice((prev) => {
-        const priceToAdd =
-          discountProducts && found !== -1
-            ? discountProducts[found].price
-            : product.price;
-        return prev - priceToAdd!!;
+        return prev - price!!;
+      });
+      cartTotal((prev) => {
+        return prev - price!!;
       });
       setDeliveryTotal((prev) => prev - product.delivery_cost!!);
     }
@@ -132,9 +142,7 @@ const ProductItem = ({
                   size={15}
                   onPress={() => {
                     handleDecrement();
-                    setCounter((prev) => {
-                      return prev - 1 < 1 ? 1 : prev - 1;
-                    });
+                    setCounter((prev) => (prev === 1 ? 1 : prev - 1));
                   }}
                 />
 
@@ -161,6 +169,10 @@ const ProductItem = ({
                 className="border border-transparent"
                 color={appTheme.colors?.textColor}
                 onPress={() => {
+                  setDelProduct(product);
+                  setDeleted(currentPrice);
+                  setDeleteOp(true);
+                  cartTotal((prev) => prev - currentPrice!!);
                   dispatch(delCart(product));
                 }}
                 size={25}

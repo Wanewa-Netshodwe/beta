@@ -134,7 +134,7 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
   let found = -1;
   if (typeof Business != "number") {
     discountProducts = Business.discountedProducts!!;
-
+if(discountProducts)
     found = discountProducts.findIndex((dp) => dp.product.id === product.id);
   }
   console.log("siscounted products", discountProducts);
@@ -154,7 +154,7 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
       id: createRandomId(),
       products: [product],
       ...(Business !== -1 ? { business: Business } : {}),
-
+      add: false,
       userId: getUserId(),
     };
     dispatch(addCart(cartItem));
@@ -364,9 +364,11 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
                       product.auction.bidPrice!! +
                       product.auction.bidIncrement!!
                     }`
-                  : `Buy R${found != -1
-                  ? discountProducts!![found].price
-                  : product.price}`}
+                  : `Buy R${
+                      found != -1
+                        ? discountProducts!![found].price
+                        : product.price
+                    }`}
               </Text>
             </View>
           </TouchableNativeFeedback>
