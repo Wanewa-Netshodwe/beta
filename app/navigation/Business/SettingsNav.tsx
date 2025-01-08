@@ -25,6 +25,7 @@ const SettingsNavigator = () => (
       //@ts-ignore
       component={ChangeAppTheme}
     />
+    
     <Stack.Screen
       options={{ headerShown: false }}
       name="BusinessSetting"

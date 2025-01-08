@@ -31,7 +31,7 @@ const CartItemHolder = ({
   process,
   setProcess,
 }: Props) => {
-  const [collapse, setCollapse] = useState(false);
+  const [collapse, setCollapse] = useState(true);
   const [deleted, setDeleted] = useState<number>();
   const [deleteOp, setDeleteOp] = useState(item.add);
   const [deleteProduct, setDelProduct] = useState<product>();
@@ -194,8 +194,8 @@ const CartItemHolder = ({
                 style={styles.text}
                 className="text-[8px] -top-1 text-end w-[90px]"
               >
-                {item.business?.free_delivery_pro
-                  ? `Spend more than ${item.business.free_delivery_pro} for free delivery`
+                {item.business?.free_delivery_promo
+                  ? `Spend more than ${item.business.free_delivery_promo} for free delivery`
                   : "Free Delivery Promo  not available"}
               </Text>
             </View>

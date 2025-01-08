@@ -72,59 +72,39 @@ const ProductItem = ({
   );
 
   const [currentPrice, setCurrentPrice] = useState(price);
-
+  const [voucherProducts, setVoucherProducts] = useState<
+    voucherProduct[] | undefined
+  >(typeof Business !== "number" ? Business.voucherProducts : undefined);
+  
   useEffect(() => {
-    if (process) {
-      if (typeof Business !== "number")
-        if (Business.voucherProducts) {
-          let vProducts = Business.voucherProducts;
-          if (vProducts) {
-            const index = vProducts!!.findIndex(
-              (vp) => vp.product.id === product.id
-            );
+    console.log("vourcherproduc length : ", voucherProducts?.length);
+    if (process && voucherProducts && voucherProducts?.length > 0) {
+      let vProducts = [...voucherProducts];
+      const index = vProducts.findIndex((vp) => vp.product.id === product.id);
 
-            console.log(
-              "is voucher product",
-              index,
-              "product name :",
-              product.name
-            );
-            if (index !== -1) {
-              console.log(vProducts[index].code);
-              console.log("voucher : ", voucher);
-              if (voucher)
-                if (
-                  vProducts!![index].code.toLowerCase() ===
-                  voucher.toLowerCase()
-                ) {
-                  setValid(true);
-                  setCounter(1);
-                  cartTotal((prev) =>
-                    vProducts[index].price === 0
-                      ? prev - currentPrice!!
-                      : prev - vProducts[index].price
-                  );
-                  setTotalPrice((prev) =>
-                    vProducts[index].price === 0
-                      ? prev - currentPrice!!
-                      : prev - vProducts[index].price
-                  );
-                  setGrandTotal((prev) =>
-                    vProducts[index].price === 0
-                      ? prev - currentPrice!!
-                      : prev - vProducts[index].price
-                  );
-                  setPrice(vProducts[index].price);
-                } else {
-                  console.log("incorrect code");
-                }
-            }
-          } else {
-            console.log("vproducts nulll");
-          }
+      if (index !== -1 && voucher) {
+        const voucherProduct = vProducts[index]; // Store reference before splicing
+
+        if (voucherProduct.code.toLowerCase() === voucher.toLowerCase()) {
+          setValid(true);
+          setCounter(1);
+
+          // Calculate price change once and reuse
+          const priceChange =
+            voucherProduct.price === 0 ? currentPrice : voucherProduct.price;
+
+          cartTotal((prev) => prev - priceChange!);
+          setTotalPrice((prev) => prev - priceChange!);
+          setGrandTotal((prev) => prev - priceChange!);
+          setPrice(voucherProduct.price);
+
+          // Remove after using the reference
+          vProducts.splice(index, 1);
+          setVoucherProducts(vProducts);
         }
-      setProcess(false);
+      }
     }
+    setProcess(false);
   }, [process]);
   const styles = useDynamicStyles();
   const TransX = useSharedValue(100);

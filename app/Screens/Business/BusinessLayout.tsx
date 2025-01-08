@@ -45,6 +45,7 @@ import LoadingComp from "../../utilities/LoadingComp";
 import {
   removeForeground,
   setDiscountProduct,
+  setvoucherProduct,
 } from "../../redux/businessSlice";
 import { useStates } from "../../utilities/States";
 import { getUserBusiness, RootState } from "../../redux/store";
@@ -74,7 +75,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
   const handleDeleteSection = (sectionInfo: sectionData) => {
     BE_deleteSection({ dispatch, sectionInfo });
   };
-  console.log('vouncher products :',voucherProducts)
+  console.log("vouncher products :", voucherProducts);
   const [isLoading, setLoading] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const { width } = Dimensions.get("screen");
@@ -97,6 +98,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
   };
   useEffect(() => {
     dispatch(setDiscountProduct(businessState.discountedProducts));
+    dispatch(setvoucherProduct(businessState.voucherProducts));
   }, []);
   console.log("sections : log : ", sections);
   useEffect(() => {

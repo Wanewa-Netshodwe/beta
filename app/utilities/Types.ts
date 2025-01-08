@@ -104,7 +104,7 @@ export type BusinessAccount = {
   verified: boolean;
   dis_auth: false;
   offersDelivery?: boolean;
-  free_delivery_pro?: number;
+  free_delivery_promo?: number;
   discountedProducts?: DiscountedProducts[];
   voucherProducts?: voucherProduct[];
 };
