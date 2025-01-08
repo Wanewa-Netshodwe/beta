@@ -10,7 +10,7 @@ import React, { useEffect, useState } from "react";
 import { useStates } from "../utilities/States";
 import { useDynamicStyles } from "../utilities/Styles";
 import { AntDesign, Entypo } from "@expo/vector-icons";
-import { product } from "../utilities/Types";
+import { product, voucherProduct } from "../utilities/Types";
 import {
   Gesture,
   GestureDetector,
@@ -30,40 +30,102 @@ type Props = {
   setTotalPrice: React.Dispatch<React.SetStateAction<number>>;
   setGrandTotal: React.Dispatch<React.SetStateAction<number>>;
   setDeliveryTotal: React.Dispatch<React.SetStateAction<number>>;
-
+  voucher?: string;
   product: product;
   setDeleteOp: React.Dispatch<React.SetStateAction<boolean>>;
   setDeleted: React.Dispatch<React.SetStateAction<number | undefined>>;
   setDelProduct: React.Dispatch<React.SetStateAction<product | undefined>>;
   cartTotal: React.Dispatch<React.SetStateAction<number>>;
+  process: boolean;
+  setProcess: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const ProductItem = ({
+  setProcess,
   cartTotal,
   product,
   setDelProduct,
   setDeliveryTotal,
   setGrandTotal,
   setTotalPrice,
-
+  voucher,
+  process,
   setDeleteOp,
   setDeleted,
 }: Props) => {
   const dispatch = useDispatch();
   const { appTheme, businessState } = useStates();
   const [counter, setCounter] = useState(1);
+  const [valid, setValid] = useState(false);
+
   const Business = getBusinessById(product.store_id!!);
   let discountProducts = businessState.discountedProducts;
+
   let found = -1;
   if (typeof Business != "number") {
     discountProducts = Business.discountedProducts!!;
     if (discountProducts)
       found = discountProducts.findIndex((dp) => dp.product.id === product.id);
   }
-  const price = found !== -1 ? discountProducts!![found].price : product.price;
+  const [price, setPrice] = useState(
+    found !== -1 ? discountProducts!![found].price : product.price
+  );
 
   const [currentPrice, setCurrentPrice] = useState(price);
 
+  useEffect(() => {
+    if (process) {
+      if (typeof Business !== "number")
+        if (Business.voucherProducts) {
+          let vProducts = Business.voucherProducts;
+          if (vProducts) {
+            const index = vProducts!!.findIndex(
+              (vp) => vp.product.id === product.id
+            );
+
+            console.log(
+              "is voucher product",
+              index,
+              "product name :",
+              product.name
+            );
+            if (index !== -1) {
+              console.log(vProducts[index].code);
+              console.log("voucher : ", voucher);
+              if (voucher)
+                if (
+                  vProducts!![index].code.toLowerCase() ===
+                  voucher.toLowerCase()
+                ) {
+                  setValid(true);
+                  setCounter(1);
+                  cartTotal((prev) =>
+                    vProducts[index].price === 0
+                      ? prev - currentPrice!!
+                      : prev - vProducts[index].price
+                  );
+                  setTotalPrice((prev) =>
+                    vProducts[index].price === 0
+                      ? prev - currentPrice!!
+                      : prev - vProducts[index].price
+                  );
+                  setGrandTotal((prev) =>
+                    vProducts[index].price === 0
+                      ? prev - currentPrice!!
+                      : prev - vProducts[index].price
+                  );
+                  setPrice(vProducts[index].price);
+                } else {
+                  console.log("incorrect code");
+                }
+            }
+          } else {
+            console.log("vproducts nulll");
+          }
+        }
+      setProcess(false);
+    }
+  }, [process]);
   const styles = useDynamicStyles();
   const TransX = useSharedValue(100);
   const opacityValue = useSharedValue(0);
@@ -128,10 +190,7 @@ const ProductItem = ({
                   className="text-[10px]"
                   style={[styles.text, { color: "red" }]}
                 >
-                  {found != -1
-                    ? discountProducts!![found].price
-                    : product.price}{" "}
-                  X {counter}
+                  {price}X {counter}
                 </Text>
               </View>
 
@@ -151,8 +210,12 @@ const ProductItem = ({
                   color={appTheme.colors?.textColor}
                   size={15}
                   onPress={() => {
-                    handleIncrement();
-                    setCounter((prev) => prev + 1);
+                    if (valid) {
+                      null;
+                    } else {
+                      handleIncrement();
+                      setCounter((prev) => prev + 1);
+                    }
                   }}
                 />
               </View>

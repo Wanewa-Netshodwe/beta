@@ -18,10 +18,19 @@ import { getBusinessById } from "../redux/store";
 
 type Props = {
   item: CartItem;
+  voucher?: string;
   cartTotal: React.Dispatch<React.SetStateAction<number>>;
+  process: boolean;
+  setProcess: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const CartItemHolder = ({ item, cartTotal }: Props) => {
+const CartItemHolder = ({
+  item,
+  cartTotal,
+  voucher,
+  process,
+  setProcess,
+}: Props) => {
   const [collapse, setCollapse] = useState(false);
   const [deleted, setDeleted] = useState<number>();
   const [deleteOp, setDeleteOp] = useState(item.add);
@@ -148,7 +157,10 @@ const CartItemHolder = ({ item, cartTotal }: Props) => {
                 renderItem={({ item }) => (
                   <View className=" mb-2">
                     <ProductItem
+                      setProcess={setProcess}
                       cartTotal={cartTotal}
+                      process={process}
+                      voucher={voucher}
                       setDelProduct={setDelProduct}
                       setGrandTotal={setGrandTotal}
                       setTotalPrice={setTotalPrice}
