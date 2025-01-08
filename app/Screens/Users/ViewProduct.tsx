@@ -134,8 +134,8 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
   let found = -1;
   if (typeof Business != "number") {
     discountProducts = Business.discountedProducts!!;
-if(discountProducts)
-    found = discountProducts.findIndex((dp) => dp.product.id === product.id);
+    if (discountProducts)
+      found = discountProducts.findIndex((dp) => dp.product.id === product.id);
   }
   console.log("siscounted products", discountProducts);
 

@@ -55,6 +55,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
   const {
     businessSections,
     businessForeground,
+    voucherProducts,
     businessPic,
     businessName,
     businessVerified,
@@ -73,6 +74,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
   const handleDeleteSection = (sectionInfo: sectionData) => {
     BE_deleteSection({ dispatch, sectionInfo });
   };
+  console.log('vouncher products :',voucherProducts)
   const [isLoading, setLoading] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const { width } = Dimensions.get("screen");
@@ -387,7 +389,11 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
 
                 <OutlineBtn
                   onPress={() => {
-                    BE_PublishStore(getUserBusiness(), discountProducts);
+                    BE_PublishStore(
+                      getUserBusiness(),
+                      discountProducts,
+                      voucherProducts
+                    );
                   }}
                   title="publish store"
                 ></OutlineBtn>

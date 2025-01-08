@@ -43,12 +43,14 @@ export type CartItem = {
   add: boolean;
 };
 export type voucherProduct = {
+  price: number;
   quantity: number;
   id: string;
   product: product;
   code: string;
   action: "Discount" | "Giveaway";
   discount?: number;
+  name?: string;
 };
 export type BusinessStatus = {
   id: string;
@@ -104,6 +106,7 @@ export type BusinessAccount = {
   offersDelivery?: boolean;
   free_delivery_pro?: number;
   discountedProducts?: DiscountedProducts[];
+  voucherProducts?: voucherProduct[];
 };
 export type sectionData = {
   id?: string;

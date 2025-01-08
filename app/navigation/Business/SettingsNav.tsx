@@ -5,6 +5,7 @@ import Settings from "../../Screens/Business/Settings";
 import BusinessLayout from "../../Screens/Business/BusinessLayout";
 import BusinessSettings from "../../Screens/Business/BusinessSettings";
 import CreateDiscount from "../../Screens/Business/CreateDiscount";
+import CreateVoucher from "../../Screens/Business/CreateVoucher";
 
 const Stack = createStackNavigator();
 const SettingsNavigator = () => (
@@ -28,7 +29,7 @@ const SettingsNavigator = () => (
       options={{ headerShown: false }}
       name="BusinessSetting"
       //@ts-ignore
-      component={CreateDiscount}
+      component={CreateVoucher}
     />
 
     {/* <Stack.Screen name="Carousel" component={AddCarousel} />

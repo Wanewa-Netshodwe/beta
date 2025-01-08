@@ -37,6 +37,7 @@ import {
   sectionData,
   StackShopLayoutParamList,
   TabParamList,
+  voucherProduct,
 } from "../utilities/Types";
 import { useSelector } from "react-redux";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -624,7 +625,8 @@ const UploadBusinessMedia = async (BusinessInfo: BusinessAccount) => {
 };
 export const BE_PublishStore = async (
   BusinessInfo: BusinessAccount,
-  discountedProducts: DiscountedProducts[]
+  discountedProducts: DiscountedProducts[],
+  voucherProducts: voucherProduct[]
 ) => {
   console.log("called publish store");
   const { id } = BusinessInfo;
@@ -636,6 +638,7 @@ export const BE_PublishStore = async (
       await updateDoc(BusinessRef, {
         ...Bus,
         discountedProducts: discountedProducts,
+        voucherProducts: voucherProducts,
       });
     } catch (err) {
       console.log(err);

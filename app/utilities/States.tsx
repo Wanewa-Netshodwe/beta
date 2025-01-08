@@ -39,9 +39,13 @@ export const useStates = () => {
     (state: RootState) => state.categoryLists
   );
   const CartState = useSelector((state: RootState) => state.user.cart);
+  const voucherProducts = useSelector(
+    (state: RootState) => state.business.voucherProducts
+  );
 
   const states = useMemo(
     () => ({
+      voucherProducts,
       CartState,
       appTheme,
       businessState,
@@ -58,6 +62,7 @@ export const useStates = () => {
       discountProducts,
     }),
     [
+      voucherProducts,
       discountProducts,
       CartState,
       AllBusiness,
