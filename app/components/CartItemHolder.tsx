@@ -14,7 +14,8 @@ import ProductItem from "./ProductItem";
 import { Cart, CartItem, product } from "../utilities/Types";
 import { ScrollView } from "react-native-gesture-handler";
 import { SharedValue, useSharedValue } from "react-native-reanimated";
-import { getBusinessById } from "../redux/store";
+import { getBusinessById, RootState } from "../redux/store";
+import { useSelector } from "react-redux";
 
 type Props = {
   item: CartItem;
@@ -33,63 +34,22 @@ const CartItemHolder = ({
 }: Props) => {
   const [collapse, setCollapse] = useState(true);
   const [deleted, setDeleted] = useState<number>();
-  const [deleteOp, setDeleteOp] = useState(item.add);
+
   const [deleteProduct, setDelProduct] = useState<product>();
-  const [deliveryTotal, setDeliveryTotal] = useState(0);
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [grandTotal, setGrandTotal] = useState(0);
+
   const { appTheme, businessState } = useStates();
-  const Business = getBusinessById(
-    item.products[item.products.length - 1].store_id!
+  const grandTotal = useSelector(
+    (state: RootState) => state.cartHolderItems.grandTotal
   );
-  let discountProducts = businessState.discountedProducts;
-  let found = -1;
-  if (Business) {
-    discountProducts = Business.discountedProducts!!;
-    if (discountProducts)
-      found = discountProducts.findIndex(
-        (dp) => dp.product.id === item.products[item.products.length - 1].id
-      );
-  }
-
-  useEffect(() => {
-    if (!deleteOp) {
-      setTotalPrice((prev) => {
-        const PriceToAdd =
-          found !== -1
-            ? discountProducts!![found].price
-            : item.products[item.products.length - 1].price!!;
-        return prev + PriceToAdd!!;
-      });
-      setDeliveryTotal(
-        (prev) => prev + item.products[item.products.length - 1].delivery_cost!!
-      );
-      cartTotal((prev) => {
-        const PriceToAdd =
-          found !== -1
-            ? discountProducts!![found].price
-            : item.products[item.products.length - 1].price!!;
-        return prev + PriceToAdd!!;
-      });
-    } else {
-      setTotalPrice((prev) => {
-        return prev - deleted!!;
-      });
-      setDeliveryTotal((prev) => prev - deleteProduct?.delivery_cost!!);
-      setDeleteOp(false);
-    }
-  }, [item.products]);
-
-  useEffect(() => {
-    setGrandTotal(totalPrice + deliveryTotal);
-  }, [totalPrice, deliveryTotal]);
-
-  // useMemo(() => {
-  //   cartTotal((prev) => prev + grandTotal);
-  // }, [grandTotal]);
+  const deliveryPrice = useSelector(
+    (state: RootState) => state.cartHolderItems.deliveryCost
+  );
+  const totalPrice = useSelector(
+    (state: RootState) => state.cartHolderItems.totalPrice
+  );
 
   const styles = useDynamicStyles();
-
+  console.log("items passed : ", item);
   return (
     <View className="mb-2 ">
       {/* header */}
@@ -156,19 +116,7 @@ const CartItemHolder = ({
                 keyExtractor={(item) => item.id!!}
                 renderItem={({ item }) => (
                   <View className=" mb-2">
-                    <ProductItem
-                      setProcess={setProcess}
-                      cartTotal={cartTotal}
-                      process={process}
-                      voucher={voucher}
-                      setDelProduct={setDelProduct}
-                      setGrandTotal={setGrandTotal}
-                      setTotalPrice={setTotalPrice}
-                      setDeliveryTotal={setDeliveryTotal}
-                      product={item}
-                      setDeleteOp={setDeleteOp}
-                      setDeleted={setDeleted}
-                    />
+                    <ProductItem product={item} />
                   </View>
                 )}
               />
@@ -177,7 +125,7 @@ const CartItemHolder = ({
 
           <View className=" px-1">
             <Text style={styles.text} className=" top-1 text-[9px]">
-              Delivery Fee : R{deliveryTotal}
+              Delivery Fee : R{deliveryPrice.toFixed(2)}
             </Text>
 
             <Text style={styles.text} className=" top-1 text-[11px]">

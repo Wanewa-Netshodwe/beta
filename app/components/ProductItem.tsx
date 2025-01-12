@@ -27,40 +27,23 @@ import { useDispatch } from "react-redux";
 
 import { getBusinessById } from "../redux/store";
 import { decrement, delCart, increment } from "../redux/businessSlice";
+import {
+  decrementCartHolder,
+  deleteProductCartHolder,
+  incrementCartHolder,
+} from "../redux/CartItemSlice";
 type Props = {
-  setTotalPrice: React.Dispatch<React.SetStateAction<number>>;
-  setGrandTotal: React.Dispatch<React.SetStateAction<number>>;
-  setDeliveryTotal: React.Dispatch<React.SetStateAction<number>>;
-  voucher?: string;
   product: product;
-  setDeleteOp: React.Dispatch<React.SetStateAction<boolean>>;
-  setDeleted: React.Dispatch<React.SetStateAction<number | undefined>>;
-  setDelProduct: React.Dispatch<React.SetStateAction<product | undefined>>;
-  cartTotal: React.Dispatch<React.SetStateAction<number>>;
-  process: boolean;
-  setProcess: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const ProductItem = ({
-  setProcess,
-  cartTotal,
-  product,
-  setDelProduct,
-  setDeliveryTotal,
-  setGrandTotal,
-  setTotalPrice,
-  voucher,
-  process,
-  setDeleteOp,
-  setDeleted,
-}: Props) => {
+const ProductItem = ({ product }: Props) => {
   const dispatch = useDispatch();
-  const { appTheme, businessState } = useStates();
+  const { appTheme } = useStates();
   const [counter, setCounter] = useState(1);
   const [valid, setValid] = useState(false);
 
   const Business = getBusinessById(product.store_id!!);
-  let discountProducts = businessState.discountedProducts;
+  let discountProducts = Business!.discountedProducts;
 
   let found = -1;
   if (Business) {
@@ -73,39 +56,7 @@ const ProductItem = ({
   );
 
   const [currentPrice, setCurrentPrice] = useState(price);
-  const [voucherProducts, setVoucherProducts] = useState<
-    voucherProduct[] | undefined
-  >(Business ? Business.voucherProducts : undefined);
 
-  useEffect(() => {
-    console.log("vourcherproduc length : ", voucherProducts?.length);
-    if (process && voucherProducts && voucherProducts?.length > 0) {
-      let vProducts = [...voucherProducts];
-      const index = vProducts.findIndex((vp) => vp.product.id === product.id);
-
-      if (index !== -1 && voucher) {
-        const voucherProduct = vProducts[index];
-
-        if (voucherProduct.code.toLowerCase() === voucher.toLowerCase()) {
-          setValid(true);
-          setCounter(1);
-
-          const priceChange =
-            voucherProduct.price === 0 ? currentPrice : voucherProduct.price;
-
-          cartTotal((prev) => prev - priceChange!);
-          setTotalPrice((prev) => prev - priceChange!);
-          setGrandTotal((prev) => prev - priceChange!);
-          setPrice(voucherProduct.price);
-
-          // Remove after using the reference
-          vProducts.splice(index, 1);
-          setVoucherProducts(vProducts);
-        }
-      }
-    }
-    setProcess(false);
-  }, [process]);
   const styles = useDynamicStyles();
   const TransX = useSharedValue(100);
   const opacityValue = useSharedValue(0);
@@ -115,15 +66,8 @@ const ProductItem = ({
     opacity: opacityValue.value,
   }));
   const handleIncrement = () => {
-    setCurrentPrice((prev) => prev!! + price!!);
-    setTotalPrice((prev) => {
-      return prev + price!!;
-    });
     dispatch(increment(price!!));
-    // cartTotal((prev) => {
-    //   return prev + price!!;
-    // });
-    setDeliveryTotal((prev) => prev + product.delivery_cost!!);
+    dispatch(incrementCartHolder(product));
   };
   const Pan = Gesture.Pan().onEnd((e) => {
     const { translationX } = e;
@@ -136,14 +80,8 @@ const ProductItem = ({
   const handleDecrement = () => {
     if (counter > 1) {
       setCurrentPrice((prev) => prev!! - price!!);
-      setTotalPrice((prev) => {
-        return prev - price!!;
-      });
       dispatch(decrement(price!!));
-      // cartTotal((prev) => {
-      //   return prev - price!!;
-      // });
-      setDeliveryTotal((prev) => prev - product.delivery_cost!!);
+      dispatch(decrementCartHolder(product));
     }
   };
   return (
@@ -218,11 +156,12 @@ const ProductItem = ({
                     ...product,
                     cuurentprice: currentPrice!!,
                   };
-                  setDelProduct(product);
-                  setDeleted(currentPrice);
-                  setDeleteOp(true);
+                  dispatch(delCart({ currentPrice: currentPrice!! }));
                   dispatch(
-                    delCart({ product: product, currentPrice: currentPrice!! })
+                    deleteProductCartHolder({
+                      product: product,
+                      currentPrice: currentPrice!!,
+                    })
                   );
                 }}
                 size={25}

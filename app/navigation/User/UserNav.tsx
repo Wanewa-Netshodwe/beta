@@ -92,15 +92,7 @@ const UserNav = () => {
         options={{
           headerShown: false,
         }}
-        listeners={{
-          tabPress: (e) => {
-            e.preventDefault();
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'Cart' }],
-            });
-          },
-        }} 
+      
         name="Cart"
         //@ts-ignore
         component={Cart}

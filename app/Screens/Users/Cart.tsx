@@ -13,15 +13,20 @@ import { useDynamicStyles } from "../../utilities/Styles";
 import CartItem from "../../components/CartItemHolder";
 import CartItemHolder from "../../components/CartItemHolder";
 import OutlineBtn from "../../components/OutlineBtn";
-
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 type Props = {};
 
 const Cart = (props: Props) => {
   const { CartState } = useStates();
+
   const style = useDynamicStyles();
   const [grandTotal, setCartTotal] = useState(0);
   const [voucher, setVoucher] = useState("");
   const [process, setProcess] = useState(false);
+  const cartitems = useSelector(
+    (state: RootState) => state.cartHolderItems.defaultCartHolderItem
+  );
   console.log("process :", process);
   console.log("cart total  :", CartState.total);
   return (
@@ -46,8 +51,8 @@ const Cart = (props: Props) => {
       <ScrollView>
         <View className="p-[5%]">
           <FlatList
-            data={CartState.items}
-            keyExtractor={(item) => item.id}
+            data={cartitems}
+            keyExtractor={(item) => item.id!}
             renderItem={({ item }) => (
               <CartItemHolder
                 setProcess={setProcess}

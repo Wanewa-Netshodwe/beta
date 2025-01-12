@@ -44,7 +44,10 @@ import { useDynamicStyles } from "../../utilities/Styles";
 import { convertT, convertTime } from "../../utilities/convertTime";
 import { StackScreenProps } from "@react-navigation/stack";
 import { createRandomId, getUid, getUserInfo } from "../../backend/Queries";
-import { addCart, setDiscountProduct } from "../../redux/businessSlice";
+import {
+  addProduct,
+  setDiscountProduct,
+} from "../../redux/businessSlice";
 import {
   useAnimatedStyle,
   useSharedValue,
@@ -141,7 +144,7 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
   });
 
   const { width } = Dimensions.get("screen");
-  const {  appTheme } = useStates();
+  const { appTheme } = useStates();
   let discountProducts: DiscountedProducts[] = [];
   let found = -1;
   if (Business) {
@@ -166,10 +169,12 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
       id: createRandomId(),
       products: [product],
       ...(Business ? { business: Business } : {}),
-      add: false,
       userId: getUserId(),
     };
-    dispatch(addCart(cartItem));
+    const price =
+      found != -1 ? discountProducts!![found].product.price : product.price;
+    dispatch(addCart(price));
+   
     // console.log("cart itemsj", CartState.items);
   };
 

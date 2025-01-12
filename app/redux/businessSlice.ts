@@ -41,7 +41,7 @@ export const defaultBusiness: BusinessAccount = {
   userId: "Hd81oqoxT0NDLs80xJY33Vlwbs23",
   verified: true,
 };
-const defaultCart: Cart = { items: [], total: 0 };
+
 const products: product[] = [];
 const AllBusinesses: BusinessAccount[] = [];
 const defaultdiscountedProducts: DiscountedProducts[] = [];
@@ -54,7 +54,7 @@ const initialState = {
   busRegData: defaultBusRegData,
   discountedProducts: defaultdiscountedProducts,
   voucherProducts: defaultvoucherProducts,
-  cart: defaultCart,
+  
 };
 
 const businessSlice = createSlice({
@@ -73,82 +73,7 @@ const businessSlice = createSlice({
       const voucherProduct: voucherProduct[] = action.payload;
       state.voucherProducts = voucherProduct;
     },
-    delCart: (
-      state,
-      action: { payload: { product: product; currentPrice: number } }
-    ) => {
-      const data = action.payload;
-      const p = state.cart.total;
-      state.cart.total = p! - data.currentPrice;
-
-      state.cart.items = state.cart.items
-        .map((item) => {
-          if (item.business?.id === data.product.store_id) {
-            item.products = item.products.filter(
-              (pro) => pro.id !== data.product.id
-            );
-            return item;
-          }
-          return item;
-        })
-        .filter((item) => item.products.length > 0);
-    },
-    increment: (state, action) => {
-      const price = action.payload;
-      const p = state.cart.total;
-      state.cart.total = p + price;
-    },
-    decrement: (state, action) => {
-      const price = action.payload;
-      const p = state.cart.total;
-      state.cart.total = p! - price;
-    },
-    addCart: (state, action) => {
-      const item: CartItem = action.payload;
-      const productId = item.products[0].id;
-      const businessId = item.business?.id;
-
-      // Determine price
-      const index = state.discountedProducts.findIndex(
-        (p) => p.product.id === productId
-      );
-      console.log("Product ID:", productId);
-      console.log("Discounted Products:", state.discountedProducts);
-      console.log("Index Found:", index);
-
-      const price =
-        index === -1
-          ? item.products[0].price! // Original price
-          : state.discountedProducts[index].price!; // Discounted price
-      console.log("Price Used:", price);
-
-      // Create a lookup map for existing cart items by businessId
-      const businessMap = new Map(
-        state.cart.items.map((cartItem) => [cartItem.business?.id, cartItem])
-      );
-
-      let addTotal = false;
-
-      if (businessMap.has(businessId)) {
-        const businessCart = businessMap.get(businessId)!;
-
-        const productSet = new Set(
-          businessCart.products.map((product) => product.id)
-        );
-
-        if (!productSet.has(productId)) {
-          businessCart.products.push(item.products[0]);
-          addTotal = true;
-        }
-      } else {
-        state.cart.items.push(item);
-        addTotal = true;
-      }
-
-      if (addTotal) {
-        state.cart.total = (state.cart.total ?? 0) + price;
-      }
-    },
+   
 
     addVoucherProduct: (state, action) => {
       const voucherProduct: voucherProduct = action.payload;
@@ -278,9 +203,5 @@ export const {
   delProduct,
   addDiscountProduct,
   setDiscountProduct,
-  increment,
-  addCart,
-  delCart,
-  decrement,
 } = businessSlice.actions;
 export default businessSlice.reducer;

@@ -4,6 +4,7 @@ import appSlice from "./appSlice";
 import businessSlice from "./businessSlice";
 import walletSlice from "./walletSlice";
 import categoryListSlice from "./categoryList";
+import CartHolderItemsSlice from "./CartItemSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     business: businessSlice,
     wallet: walletSlice,
     categoryLists: categoryListSlice,
+    cartHolderItems: CartHolderItemsSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

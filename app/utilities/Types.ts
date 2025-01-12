@@ -34,14 +34,13 @@ export type StackSettingsParamList = {
 };
 export type Cart = {
   total?: number;
-  items: CartItem[];
+  item: CartItem;
 };
 export type CartItem = {
-  id: string;
+  id?: string;
   business?: BusinessAccount;
-  products: product[];
+  products?: product[];
   userId?: string;
-  add: boolean;
 };
 export type voucherProduct = {
   price: number;
