@@ -11,6 +11,8 @@ import Toast from "react-native-toast-message";
 import RootStack from "./app/navigation/RootStack";
 import { useEffect } from "react";
 import { BE_getAllBusinesses } from "./app/backend/Queries";
+import { BusinessAccount, DiscountedProducts } from "./app/utilities/Types";
+import { setDiscountProduct } from "./app/redux/businessSlice";
 
 LogBox.ignoreAllLogs(true);
 
@@ -18,8 +20,17 @@ export default function AppContent() {
   const { appTheme, AllBusiness, businessForeground } = useStates();
   const dispatch = useDispatch();
   useEffect(() => {
-    BE_getAllBusinesses(dispatch);
+    BE_getAllBusinesses(dispatch).then((allBusiness: any) => {
+      let discountedProducts: any = [];
+      allBusiness.map((bus: BusinessAccount) => {
+        if (bus.discountedProducts) {
+          discountedProducts.push(bus.discountedProducts);
+        }
+      });
+      dispatch(setDiscountProduct(discountedProducts.flat()));
+    });
   }, []);
+
   const shouldRenderScreen =
     appTheme.current_screen === "layout" && businessForeground;
 

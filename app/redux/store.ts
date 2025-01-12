@@ -22,6 +22,11 @@ export const getCurrentUser = () => {
   const state = store.getState();
   return state.user.currentUser;
 };
+export const getDiscountProducts = () => {
+  const state = store.getState();
+  return state.business.discountedProducts;
+};
+
 export const getBusinessCategories = () => {
   const state = store.getState();
   const categories = state.business.userBusiness.sections.filter(
@@ -42,7 +47,7 @@ export const getBusinessById = (id: string) => {
   const targetBusiness = state.business.allBusinesses.filter(
     (bus) => bus.id === id
   );
-  return targetBusiness ? targetBusiness[0] : -1;
+  return targetBusiness ? targetBusiness[0] : undefined;
 };
 export const getUserId = () => {
   const state = store.getState();

@@ -24,8 +24,9 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useDispatch } from "react-redux";
-import { delCart } from "../redux/userSlice";
+
 import { getBusinessById } from "../redux/store";
+import { decrement, delCart, increment } from "../redux/businessSlice";
 type Props = {
   setTotalPrice: React.Dispatch<React.SetStateAction<number>>;
   setGrandTotal: React.Dispatch<React.SetStateAction<number>>;
@@ -62,7 +63,7 @@ const ProductItem = ({
   let discountProducts = businessState.discountedProducts;
 
   let found = -1;
-  if (typeof Business != "number") {
+  if (Business) {
     discountProducts = Business.discountedProducts!!;
     if (discountProducts)
       found = discountProducts.findIndex((dp) => dp.product.id === product.id);
@@ -74,8 +75,8 @@ const ProductItem = ({
   const [currentPrice, setCurrentPrice] = useState(price);
   const [voucherProducts, setVoucherProducts] = useState<
     voucherProduct[] | undefined
-  >(typeof Business !== "number" ? Business.voucherProducts : undefined);
-  
+  >(Business ? Business.voucherProducts : undefined);
+
   useEffect(() => {
     console.log("vourcherproduc length : ", voucherProducts?.length);
     if (process && voucherProducts && voucherProducts?.length > 0) {
@@ -83,13 +84,12 @@ const ProductItem = ({
       const index = vProducts.findIndex((vp) => vp.product.id === product.id);
 
       if (index !== -1 && voucher) {
-        const voucherProduct = vProducts[index]; // Store reference before splicing
+        const voucherProduct = vProducts[index];
 
         if (voucherProduct.code.toLowerCase() === voucher.toLowerCase()) {
           setValid(true);
           setCounter(1);
 
-          // Calculate price change once and reuse
           const priceChange =
             voucherProduct.price === 0 ? currentPrice : voucherProduct.price;
 
@@ -119,9 +119,10 @@ const ProductItem = ({
     setTotalPrice((prev) => {
       return prev + price!!;
     });
-    cartTotal((prev) => {
-      return prev + price!!;
-    });
+    dispatch(increment(price!!));
+    // cartTotal((prev) => {
+    //   return prev + price!!;
+    // });
     setDeliveryTotal((prev) => prev + product.delivery_cost!!);
   };
   const Pan = Gesture.Pan().onEnd((e) => {
@@ -138,9 +139,10 @@ const ProductItem = ({
       setTotalPrice((prev) => {
         return prev - price!!;
       });
-      cartTotal((prev) => {
-        return prev - price!!;
-      });
+      dispatch(decrement(price!!));
+      // cartTotal((prev) => {
+      //   return prev - price!!;
+      // });
       setDeliveryTotal((prev) => prev - product.delivery_cost!!);
     }
   };
@@ -212,11 +214,16 @@ const ProductItem = ({
                 className="border border-transparent"
                 color={appTheme.colors?.textColor}
                 onPress={() => {
+                  const p: product & { cuurentprice: number } = {
+                    ...product,
+                    cuurentprice: currentPrice!!,
+                  };
                   setDelProduct(product);
                   setDeleted(currentPrice);
                   setDeleteOp(true);
-                  cartTotal((prev) => prev - currentPrice!!);
-                  dispatch(delCart(product));
+                  dispatch(
+                    delCart({ product: product, currentPrice: currentPrice!! })
+                  );
                 }}
                 size={25}
               />

@@ -43,9 +43,13 @@ import { useStates } from "../../utilities/States";
 import { getUserBusiness, RootState } from "../../redux/store";
 import OutlineBtn from "../../components/OutlineBtn";
 import MySectionStore from "../../components/MySectionStore";
+import { useSharedValue } from "react-native-reanimated";
+import { useFocusEffect } from "@react-navigation/native";
 
 type prop = StackScreenProps<StackStoreListParamList, "viewStore">;
+
 const ViewStore: React.FC<prop> = ({ navigation, route }) => {
+  let Focused = useSharedValue(false);
   const businessData = route.params.business;
   const sections = businessData.sections;
   const Businessforeground = businessData.foregroundImg;
@@ -61,7 +65,7 @@ const ViewStore: React.FC<prop> = ({ navigation, route }) => {
   const [showSearch, setShowSearch] = useState(false);
   const { width } = Dimensions.get("screen");
   const font = appTheme.fonts?.primary;
-  console.log("business layout screen called");
+  console.log("store view screen called");
   console.log(businessData);
   const [selectedFont, setSelectedFont] = useState(
     appTheme.fonts?.primary || ""
@@ -72,7 +76,12 @@ const ViewStore: React.FC<prop> = ({ navigation, route }) => {
     ),
     []
   );
+  useEffect(() => {
+    Focused.value = false;
+  }, []);
 
+ 
+  console.log("useer is focused : ", Focused.value);
   const loadFont = async (fontName: string) => {
     if (fontMap[fontName]) {
       await Font.loadAsync({ [fontName]: fontMap[fontName] });
@@ -134,6 +143,10 @@ const ViewStore: React.FC<prop> = ({ navigation, route }) => {
     },
     []
   );
+  useFocusEffect(() => {
+   
+  });
+
 
   return (
     <View

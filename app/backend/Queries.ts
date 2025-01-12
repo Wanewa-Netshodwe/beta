@@ -480,24 +480,27 @@ export const BE_login = (data: {
 export const BE_getAllBusinesses = async (
   dispatch: Dispatch<UnknownAction>
 ) => {
-  let businesses: any = [];
-  console.log("fetching businesses data");
-  try {
-    const querySnapshot = await getDocs(collection(db, BUSINESSCOLLECTION));
-    if (querySnapshot) {
-      console.log("found");
-      querySnapshot.forEach((doc) => {
-        businesses.push(doc.data());
-      });
+  return new Promise(async (res, rej) => {
+    let businesses: any = [];
+    console.log("fetching businesses data");
+    try {
+      const querySnapshot = await getDocs(collection(db, BUSINESSCOLLECTION));
+      if (querySnapshot) {
+        console.log("found");
+        querySnapshot.forEach((doc) => {
+          businesses.push(doc.data());
+        });
+      }
+      if (querySnapshot.empty) {
+        console.log("no data found");
+      }
+      dispatch(setBusinesses(businesses));
+      console.log("done");
+      res(businesses);
+    } catch (err) {
+      console.log(err);
     }
-    if (querySnapshot.empty) {
-      console.log("no data found");
-    }
-    dispatch(setBusinesses(businesses));
-    console.log("done");
-  } catch (err) {
-    console.log(err);
-  }
+  });
 };
 const UploadBusinessMedia = async (BusinessInfo: BusinessAccount) => {
   const { foregroundImg, sections } = BusinessInfo;

@@ -44,7 +44,7 @@ const CartItemHolder = ({
   );
   let discountProducts = businessState.discountedProducts;
   let found = -1;
-  if (typeof Business != "number") {
+  if (Business) {
     discountProducts = Business.discountedProducts!!;
     if (discountProducts)
       found = discountProducts.findIndex(

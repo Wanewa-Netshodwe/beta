@@ -23,6 +23,7 @@ const Cart = (props: Props) => {
   const [voucher, setVoucher] = useState("");
   const [process, setProcess] = useState(false);
   console.log("process :", process);
+  console.log("cart total  :", CartState.total);
   return (
     <View className="w-full h-full">
       <View
@@ -39,7 +40,7 @@ const Cart = (props: Props) => {
           style={[style.text, { color: "#991b1b" }]}
           className="text-[26px] text-red-800 border border-transparent"
         >
-          R{grandTotal.toFixed(2)}
+          R{CartState.total!.toFixed(2)}
         </Text>
       </View>
       <ScrollView>

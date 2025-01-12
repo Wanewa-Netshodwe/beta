@@ -8,7 +8,7 @@ import {
   product,
 } from "../utilities/Types";
 import { act } from "react";
-import { getBusinessById } from "./store";
+import { getBusinessById, getDiscountProducts } from "./store";
 
 export const defaultUser: personalAccount = {
   businessid: "hjoZMJGDpAe802w4SDEw",
@@ -27,13 +27,11 @@ export const defaultUser: personalAccount = {
   email: "Waneex@gamil.com",
   username: "Carl Johnson",
 };
-const defaultCart: Cart = { items: [] };
 
 const defaultBusRegData: BusRegData = {};
 const initialState = {
   currentUser: defaultUser,
   busRegData: defaultBusRegData,
-  cart: defaultCart,
 };
 
 const userSlice = createSlice({
@@ -48,44 +46,8 @@ const userSlice = createSlice({
       const data: BusRegData = action.payload;
       state.busRegData = { ...data };
     },
-    delCart: (state, action) => {
-      const product: product = action.payload;
-
-      state.cart.items = state.cart.items
-        .map((item) => {
-          if (item.business?.id === product.store_id) {
-            item.products = item.products.filter(
-              (pro) => pro.id !== product.id
-            );
-            return item;
-          }
-          return item;
-        })
-        .filter((item) => item.products.length > 0);
-    },
-
-    addCart: (state, action) => {
-      const item: CartItem = action.payload;
-      let found = false;
-      let cartItems = state.cart.items;
-      cartItems = cartItems.map((items) => {
-        if (items.business?.id === item.business?.id) {
-          found = true;
-          const result = items.products.findIndex(
-            (pro) => pro.id === item.products[0].id
-          );
-          if (result === -1) {
-            items.products.push(item.products[0]);
-          }
-
-          return items;
-        }
-        return items;
-      });
-      found ? (state.cart.items = cartItems) : state.cart.items.push(item);
-    },
   },
 });
 
-export const { setRegData, setUser, addCart, delCart } = userSlice.actions;
+export const { setRegData, setUser } = userSlice.actions;
 export default userSlice.reducer;

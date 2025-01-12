@@ -33,6 +33,7 @@ export type StackSettingsParamList = {
   BusinessSetting: undefined;
 };
 export type Cart = {
+  total?: number;
   items: CartItem[];
 };
 export type CartItem = {

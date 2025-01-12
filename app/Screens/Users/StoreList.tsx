@@ -35,7 +35,6 @@ const StoreList: React.FC<Props> = ({ navigation }) => {
           </TouchableHighlight>
         )}
       />
-      =
     </View>
   );
 };

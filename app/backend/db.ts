@@ -5,13 +5,13 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBOlcdjKnXpR6FQTYh9o7IdnF1cyvU4Sm8",
-  authDomain: "pocketpal-509a5.firebaseapp.com",
-  projectId: "pocketpal-509a5",
-  storageBucket: "pocketpal-509a5.firebasestorage.app",
-  messagingSenderId: "46628389457",
-  appId: "1:46628389457:web:2be6231a2b3244fcc2ae70",
-  measurementId: "G-8QRB5WF1F6",
+  apiKey: `${process.env.APIKEY}`,
+  authDomain: `${process.env.AUTHDOMAIN}`,
+  projectId: `${process.env.PROJECTID}`,
+  storageBucket: `${process.env.STORAGEBUCKET}`,
+  messagingSenderId: `${process.env.MESSAGINGSENDERID}`,
+  appId: `${process.env.APPID}`,
+  measurementId: `${process.env.MEASUREMENTID}`,
 };
 
 // Initialize Firebase

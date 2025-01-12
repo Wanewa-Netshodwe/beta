@@ -11,7 +11,8 @@ import {
   TouchableNativeFeedback,
   Animated,
 } from "react-native";
-import React, { useEffect, useMemo, useState } from "react";
+import { Rating } from "react-native-ratings";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import Screen from "../../utilities/Screen";
 import { getBusinessById, getUserId, RootState } from "../../redux/store";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,10 +25,11 @@ import {
   TableWrapper,
   Rows,
 } from "react-native-table-component";
-import StarRating from "react-native-star-rating-widget";
+// import StarRating from "react-native-star-rating-widget";
 import * as Progress from "react-native-progress";
 import {
   CartItem,
+  DiscountedProducts,
   reviews,
   StackShopLayoutParamList,
   StackStoreListParamList,
@@ -42,7 +44,7 @@ import { useDynamicStyles } from "../../utilities/Styles";
 import { convertT, convertTime } from "../../utilities/convertTime";
 import { StackScreenProps } from "@react-navigation/stack";
 import { createRandomId, getUid, getUserInfo } from "../../backend/Queries";
-import { addCart } from "../../redux/userSlice";
+import { addCart, setDiscountProduct } from "../../redux/businessSlice";
 import {
   useAnimatedStyle,
   useSharedValue,
@@ -50,13 +52,22 @@ import {
 } from "react-native-reanimated";
 type Props = StackScreenProps<StackStoreListParamList, "viewProduct">;
 
-const ViewProduct: React.FC<Props> = ({ route }) => {
+const ViewProduct: React.FC<Props> = memo(({ route }) => {
   console.log("view scrren called");
-
+  const RenderImage = useCallback(({ item }: any) => {
+    return (
+      <Image
+        key={item.toString()}
+        source={{ uri: item }}
+        width={width - 5}
+        height={250}
+      />
+    );
+  }, []);
   const styles = useDynamicStyles();
   const { product } = route.params;
   const Business = getBusinessById(product.store_id!!);
-  Business === -1 && console.log("business not found");
+  !Business && console.log("business not found");
   const [Video, setVideo] = useState("");
   const [loading, setLoading] = useState(true);
   const [ReviewStarsInfo, setReviewStarsInfo] = useState<
@@ -105,6 +116,7 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
     product.reviews?.forEach((review) => {
       let rating = review.rating;
       if (stars.has(rating)) {
+        //@ts-ignore
         stars.set(rating, stars.get(rating) + 1);
       }
     });
@@ -129,10 +141,10 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
   });
 
   const { width } = Dimensions.get("screen");
-  const { CartState, appTheme, businessState } = useStates();
-  let discountProducts = businessState.discountedProducts;
+  const {  appTheme } = useStates();
+  let discountProducts: DiscountedProducts[] = [];
   let found = -1;
-  if (typeof Business != "number") {
+  if (Business) {
     discountProducts = Business.discountedProducts!!;
     if (discountProducts)
       found = discountProducts.findIndex((dp) => dp.product.id === product.id);
@@ -153,7 +165,7 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
     const cartItem: CartItem = {
       id: createRandomId(),
       products: [product],
-      ...(Business !== -1 ? { business: Business } : {}),
+      ...(Business ? { business: Business } : {}),
       add: false,
       userId: getUserId(),
     };
@@ -180,632 +192,664 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
 
   return (
     <View className="relative">
-      <Animated.View
-        style={[animatedStyle, { transform: [{ scale: 0.7 }] }]}
-        className="p-2 z-50 absolute border top-[14%] rounded-md"
-      >
-        <Text style={styles.text}>Added To Cart</Text>
-      </Animated.View>
-      <View
-        style={styles.sections}
-        className="   p-[2%] gap-5 flex-row items-center "
-      >
-        <MaterialIcons
-          name="arrow-back-ios-new"
-          size={20}
-          style={{ color: appTheme.colors?.textColor }}
-        />
-        <Text style={styles.text} className=" top-2 text-[15px] ">
-          {product.name}
-        </Text>
-      </View>
-      <ScrollView>
-        <View
-          style={{ width: width, backgroundColor: appTheme.colors?.background }}
-          className="mt-1"
-        >
-          {product.imgs && product.imgs?.length > 1 ? (
-            <>
-              <Carousel
-                height={250}
-                width={width}
-                autoPlay={false}
-                pagingEnabled={true}
-                scrollAnimationDuration={500}
-                data={product.imgs!!}
-                renderItem={({ item }) => (
-                  <Image
-                    key={item.toString()}
-                    source={{ uri: item }}
-                    width={width - 5}
-                    height={250}
-                  />
-                )}
-              />
-            </>
-          ) : (
-            <Image
-              source={{ uri: product.imgs!![0] }}
-              width={width}
-              height={250}
-              className="self-center"
-            />
-          )}
-        </View>
-        <View style={styles.sections} className=" ">
-          <View className="  ">
-            <Text className="text-[20px] font-semibold" style={styles.text}>
-              {product.name!!}
-            </Text>
-          </View>
-          {product.rating ? (
-            <>
-              <View className=" mt-2  flex-row items-center">
-                <Feather
-                  name="star"
-                  size={16}
-                  style={{ color: appTheme.colors?.tertiary }}
-                  className="w-[20px]"
-                />
-                <Text
-                  className="text-[14px] font-semibold w-[25px]"
-                  style={styles.text}
-                >
-                  {product.rating}
-                </Text>
-                <Text className="text-[14px] font-semibold" style={styles.text}>
-                  {product.reviews?.length!!} REVIEWS
-                </Text>
-              </View>
-            </>
-          ) : null}
-        </View>
-
-        <View
-          style={styles.sections}
-          className=" mt-1   flex-row items-center justify-between "
-        >
-          <Text className="text-[34px]  w-fit" style={styles.text}>
-            R{" "}
-            {product.auction
-              ? product.auction.started
-                ? product.auction.bidPrice
-                : product.auction.startPrice
-              : found != -1
-              ? discountProducts!![found].price
-              : product.price}
-          </Text>
-          {found != -1 && (
-            <View>
-              <Text
-                className="text-[17px]  -top-1  w-fit"
-                style={[styles.text, { color: "grey" }]}
-              >
-                R{discountProducts!![found].product.price}
-              </Text>
-              <View
-                className="absolute w-[100%] top-[8px]"
-                style={{ borderColor: "grey", borderWidth: 1 }}
-              ></View>
-            </View>
-          )}
-          <View className="mr-4 items-end">
-            <Text className="text-[12px] font-semibold" style={styles.text}>
-              delivery cost
-            </Text>
-            <Text className="text-[14px]  " style={styles.text}>
-              R{product.delivery_cost ? product.delivery_cost : "0"}
-            </Text>
-          </View>
-        </View>
-        {product.auction ? (
-          <>
+      <FlatList
+        ListHeaderComponent={() => (
+          <View>
+            <Animated.View
+              style={[animatedStyle, { transform: [{ scale: 0.7 }] }]}
+              className="p-2 z-50 absolute border top-[14%] rounded-md"
+            >
+              <Text style={styles.text}>Added To Cart</Text>
+            </Animated.View>
             <View
               style={styles.sections}
-              className="mt-2   flex-row items-center justify-between "
+              className="   p-[2%] gap-5 flex-row items-center "
             >
-              <View className="mr-4 gap-1">
-                <Text
-                  className="text-[12px] font-semibold "
-                  style={styles.text}
-                >
-                  Start Date
-                </Text>
-                <Text className="text-[14px] " style={styles.text}>
-                  12/12/2024 00:00
-                </Text>
-              </View>
-            </View>
-          </>
-        ) : null}
-        {product.auction ? (
-          <View
-            style={styles.sections}
-            className="mt-2  px-4 flex-row items-center justify-between "
-          >
-            <View className="mr-4 gap-1">
-              <Text className="text-[12px] font-semibold " style={styles.text}>
-                Closing Date
-              </Text>
-              <Text className="text-[14px] font-extrabold " style={styles.text}>
-                17/12/2024 16:30
+              <MaterialIcons
+                name="arrow-back-ios-new"
+                size={20}
+                style={{ color: appTheme.colors?.textColor }}
+              />
+              <Text style={styles.text} className=" top-2 text-[15px] ">
+                {product.name}
               </Text>
             </View>
-            <View className="mr-4 items-end">
-              <Text className="text-[12px] font-semibold" style={styles.text}>
-                bid increment
-              </Text>
-              <Text className="text-[14px] font-bold " style={styles.text}>
-                R90
-              </Text>
-            </View>
-          </View>
-        ) : null}
 
-        <View
-          style={styles.sections}
-          className="mt-2    flex-row items-center justify-between "
-        >
-          <TouchableNativeFeedback
-            onPress={() => {
-              addToCart();
-            }}
-          >
             <View
               style={{
-                borderColor: appTheme.colors?.textColor,
-                borderWidth: 2,
+                width: width,
+                backgroundColor: appTheme.colors?.background,
               }}
-              className="p-2 items-center"
+              className="mt-1"
             >
-              <Text className="text-[23px]  " style={styles.text}>
-                {product.auction
-                  ? `Bid R${
-                      product.auction.bidPrice!! +
-                      product.auction.bidIncrement!!
-                    }`
-                  : `Buy R${
-                      found != -1
-                        ? discountProducts!![found].price
-                        : product.price
-                    }`}
-              </Text>
+              {product.imgs && product.imgs?.length > 1 ? (
+                <>
+                  <Carousel
+                    height={250}
+                    width={width}
+                    autoPlay={false}
+                    pagingEnabled={true}
+                    scrollAnimationDuration={500}
+                    data={product.imgs!!}
+                    renderItem={RenderImage}
+                  />
+                </>
+              ) : (
+                <Image
+                  source={{ uri: product.imgs!![0] }}
+                  width={width}
+                  height={250}
+                  className="self-center"
+                />
+              )}
             </View>
-          </TouchableNativeFeedback>
-
-          {product.auction ? (
-            <View className="mr-4 flex-row gap-9">
-              <Feather
-                name="edit"
-                size={30}
-                style={{ color: appTheme.colors?.tertiary }}
-                onPress={() => {
-                  setVisible(!visible);
-                }}
-              />
-            </View>
-          ) : null}
-        </View>
-        {product.auction ? (
-          <>
-            <View style={styles.sections} className="mt-2 ">
-              <View className="  flex-row items-center ">
-                <Text className="text-[20px]  " style={styles.text}>
-                  Winning Bid
+            <View style={styles.sections} className=" ">
+              <View className="  ">
+                <Text className="text-[20px] font-semibold" style={styles.text}>
+                  {product.name!!}
                 </Text>
               </View>
-              <View className="mt-[4%]   flex-row items-center justify-between ">
+              {product.rating ? (
+                <>
+                  <View className=" mt-2  flex-row items-center">
+                    <Feather
+                      name="star"
+                      size={16}
+                      style={{ color: appTheme.colors?.tertiary }}
+                      className="w-[20px]"
+                    />
+                    <Text
+                      className="text-[14px] font-semibold w-[25px]"
+                      style={styles.text}
+                    >
+                      {product.rating}
+                    </Text>
+                    <Text
+                      className="text-[14px] font-semibold"
+                      style={styles.text}
+                    >
+                      {product.reviews?.length!!} REVIEWS
+                    </Text>
+                  </View>
+                </>
+              ) : null}
+            </View>
+
+            <View
+              style={styles.sections}
+              className=" mt-1   flex-row items-center justify-between "
+            >
+              <Text className="text-[34px]  w-fit" style={styles.text}>
+                R{" "}
+                {product.auction
+                  ? product.auction.started
+                    ? product.auction.bidPrice
+                    : product.auction.startPrice
+                  : found != -1
+                  ? discountProducts!![found].price
+                  : product.price}
+              </Text>
+              {found != -1 && (
+                <View>
+                  <Text
+                    className="text-[17px]  -top-1  w-fit"
+                    style={[styles.text, { color: "grey" }]}
+                  >
+                    R{discountProducts!![found].product.price}
+                  </Text>
+                  <View
+                    className="absolute w-[100%] top-[8px]"
+                    style={{ borderColor: "grey", borderWidth: 1 }}
+                  ></View>
+                </View>
+              )}
+              <View className="mr-4 items-end">
+                <Text className="text-[12px] font-semibold" style={styles.text}>
+                  delivery cost
+                </Text>
+                <Text className="text-[14px]  " style={styles.text}>
+                  R{product.delivery_cost ? product.delivery_cost : "0"}
+                </Text>
+              </View>
+            </View>
+            {product.auction ? (
+              <>
+                <View
+                  style={styles.sections}
+                  className="mt-2   flex-row items-center justify-between "
+                >
+                  <View className="mr-4 gap-1">
+                    <Text
+                      className="text-[12px] font-semibold "
+                      style={styles.text}
+                    >
+                      Start Date
+                    </Text>
+                    <Text className="text-[14px] " style={styles.text}>
+                      12/12/2024 00:00
+                    </Text>
+                  </View>
+                </View>
+              </>
+            ) : null}
+            {product.auction ? (
+              <View
+                style={styles.sections}
+                className="mt-2  px-4 flex-row items-center justify-between "
+              >
+                <View className="mr-4 gap-1">
+                  <Text
+                    className="text-[12px] font-semibold "
+                    style={styles.text}
+                  >
+                    Closing Date
+                  </Text>
+                  <Text
+                    className="text-[14px] font-extrabold "
+                    style={styles.text}
+                  >
+                    17/12/2024 16:30
+                  </Text>
+                </View>
+                <View className="mr-4 items-end">
+                  <Text
+                    className="text-[12px] font-semibold"
+                    style={styles.text}
+                  >
+                    bid increment
+                  </Text>
+                  <Text className="text-[14px] font-bold " style={styles.text}>
+                    R90
+                  </Text>
+                </View>
+              </View>
+            ) : null}
+
+            <View
+              style={styles.sections}
+              className="mt-2    flex-row items-center justify-between "
+            >
+              <TouchableNativeFeedback
+                onPress={() => {
+                  addToCart();
+                }}
+              >
                 <View
                   style={{
                     borderColor: appTheme.colors?.textColor,
                     borderWidth: 2,
-                    width: width - 35,
                   }}
-                  className=" flex-row items-center p-2 "
+                  className="p-2 items-center"
                 >
-                  <View className="flex-row w-[200px] items-center gap-4">
-                    <View
-                      style={{
-                        borderColor: appTheme.colors?.tertiary,
-                        borderWidth: 2,
-                      }}
-                      className=" w-[35px] h-[35px]  rounded-sm"
-                    ></View>
-                    <Text className="text-[20px]  " style={styles.text}>
-                      Stanley
-                    </Text>
-                  </View>
-
-                  <Text className="text-[20px] " style={styles.text}>
-                    R16 675
+                  <Text className="text-[23px]  " style={styles.text}>
+                    {product.auction
+                      ? `Bid R${
+                          product.auction.bidPrice!! +
+                          product.auction.bidIncrement!!
+                        }`
+                      : `Buy R${
+                          found != -1
+                            ? discountProducts!![found].price
+                            : product.price
+                        }`}
                   </Text>
                 </View>
+              </TouchableNativeFeedback>
+
+              {product.auction ? (
+                <View className="mr-4 flex-row gap-9">
+                  <Feather
+                    name="edit"
+                    size={30}
+                    style={{ color: appTheme.colors?.tertiary }}
+                    onPress={() => {
+                      setVisible(!visible);
+                    }}
+                  />
+                </View>
+              ) : null}
+            </View>
+            {product.auction ? (
+              <>
+                <View style={styles.sections} className="mt-2 ">
+                  <View className="  flex-row items-center ">
+                    <Text className="text-[20px]  " style={styles.text}>
+                      Winning Bid
+                    </Text>
+                  </View>
+                  <View className="mt-[4%]   flex-row items-center justify-between ">
+                    <View
+                      style={{
+                        borderColor: appTheme.colors?.textColor,
+                        borderWidth: 2,
+                        width: width - 35,
+                      }}
+                      className=" flex-row items-center p-2 "
+                    >
+                      <View className="flex-row w-[200px] items-center gap-4">
+                        <View
+                          style={{
+                            borderColor: appTheme.colors?.tertiary,
+                            borderWidth: 2,
+                          }}
+                          className=" w-[35px] h-[35px]  rounded-sm"
+                        ></View>
+                        <Text className="text-[20px]  " style={styles.text}>
+                          Stanley
+                        </Text>
+                      </View>
+
+                      <Text className="text-[20px] " style={styles.text}>
+                        R16 675
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                <View style={styles.sections} className="mt-2 ">
+                  <View className=" flex-row items-center justify-between ">
+                    <Text className="text-[15px]  " style={styles.text}>
+                      Previous Bids
+                    </Text>
+                  </View>
+                  <View className="mt-[4%]   flex-row items-center justify-between ">
+                    <View className="  h-[150px] ">
+                      <ScrollView nestedScrollEnabled={true}>
+                        <View
+                          style={{
+                            borderColor: appTheme.colors?.textColor,
+                            borderWidth: 2,
+                            width: width - 35,
+                          }}
+                          className=" flex-row items-center p-2 justify-between  mb-3"
+                        >
+                          <View className="flex-row w-[200px] items-center gap-4">
+                            <View
+                              style={{
+                                borderColor: appTheme.colors?.textColor,
+                                borderWidth: 2,
+                              }}
+                              className=" w-[25px] h-[25px]  rounded-sm"
+                            ></View>
+                            <Text className="text-[15px]  " style={styles.text}>
+                              Greg421
+                            </Text>
+                          </View>
+
+                          <Text className="text-[15px] " style={styles.text}>
+                            R16475
+                          </Text>
+                        </View>
+                        <View
+                          style={{
+                            borderColor: appTheme.colors?.textColor,
+                            borderWidth: 2,
+                            width: width - 35,
+                          }}
+                          className=" flex-row items-center p-2 justify-between  mb-3"
+                        >
+                          <View className="flex-row w-[200px] items-center gap-4">
+                            <View
+                              style={{
+                                borderColor: appTheme.colors?.textColor,
+                                borderWidth: 2,
+                              }}
+                              className=" w-[25px] h-[25px]  rounded-sm"
+                            ></View>
+                            <Text className="text-[15px]  " style={styles.text}>
+                              ThaB090
+                            </Text>
+                          </View>
+
+                          <Text className="text-[15px]  " style={styles.text}>
+                            R16 175
+                          </Text>
+                        </View>
+                        <View
+                          style={{
+                            borderColor: appTheme.colors?.textColor,
+                            borderWidth: 2,
+                            width: width - 35,
+                          }}
+                          className=" flex-row items-center p-2 justify-between  mb-3"
+                        >
+                          <View className="flex-row w-[200px] items-center gap-4">
+                            <View
+                              style={{
+                                borderColor: appTheme.colors?.textColor,
+                                borderWidth: 2,
+                              }}
+                              className=" w-[25px] h-[25px]  rounded-sm"
+                            ></View>
+                            <Text className="text-[15px]  " style={styles.text}>
+                              Mark
+                            </Text>
+                          </View>
+
+                          <Text className="text-[15px]  " style={styles.text}>
+                            R14 675
+                          </Text>
+                        </View>
+                      </ScrollView>
+                    </View>
+                  </View>
+                </View>
+              </>
+            ) : null}
+
+            <View style={styles.sections} className=" mt-2 ">
+              <View className="   flex-row items-center ">
+                <Text className="text-[20px]  " style={styles.text}>
+                  Description
+                </Text>
+              </View>
+              <View className="mt-[3%]   flex-row items-center ">
+                <Text
+                  className="text-[13px] font-semibold "
+                  style={[{ width: width - 45 }, styles.text]}
+                >
+                  {product.descriptions!!}
+                </Text>
+              </View>
+            </View>
+
+            {product.video ? (
+              product.video.type === "web" ? (
+                <>
+                  <View style={styles.sections} className=" mt-2 ">
+                    <View className="  flex-row items-center ">
+                      <Text className="text-[20px] " style={styles.text}>
+                        Video Preview
+                      </Text>
+                    </View>
+                    <View className="mt-[5%]  px-4 flex-row items-center ">
+                      <WebView
+                        style={{ width: width - 45, height: 200 }}
+                        source={{
+                          uri: Video,
+                        }}
+                      ></WebView>
+                    </View>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <View style={styles.sections} className=" mt-2 ">
+                    <View className="    flex-row items-center ">
+                      <Text className="text-[20px] " style={styles.text}>
+                        Video Preview
+                      </Text>
+                    </View>
+                    <VideoView
+                      className="mt-[8%]"
+                      allowsFullscreen
+                      allowsPictureInPicture
+                      nativeControls
+                      style={{
+                        alignSelf: "center",
+                        marginTop: 18,
+                        height: 250,
+                        width: 300,
+                      }}
+                      player={player}
+                    />
+                  </View>
+                </>
+              )
+            ) : null}
+
+            <View style={styles.sections} className=" mt-2 ">
+              <View className=" flex-row items-center ">
+                <Text className="text-[20px]  " style={styles.text}>
+                  Product Information
+                </Text>
+              </View>
+              <View className="mt-[5%]   flex-row items-center ">
+                <Table
+                  borderStyle={{
+                    borderWidth: 1,
+                    borderColor: appTheme.colors?.tertiary,
+                  }}
+                >
+                  <TableWrapper
+                    borderStyle={{ borderColor: "red" }}
+                    style={{ flexDirection: "row" }}
+                  >
+                    <Col
+                      heightArr={ArrHeight}
+                      width={120}
+                      textStyle={{ ...styles.text, padding: 5 }}
+                      data={tableData.property}
+                    />
+                    <Col
+                      data={tableData.info}
+                      heightArr={ArrHeight}
+                      width={width - 140}
+                      textStyle={{ ...styles.text, padding: 5 }}
+                    />
+                  </TableWrapper>
+                </Table>
               </View>
             </View>
             <View style={styles.sections} className="mt-2 ">
-              <View className=" flex-row items-center justify-between ">
-                <Text className="text-[15px]  " style={styles.text}>
-                  Previous Bids
+              <View className="  mt-3  flex-row items-center  ">
+                <Text className="text-[34px]  w-[55px]" style={styles.text}>
+                  {product.rating}
                 </Text>
-              </View>
-              <View className="mt-[4%]   flex-row items-center justify-between ">
-                <View className="  h-[150px] ">
-                  <ScrollView nestedScrollEnabled={true}>
-                    <View
-                      style={{
-                        borderColor: appTheme.colors?.textColor,
-                        borderWidth: 2,
-                        width: width - 35,
-                      }}
-                      className=" flex-row items-center p-2 justify-between  mb-3"
-                    >
-                      <View className="flex-row w-[200px] items-center gap-4">
-                        <View
-                          style={{
-                            borderColor: appTheme.colors?.textColor,
-                            borderWidth: 2,
-                          }}
-                          className=" w-[25px] h-[25px]  rounded-sm"
-                        ></View>
-                        <Text className="text-[15px]  " style={styles.text}>
-                          Greg421
-                        </Text>
-                      </View>
-
-                      <Text className="text-[15px] " style={styles.text}>
-                        R16475
-                      </Text>
-                    </View>
-                    <View
-                      style={{
-                        borderColor: appTheme.colors?.textColor,
-                        borderWidth: 2,
-                        width: width - 35,
-                      }}
-                      className=" flex-row items-center p-2 justify-between  mb-3"
-                    >
-                      <View className="flex-row w-[200px] items-center gap-4">
-                        <View
-                          style={{
-                            borderColor: appTheme.colors?.textColor,
-                            borderWidth: 2,
-                          }}
-                          className=" w-[25px] h-[25px]  rounded-sm"
-                        ></View>
-                        <Text className="text-[15px]  " style={styles.text}>
-                          ThaB090
-                        </Text>
-                      </View>
-
-                      <Text className="text-[15px]  " style={styles.text}>
-                        R16 175
-                      </Text>
-                    </View>
-                    <View
-                      style={{
-                        borderColor: appTheme.colors?.textColor,
-                        borderWidth: 2,
-                        width: width - 35,
-                      }}
-                      className=" flex-row items-center p-2 justify-between  mb-3"
-                    >
-                      <View className="flex-row w-[200px] items-center gap-4">
-                        <View
-                          style={{
-                            borderColor: appTheme.colors?.textColor,
-                            borderWidth: 2,
-                          }}
-                          className=" w-[25px] h-[25px]  rounded-sm"
-                        ></View>
-                        <Text className="text-[15px]  " style={styles.text}>
-                          Mark
-                        </Text>
-                      </View>
-
-                      <Text className="text-[15px]  " style={styles.text}>
-                        R14 675
-                      </Text>
-                    </View>
-                  </ScrollView>
-                </View>
-              </View>
-            </View>
-          </>
-        ) : null}
-
-        <View style={styles.sections} className=" mt-2 ">
-          <View className="   flex-row items-center ">
-            <Text className="text-[20px]  " style={styles.text}>
-              Description
-            </Text>
-          </View>
-          <View className="mt-[3%]   flex-row items-center ">
-            <Text
-              className="text-[13px] font-semibold "
-              style={[{ width: width - 45 }, styles.text]}
-            >
-              {product.descriptions!!}
-            </Text>
-          </View>
-        </View>
-
-        {product.video ? (
-          product.video.type === "web" ? (
-            <>
-              <View style={styles.sections} className=" mt-2 ">
-                <View className="  flex-row items-center ">
-                  <Text className="text-[20px] " style={styles.text}>
-                    Video Preview
-                  </Text>
-                </View>
-                <View className="mt-[5%]  px-4 flex-row items-center ">
-                  <WebView
-                    style={{ width: width - 45, height: 200 }}
-                    source={{
-                      uri: Video,
-                    }}
-                  ></WebView>
-                </View>
-              </View>
-            </>
-          ) : (
-            <>
-              <View style={styles.sections} className=" mt-2 ">
-                <View className="    flex-row items-center ">
-                  <Text className="text-[20px] " style={styles.text}>
-                    Video Preview
-                  </Text>
-                </View>
-                <VideoView
-                  className="mt-[8%]"
-                  allowsFullscreen
-                  allowsPictureInPicture
-                  nativeControls
-                  style={{
-                    alignSelf: "center",
-                    marginTop: 18,
-                    height: 250,
-                    width: 300,
-                  }}
-                  player={player}
-                />
-              </View>
-            </>
-          )
-        ) : null}
-
-        <View style={styles.sections} className=" mt-2 ">
-          <View className=" flex-row items-center ">
-            <Text className="text-[20px]  " style={styles.text}>
-              Product Information
-            </Text>
-          </View>
-          <View className="mt-[5%]   flex-row items-center ">
-            <Table
-              borderStyle={{
-                borderWidth: 1,
-                borderColor: appTheme.colors?.tertiary,
-              }}
-            >
-              <TableWrapper
-                borderStyle={{ borderColor: "red" }}
-                style={{ flexDirection: "row" }}
-              >
-                <Col
-                  heightArr={ArrHeight}
-                  width={120}
-                  textStyle={[styles.text, { padding: 5 }]}
-                  data={tableData.property}
-                />
-                <Col
-                  data={tableData.info}
-                  heightArr={ArrHeight}
-                  width={width - 140}
-                  textStyle={[styles.text, { padding: 5 }]}
-                />
-              </TableWrapper>
-            </Table>
-          </View>
-        </View>
-        <View style={styles.sections} className="mt-2 ">
-          <View className="  mt-3  flex-row items-center  ">
-            <Text className="text-[34px]  w-[55px]" style={styles.text}>
-              {product.rating}
-            </Text>
-            <StarRating
-              color={appTheme.colors?.textColor}
-              rating={
-                Number.isInteger(product.rating)
-                  ? product.rating!!
-                  : parseFloat(`${product.rating?.toString().charAt(0)}.5`)
-              }
-              onChange={() => {}}
-              animationConfig={{ scale: 1 }}
-            />
-          </View>
-          <View className="mt-2   flex-row items-center gap-5">
-            <View className=" flex-row gap-1 items-center">
-              <Text className="text-[20px]  " style={styles.text}>
-                5
-              </Text>
-              <Feather
-                name="star"
-                size={12}
-                style={{ color: appTheme.colors?.textColor }}
-              />
-            </View>
-
-            <Progress.Bar
-              height={9}
-              borderRadius={4}
-              borderWidth={0}
-              color={appTheme.colors?.textColor}
-              progress={ReviewStarsInfo[4].star.perc}
-              unfilledColor={appTheme.colors?.background}
-              width={200}
-            />
-            <Text className="text-[17px]  " style={styles.text}>
-              {ReviewStarsInfo[4].star.num_of_people}
-            </Text>
-          </View>
-          <View className="mt-[3%]   flex-row items-center gap-5">
-            <View className=" flex-row gap-1 items-center">
-              <Text className="text-[20px] " style={styles.text}>
-                4
-              </Text>
-              <Feather
-                name="star"
-                size={12}
-                style={{ color: appTheme.colors?.textColor }}
-              />
-            </View>
-
-            <Progress.Bar
-              height={9}
-              borderRadius={4}
-              borderWidth={0}
-              color={appTheme.colors?.textColor}
-              progress={ReviewStarsInfo[3].star.perc}
-              unfilledColor={appTheme.colors?.background}
-              width={200}
-            />
-            <Text className="text-[17px]  " style={styles.text}>
-              {ReviewStarsInfo[3].star.num_of_people}
-            </Text>
-          </View>
-          <View className="mt-[3%]  flex-row items-center gap-5">
-            <View className=" flex-row gap-1 items-center">
-              <Text className="text-[20px]" style={styles.text}>
-                3
-              </Text>
-              <Feather
-                name="star"
-                size={12}
-                style={{ color: appTheme.colors?.textColor }}
-              />
-            </View>
-
-            <Progress.Bar
-              height={9}
-              borderRadius={4}
-              borderWidth={0}
-              color={appTheme.colors?.textColor}
-              progress={ReviewStarsInfo[2].star.perc}
-              unfilledColor={appTheme.colors?.background}
-              width={200}
-            />
-            <Text className="text-[17px]  " style={styles.text}>
-              {ReviewStarsInfo[2].star.num_of_people}
-            </Text>
-          </View>
-          <View className="mt-[3%]   flex-row items-center gap-5">
-            <View className=" flex-row gap-1 items-center">
-              <Text className="text-[20px] " style={styles.text}>
-                2
-              </Text>
-              <Feather
-                name="star"
-                size={12}
-                style={{ color: appTheme.colors?.textColor }}
-              />
-            </View>
-
-            <Progress.Bar
-              height={9}
-              borderRadius={4}
-              borderWidth={0}
-              color={appTheme.colors?.textColor}
-              progress={ReviewStarsInfo[1].star.perc}
-              unfilledColor={appTheme.colors?.background}
-              width={200}
-            />
-            <Text className="text-[17px]  " style={styles.text}>
-              {ReviewStarsInfo[1].star.num_of_people}
-            </Text>
-          </View>
-          <View className="mt-[3%]  flex-row items-center gap-5">
-            <View className=" flex-row gap-1 items-center">
-              <Text className="text-[20px]  " style={styles.text}>
-                1
-              </Text>
-              <Feather
-                name="star"
-                size={12}
-                style={{ color: appTheme.colors?.textColor }}
-              />
-            </View>
-
-            <Progress.Bar
-              height={9}
-              borderRadius={4}
-              borderWidth={0}
-              color={appTheme.colors?.textColor}
-              progress={ReviewStarsInfo[0].star.perc}
-              unfilledColor={appTheme.colors?.background}
-              width={200}
-            />
-            <Text className="text-[17px]  " style={styles.text}>
-              {ReviewStarsInfo[0].star.num_of_people}
-            </Text>
-          </View>
-        </View>
-
-        <FlatList
-          nestedScrollEnabled={true}
-          data={product.reviews}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.sections} className="  mt-2  ">
-              <Text style={styles.text} className="text-[24px]  w-[250px]">
-                {item.Title}
-              </Text>
-
-              <View className="-left-2 mt-[2%]">
-                <StarRating
+                {/* <StarRating
                   color={appTheme.colors?.textColor}
-                  starSize={15}
-                  rating={item.rating}
+                  rating={
+                    Number.isInteger(product.rating)
+                      ? product.rating!!
+                      : parseFloat(`${product.rating?.toString().charAt(0)}.5`)
+                  }
                   onChange={() => {}}
                   animationConfig={{ scale: 1 }}
+                /> */}
+                <Rating
+                  ratingCount={5}
+                  startingValue={product.rating}
+                  style={{ top: -4 }}
+                  type="custom"
+                  ratingColor={appTheme.colors?.textColor}
+                  ratingBackgroundColor={appTheme.colors?.background}
+                  tintColor={appTheme.colors?.primary}
+                  readonly
+                  fractions={1}
+                  imageSize={32}
                 />
               </View>
-              <View className="flex-row gap-1 mt-[2%]">
-                <Text className="text-[15px] " style={styles.text}>
-                  {item.name} -
-                </Text>
-                <Text className="text-[15px] " style={styles.text}>
-                  {/* {item.date && item.date.toUTCString().substring(0, 16)} */}
-                  {String(item.date)}
+              <View className="mt-2   flex-row items-center gap-5">
+                <View className=" flex-row gap-1 items-center">
+                  <Text className="text-[20px]  " style={styles.text}>
+                    5
+                  </Text>
+                  <Feather
+                    name="star"
+                    size={12}
+                    style={{ color: appTheme.colors?.textColor }}
+                  />
+                </View>
+
+                <Progress.Bar
+                  height={9}
+                  borderRadius={4}
+                  borderWidth={0}
+                  color={appTheme.colors?.textColor}
+                  progress={ReviewStarsInfo[4].star.perc}
+                  unfilledColor={appTheme.colors?.background}
+                  width={200}
+                />
+                <Text className="text-[17px]  " style={styles.text}>
+                  {ReviewStarsInfo[4].star.num_of_people}
                 </Text>
               </View>
-              <Text style={styles.text} className="mt-[2%] w-[290px]">
-                {item.content}
-              </Text>
-              <View
-                style={{
-                  borderColor: appTheme.colors?.textColor,
-                  borderWidth: 1,
-                }}
-                className="rounded-[69px] mt-[5%] p-2 items-center flex-row gap-2 w-[70px] self-end "
-              >
-                <AntDesign
-                  name="like1"
-                  size={16}
-                  style={{ color: appTheme.colors?.textColor }}
+              <View className="mt-[3%]   flex-row items-center gap-5">
+                <View className=" flex-row gap-1 items-center">
+                  <Text className="text-[20px] " style={styles.text}>
+                    4
+                  </Text>
+                  <Feather
+                    name="star"
+                    size={12}
+                    style={{ color: appTheme.colors?.textColor }}
+                  />
+                </View>
+
+                <Progress.Bar
+                  height={9}
+                  borderRadius={4}
+                  borderWidth={0}
+                  color={appTheme.colors?.textColor}
+                  progress={ReviewStarsInfo[3].star.perc}
+                  unfilledColor={appTheme.colors?.background}
+                  width={200}
                 />
-                <Text
-                  className="text-[15px] "
-                  style={{ color: appTheme.colors?.textColor }}
-                >
-                  ({item.likes})
+                <Text className="text-[17px]  " style={styles.text}>
+                  {ReviewStarsInfo[3].star.num_of_people}
+                </Text>
+              </View>
+              <View className="mt-[3%]  flex-row items-center gap-5">
+                <View className=" flex-row gap-1 items-center">
+                  <Text className="text-[20px]" style={styles.text}>
+                    3
+                  </Text>
+                  <Feather
+                    name="star"
+                    size={12}
+                    style={{ color: appTheme.colors?.textColor }}
+                  />
+                </View>
+
+                <Progress.Bar
+                  height={9}
+                  borderRadius={4}
+                  borderWidth={0}
+                  color={appTheme.colors?.textColor}
+                  progress={ReviewStarsInfo[2].star.perc}
+                  unfilledColor={appTheme.colors?.background}
+                  width={200}
+                />
+                <Text className="text-[17px]  " style={styles.text}>
+                  {ReviewStarsInfo[2].star.num_of_people}
+                </Text>
+              </View>
+              <View className="mt-[3%]   flex-row items-center gap-5">
+                <View className=" flex-row gap-1 items-center">
+                  <Text className="text-[20px] " style={styles.text}>
+                    2
+                  </Text>
+                  <Feather
+                    name="star"
+                    size={12}
+                    style={{ color: appTheme.colors?.textColor }}
+                  />
+                </View>
+
+                <Progress.Bar
+                  height={9}
+                  borderRadius={4}
+                  borderWidth={0}
+                  color={appTheme.colors?.textColor}
+                  progress={ReviewStarsInfo[1].star.perc}
+                  unfilledColor={appTheme.colors?.background}
+                  width={200}
+                />
+                <Text className="text-[17px]  " style={styles.text}>
+                  {ReviewStarsInfo[1].star.num_of_people}
+                </Text>
+              </View>
+              <View className="mt-[3%]  flex-row items-center gap-5">
+                <View className=" flex-row gap-1 items-center">
+                  <Text className="text-[20px]  " style={styles.text}>
+                    1
+                  </Text>
+                  <Feather
+                    name="star"
+                    size={12}
+                    style={{ color: appTheme.colors?.textColor }}
+                  />
+                </View>
+
+                <Progress.Bar
+                  height={9}
+                  borderRadius={4}
+                  borderWidth={0}
+                  color={appTheme.colors?.textColor}
+                  progress={ReviewStarsInfo[0].star.perc}
+                  unfilledColor={appTheme.colors?.background}
+                  width={200}
+                />
+                <Text className="text-[17px]  " style={styles.text}>
+                  {ReviewStarsInfo[0].star.num_of_people}
                 </Text>
               </View>
             </View>
-          )}
-        />
-      </ScrollView>
+          </View>
+        )}
+        data={product.reviews}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.sections} className="  mt-2  ">
+            <Text style={styles.text} className="text-[24px]  w-[250px]">
+              {item.Title}
+            </Text>
+
+            <View className="-left-2 mt-[2%]">
+              {/* <StarRating
+                color={appTheme.colors?.textColor}
+                starSize={15}
+                rating={item.rating}
+                onChange={() => {}}
+                animationConfig={{ scale: 1 }}
+              /> */}
+              <Rating
+                startingValue={item.rating}
+                style={{ width: "25%" }}
+                type="custom"
+                ratingColor={appTheme.colors?.textColor}
+                ratingBackgroundColor={appTheme.colors?.background}
+                tintColor={appTheme.colors?.primary}
+                readonly
+                fractions={0}
+                imageSize={15}
+              />
+            </View>
+            <View className="flex-row gap-1 mt-[2%]">
+              <Text className="text-[15px] " style={styles.text}>
+                {item.name} -
+              </Text>
+              <Text className="text-[15px] " style={styles.text}>
+                {/* {item.date && item.date.toUTCString().substring(0, 16)} */}
+                {String(item.date)}
+              </Text>
+            </View>
+            <Text style={styles.text} className="mt-[2%] w-[290px]">
+              {item.content}
+            </Text>
+            <View
+              style={{
+                borderColor: appTheme.colors?.textColor,
+                borderWidth: 1,
+              }}
+              className="rounded-[69px] mt-[5%] p-2 items-center flex-row gap-2 w-[70px] self-end "
+            >
+              <AntDesign
+                name="like1"
+                size={16}
+                style={{ color: appTheme.colors?.textColor }}
+              />
+              <Text
+                className="text-[15px] "
+                style={{ color: appTheme.colors?.textColor }}
+              >
+                ({item.likes})
+              </Text>
+            </View>
+          </View>
+        )}
+      />
     </View>
   );
-};
+});
 
 export default ViewProduct;

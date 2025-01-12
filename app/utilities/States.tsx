@@ -38,7 +38,7 @@ export const useStates = () => {
   const CategoryListState = useSelector(
     (state: RootState) => state.categoryLists
   );
-  const CartState = useSelector((state: RootState) => state.user.cart);
+  const CartState = useSelector((state: RootState) => state.business.cart);
   const voucherProducts = useSelector(
     (state: RootState) => state.business.voucherProducts
   );
