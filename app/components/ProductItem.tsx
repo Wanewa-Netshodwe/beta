@@ -26,20 +26,27 @@ import Animated, {
 import { useDispatch } from "react-redux";
 
 import { getBusinessById } from "../redux/store";
-import { decrement, delCart, increment } from "../redux/businessSlice";
-import {
-  decrementCartHolder,
-  deleteProductCartHolder,
-  incrementCartHolder,
-} from "../redux/CartItemSlice";
+
+import { decrement, delCart, increment } from "../redux/CartItemSlice";
+
 type Props = {
   product: product;
+  counter: number;
+  onIncrement: () => void;
+  onDecrement: () => void;
+  currentPrice: number;
 };
 
-const ProductItem = ({ product }: Props) => {
+const ProductItem = ({
+  product,
+  counter,
+  onDecrement,
+  onIncrement,
+  currentPrice,
+}: Props) => {
   const dispatch = useDispatch();
   const { appTheme } = useStates();
-  const [counter, setCounter] = useState(1);
+
   const [valid, setValid] = useState(false);
 
   const Business = getBusinessById(product.store_id!!);
@@ -55,7 +62,9 @@ const ProductItem = ({ product }: Props) => {
     found !== -1 ? discountProducts!![found].price : product.price
   );
 
-  const [currentPrice, setCurrentPrice] = useState(price);
+  const [currentPriceDelivery, setcurrentPriceDelivery] = useState(
+    product.delivery_cost!!
+  );
 
   const styles = useDynamicStyles();
   const TransX = useSharedValue(100);
@@ -66,8 +75,9 @@ const ProductItem = ({ product }: Props) => {
     opacity: opacityValue.value,
   }));
   const handleIncrement = () => {
-    dispatch(increment(price!!));
-    dispatch(incrementCartHolder(product));
+    setcurrentPriceDelivery((prev) => prev!! + product.delivery_cost!!);
+    dispatch(increment(product));
+    onIncrement();
   };
   const Pan = Gesture.Pan().onEnd((e) => {
     const { translationX } = e;
@@ -79,9 +89,9 @@ const ProductItem = ({ product }: Props) => {
   console.log(counter);
   const handleDecrement = () => {
     if (counter > 1) {
-      setCurrentPrice((prev) => prev!! - price!!);
-      dispatch(decrement(price!!));
-      dispatch(decrementCartHolder(product));
+      setcurrentPriceDelivery((prev) => prev!! - product.delivery_cost!!);
+      dispatch(decrement(product));
+      onDecrement();
     }
   };
   return (
@@ -121,7 +131,6 @@ const ProductItem = ({ product }: Props) => {
                   size={15}
                   onPress={() => {
                     handleDecrement();
-                    setCounter((prev) => (prev === 1 ? 1 : prev - 1));
                   }}
                 />
 
@@ -134,7 +143,6 @@ const ProductItem = ({ product }: Props) => {
                       null;
                     } else {
                       handleIncrement();
-                      setCounter((prev) => prev + 1);
                     }
                   }}
                 />
@@ -156,11 +164,11 @@ const ProductItem = ({ product }: Props) => {
                     ...product,
                     cuurentprice: currentPrice!!,
                   };
-                  dispatch(delCart({ currentPrice: currentPrice!! }));
                   dispatch(
-                    deleteProductCartHolder({
+                    delCart({
                       product: product,
                       currentPrice: currentPrice!!,
+                      currentPriceDelivery,
                     })
                   );
                 }}

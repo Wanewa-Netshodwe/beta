@@ -42,31 +42,35 @@ import BannerSection from "../../components/BannerSection";
 import CarouselSection from "../../components/CarouselSection";
 import { useDynamicStyles } from "../../utilities/Styles";
 import LoadingComp from "../../utilities/LoadingComp";
-import {
-  removeForeground,
-  setDiscountProduct,
-  setvoucherProduct,
-} from "../../redux/businessSlice";
+import { removeForeground } from "../../redux/businessSlice";
 import { useStates } from "../../utilities/States";
 import { getUserBusiness, RootState } from "../../redux/store";
 import OutlineBtn from "../../components/OutlineBtn";
+import {
+  setDiscountProduct,
+  setvoucherProduct,
+} from "../../redux/CartItemSlice";
 
 type prop = StackScreenProps<StackShopLayoutParamList, "home">;
 const BusinessLayout: React.FC<prop> = ({ navigation }) => {
   const {
     businessSections,
     businessForeground,
-    voucherProducts,
     businessPic,
     businessName,
     businessVerified,
-    discountProducts,
     businessState,
   } = useStates();
   const sections = businessSections;
   const Businessforeground = businessForeground;
   const store_pic = useSelector(
     (state: RootState) => state.business.userBusiness.store_pic
+  );
+  const discountProducts = useSelector(
+    (state: RootState) => state.cartHolderItems.discountedProducts
+  );
+  const voucherProducts = useSelector(
+    (state: RootState) => state.cartHolderItems.voucherProducts
   );
   const store_name = businessName;
   const verified = businessVerified;
@@ -75,7 +79,7 @@ const BusinessLayout: React.FC<prop> = ({ navigation }) => {
   const handleDeleteSection = (sectionInfo: sectionData) => {
     BE_deleteSection({ dispatch, sectionInfo });
   };
-  console.log("vouncher products :", voucherProducts);
+
   const [isLoading, setLoading] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const { width } = Dimensions.get("screen");

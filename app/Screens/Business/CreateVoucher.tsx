@@ -28,13 +28,10 @@ import Animated, {
 } from "react-native-reanimated";
 import ClickableBtn from "../../components/ClickableBtn";
 import { useDispatch } from "react-redux";
-import {
-  addDiscountProduct,
-  addVoucherProduct,
-} from "../../redux/businessSlice";
 import { getBusinessById } from "../../redux/store";
 import { SelectList } from "react-native-dropdown-select-list";
 import { createRandomId } from "../../backend/Queries";
+import { addVoucherProduct } from "../../redux/CartItemSlice";
 type Props = {};
 
 const CreateVoucher = (props: Props) => {
@@ -183,6 +180,7 @@ const CreateVoucher = (props: Props) => {
                     scale.value = withTiming(1.1, { duration: 250 });
                     setSel(true);
                     const v: voucherProduct = {
+                      store_id: businessId,
                       action:
                         voucherType === "Discount" ? "Discount" : "Giveaway",
                       code: voucher,

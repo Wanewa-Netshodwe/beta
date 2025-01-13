@@ -9,7 +9,7 @@ import {
   BE_login,
   BE_signup,
 } from "../../../backend/Queries";
-import { Rating} from "react-native-ratings";
+import { Rating } from "react-native-ratings";
 import { BusRegData } from "../../../utilities/Types";
 
 export default function SignUp() {
@@ -19,9 +19,9 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phonenumber, setPhonenumber] = useState("");
-  const [ratingCompleted, setRatingCompleted] = useState();
+
   const [img, setImg] = useState("");
-  console.log(ratingCompleted);
+
   const handleSignup = () => {
     const data = {
       image: img,
@@ -127,21 +127,6 @@ export default function SignUp() {
       />
       <Button onPress={handleSignup} title="signup"></Button>
       <Button onPress={handleSignin} title="signin"></Button>
-      <View className="mt-2 p-5">
-        <Rating
-        style={{borderColor:'black',borderWidth:1 ,width:'50%'}}
-          type="custom"
-          ratingColor="red"
-          ratingBackgroundColor="blue"
-          tintColor="white"
-          readonly
-          fractions={0}
-          imageSize={15}
-         
-        />
-       
-        
-      </View>
     </View>
   );
 }

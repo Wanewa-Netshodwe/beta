@@ -2,8 +2,6 @@ import { StatusBar } from "expo-status-bar";
 import { LogBox, StyleSheet } from "react-native";
 import { Provider, useDispatch } from "react-redux";
 import { NavigationContainer } from "@react-navigation/native";
-import store from "./app/redux/store";
-import BusinessNav from "./app/navigation/Business/BusinessNav";
 import Screen from "./app/utilities/Screen";
 import { useStates } from "./app/utilities/States";
 import "./global.css"; // Ensure this path is correct
@@ -12,22 +10,29 @@ import RootStack from "./app/navigation/RootStack";
 import { useEffect } from "react";
 import { BE_getAllBusinesses } from "./app/backend/Queries";
 import { BusinessAccount, DiscountedProducts } from "./app/utilities/Types";
-import { setDiscountProduct } from "./app/redux/businessSlice";
-
+import {
+  setDiscountProduct,
+  setvoucherProduct,
+} from "./app/redux/CartItemSlice";
+import React from "react";
 LogBox.ignoreAllLogs(true);
-
 export default function AppContent() {
   const { appTheme, AllBusiness, businessForeground } = useStates();
   const dispatch = useDispatch();
   useEffect(() => {
     BE_getAllBusinesses(dispatch).then((allBusiness: any) => {
       let discountedProducts: any = [];
+      let voucherProducts: any = [];
       allBusiness.map((bus: BusinessAccount) => {
         if (bus.discountedProducts) {
           discountedProducts.push(bus.discountedProducts);
         }
+        if (bus.voucherProducts) {
+          voucherProducts.push(bus.voucherProducts);
+        }
       });
       dispatch(setDiscountProduct(discountedProducts.flat()));
+      dispatch(setvoucherProduct(voucherProducts.flat()));
     });
   }, []);
 

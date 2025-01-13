@@ -34,7 +34,7 @@ export type StackSettingsParamList = {
 };
 export type Cart = {
   total?: number;
-  item: CartItem;
+
 };
 export type CartItem = {
   id?: string;
@@ -43,6 +43,7 @@ export type CartItem = {
   userId?: string;
 };
 export type voucherProduct = {
+  store_id: string;
   price: number;
   quantity: number;
   id: string;

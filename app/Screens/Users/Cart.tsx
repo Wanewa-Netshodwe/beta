@@ -18,8 +18,6 @@ import { RootState } from "../../redux/store";
 type Props = {};
 
 const Cart = (props: Props) => {
-  const { CartState } = useStates();
-
   const style = useDynamicStyles();
   const [grandTotal, setCartTotal] = useState(0);
   const [voucher, setVoucher] = useState("");
@@ -27,8 +25,10 @@ const Cart = (props: Props) => {
   const cartitems = useSelector(
     (state: RootState) => state.cartHolderItems.defaultCartHolderItem
   );
+  const total = useSelector((state: RootState) => state.cartHolderItems.Total);
   console.log("process :", process);
-  console.log("cart total  :", CartState.total);
+  console.log("cart total  :", total);
+  console.log(cartitems.length, " length of card items");
   return (
     <View className="w-full h-full">
       <View
@@ -45,54 +45,58 @@ const Cart = (props: Props) => {
           style={[style.text, { color: "#991b1b" }]}
           className="text-[26px] text-red-800 border border-transparent"
         >
-          R{CartState.total!.toFixed(2)}
+          R{Math.abs(total).toFixed(2)}
         </Text>
       </View>
-      <ScrollView>
-        <View className="p-[5%]">
-          <FlatList
-            data={cartitems}
-            keyExtractor={(item) => item.id!}
-            renderItem={({ item }) => (
-              <CartItemHolder
-                setProcess={setProcess}
-                process={process}
-                item={item}
-                voucher={voucher}
-                cartTotal={setCartTotal}
-              />
-            )}
-          />
-        </View>
-        <View className="p-[5%]">
-          <Text style={style.text}>Redeem voucher</Text>
-          <View className="items-center flex-row  gap-6">
-            <TextInput
-              maxLength={8}
-              className="w-[160px]"
-              style={style.inputs}
-              placeholder="Voucher Code"
-              value={
-                voucher.length > 3 && !voucher.includes("-")
-                  ? voucher.toUpperCase().substring(0, 3) +
-                    "-" +
-                    voucher.toUpperCase().substring(3)
-                  : voucher.toUpperCase()
-              }
-              onChangeText={setVoucher}
+      {cartitems.length > 0 ? (
+        <ScrollView>
+          <View className="p-[5%]">
+            <FlatList
+              data={cartitems}
+              keyExtractor={(item) => item.id!}
+              renderItem={({ item }) => (
+                <CartItemHolder
+                  setProcess={setProcess}
+                  process={process}
+                  item={item}
+                  voucher={voucher}
+                  cartTotal={setCartTotal}
+                />
+              )}
             />
-            <TouchableNativeFeedback>
-              <OutlineBtn
-                onPress={() => {
-                  setProcess(true);
-                }}
-                width={85}
-                title="Redeem"
-              />
-            </TouchableNativeFeedback>
           </View>
-        </View>
-      </ScrollView>
+          <View className="p-[5%]">
+            <Text style={style.text}>Redeem voucher</Text>
+            <View className="items-center flex-row  gap-6">
+              <TextInput
+                maxLength={8}
+                className="w-[160px]"
+                style={style.inputs}
+                placeholder="Voucher Code"
+                value={
+                  voucher.length > 3 && !voucher.includes("-")
+                    ? voucher.toUpperCase().substring(0, 3) +
+                      "-" +
+                      voucher.toUpperCase().substring(3)
+                    : voucher.toUpperCase()
+                }
+                onChangeText={setVoucher}
+              />
+              <TouchableNativeFeedback>
+                <OutlineBtn
+                  onPress={() => {
+                    setProcess(true);
+                  }}
+                  width={85}
+                  title="Redeem"
+                />
+              </TouchableNativeFeedback>
+            </View>
+          </View>
+        </ScrollView>
+      ) : (
+        <Text>No products found</Text>
+      )}
     </View>
   );
 };

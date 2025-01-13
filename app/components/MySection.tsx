@@ -34,7 +34,10 @@ const MySection = (props: Props) => {
   const dispatch = useDispatch();
   const styles2 = useDynamicStyles();
   const { nav } = props;
-  const { appTheme, discountProducts } = useStates();
+  const { appTheme } = useStates();
+  const discountProducts = useSelector(
+    (state: RootState) => state.cartHolderItems.discountedProducts
+  );
   console.log("discounted products ", discountProducts);
 
   const prod = props.products ? props.products : null;
@@ -71,10 +74,14 @@ const MySection = (props: Props) => {
                 data={prod.slice(0, 4)}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => {
-                  const found = discountProducts.findIndex(
-                    (dp) => dp.product.id === item.id
-                  );
-                  console.log("found at : ", found);
+                  let found = -1;
+                  if (discountProducts) {
+                    found = discountProducts.findIndex(
+                      (dp) => dp.product.id === item.id
+                    );
+                    console.log("found at : ", found);
+                  }
+
                   return (
                     <TouchableNativeFeedback
                       onPress={() => {
@@ -198,10 +205,13 @@ const MySection = (props: Props) => {
               <>
                 <View className=" gap-2  flex-wrap flex-row  ">
                   {prod.slice(0, 4).map((item, index) => {
-                    const found = discountProducts.findIndex(
-                      (dp) => dp.product.id === item.id
-                    );
-                    console.log("found at : ", found);
+                    let found = -1;
+                    if (discountProducts) {
+                      found = discountProducts.findIndex(
+                        (dp) => dp.product.id === item.id
+                      );
+                      console.log("found at : ", found);
+                    }
                     return (
                       <TouchableNativeFeedback
                         onPress={() => {

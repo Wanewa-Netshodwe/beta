@@ -44,17 +44,12 @@ export const defaultBusiness: BusinessAccount = {
 
 const products: product[] = [];
 const AllBusinesses: BusinessAccount[] = [];
-const defaultdiscountedProducts: DiscountedProducts[] = [];
-const defaultvoucherProducts: voucherProduct[] = [];
 const initialState = {
   allBusinesses: AllBusinesses,
   userBusiness: defaultBusiness,
   products: products,
   wallets: [],
-  busRegData: defaultBusRegData,
-  discountedProducts: defaultdiscountedProducts,
-  voucherProducts: defaultvoucherProducts,
-  
+  busRegData: defaultBusRegData,  
 };
 
 const businessSlice = createSlice({
@@ -65,34 +60,7 @@ const businessSlice = createSlice({
       const data: BusRegData = action.payload;
       state.busRegData = { ...data };
     },
-    setDiscountProduct: (state, action) => {
-      const discountedProduct: DiscountedProducts[] = action.payload;
-      state.discountedProducts = discountedProduct;
-    },
-    setvoucherProduct: (state, action) => {
-      const voucherProduct: voucherProduct[] = action.payload;
-      state.voucherProducts = voucherProduct;
-    },
-   
-
-    addVoucherProduct: (state, action) => {
-      const voucherProduct: voucherProduct = action.payload;
-      // const result = state.voucherProducts.findIndex(
-      //   (vp) => vp.id === voucherProduct.id
-      // );
-      // console.log(result)
-      // result === -1 ? null : state.voucherProducts.push(voucherProduct);
-      state.voucherProducts.push(voucherProduct);
-    },
-    addDiscountProduct: (state, action) => {
-      const discountedProduct: DiscountedProducts[] = action.payload;
-      discountedProduct.forEach((dpro) => {
-        const result = state.discountedProducts.findIndex(
-          (dp) => dp.product.id === dpro.product.id
-        );
-        result === -1 && state.discountedProducts.push(dpro);
-      });
-    },
+    
     setBusiness: (state, action) => {
       const business = action.payload;
       state.userBusiness = business;
@@ -186,8 +154,6 @@ const businessSlice = createSlice({
 });
 
 export const {
-  addVoucherProduct,
-  setvoucherProduct,
   setBusiness,
   setProducts,
   setWallets,
@@ -201,7 +167,5 @@ export const {
   removeForeground,
   editProduct,
   delProduct,
-  addDiscountProduct,
-  setDiscountProduct,
 } = businessSlice.actions;
 export default businessSlice.reducer;

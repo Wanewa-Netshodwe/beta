@@ -8,9 +8,7 @@ export const useStates = () => {
   const businessSections = useSelector(
     (state: RootState) => state.business.userBusiness.sections
   );
-  const discountProducts = useSelector(
-    (state: RootState) => state.business.discountedProducts
-  );
+
   const businessId = useSelector(
     (state: RootState) => state.business.userBusiness.id
   );
@@ -38,15 +36,9 @@ export const useStates = () => {
   const CategoryListState = useSelector(
     (state: RootState) => state.categoryLists
   );
-  const CartState = useSelector((state: RootState) => state.business.cart);
-  const voucherProducts = useSelector(
-    (state: RootState) => state.business.voucherProducts
-  );
 
   const states = useMemo(
     () => ({
-      voucherProducts,
-      CartState,
       appTheme,
       businessState,
       businessSections,
@@ -59,12 +51,8 @@ export const useStates = () => {
       businessVerified,
       businessId,
       AllBusiness,
-      discountProducts,
     }),
     [
-      voucherProducts,
-      discountProducts,
-      CartState,
       AllBusiness,
       appTheme,
       businessState,

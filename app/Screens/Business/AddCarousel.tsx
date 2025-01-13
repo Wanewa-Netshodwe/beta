@@ -39,7 +39,7 @@ const AddCarousel: React.FC<Prop> = ({ navigation }: Prop) => {
   const { width } = Dimensions.get("window");
   const styles = useDynamicStyles();
   const dispatch = useDispatch();
-  const { appTheme, businessSections } = useStates();
+  const { appTheme, businessSections ,businessId} = useStates();
   const businessData = businessSections;
   const [img, setImg] = useState<string[]>([]);
   const [name, setName] = useState("");
@@ -101,7 +101,7 @@ const AddCarousel: React.FC<Prop> = ({ navigation }: Prop) => {
         name: name,
         postion: num,
         imgs: img,
-        businessid: businessData.id,
+        businessid: businessId,
         type: "Carousel",
         height: height,
         properties: {

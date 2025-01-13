@@ -45,14 +45,11 @@ import { convertT, convertTime } from "../../utilities/convertTime";
 import { StackScreenProps } from "@react-navigation/stack";
 import { createRandomId, getUid, getUserInfo } from "../../backend/Queries";
 import {
-  addProduct,
-  setDiscountProduct,
-} from "../../redux/businessSlice";
-import {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { addCart } from "../../redux/CartItemSlice";
 type Props = StackScreenProps<StackStoreListParamList, "viewProduct">;
 
 const ViewProduct: React.FC<Props> = memo(({ route }) => {
@@ -70,6 +67,7 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
   const styles = useDynamicStyles();
   const { product } = route.params;
   const Business = getBusinessById(product.store_id!!);
+
   !Business && console.log("business not found");
   const [Video, setVideo] = useState("");
   const [loading, setLoading] = useState(true);
@@ -173,8 +171,8 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
     };
     const price =
       found != -1 ? discountProducts!![found].product.price : product.price;
-    dispatch(addCart(price));
-   
+    dispatch(addCart(cartItem));
+
     // console.log("cart itemsj", CartState.items);
   };
 

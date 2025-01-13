@@ -32,21 +32,134 @@ const CartItemHolder = ({
   process,
   setProcess,
 }: Props) => {
+  let discountProducts = item.business!.discountedProducts;
   const [collapse, setCollapse] = useState(true);
-  const [deleted, setDeleted] = useState<number>();
-
-  const [deleteProduct, setDelProduct] = useState<product>();
 
   const { appTheme, businessState } = useStates();
-  const grandTotal = useSelector(
-    (state: RootState) => state.cartHolderItems.grandTotal
+  const carts = useSelector(
+    (state: RootState) => state.cartHolderItems.defaultCartHolderItem
   );
-  const deliveryPrice = useSelector(
-    (state: RootState) => state.cartHolderItems.deliveryCost
+  const cart_infos = useSelector(
+    (state: RootState) => state.cartHolderItems.defaultCartHolderItemInfo
   );
-  const totalPrice = useSelector(
-    (state: RootState) => state.cartHolderItems.totalPrice
+  const cartIndex = carts.findIndex(
+    (cart) => cart.business?.id === item.business?.id
   );
+  const totalPrice = cart_infos[cartIndex].totalPrice!;
+  const deliveryPrice = cart_infos[cartIndex].deliveryCost!;
+  const grandTotal = cart_infos[cartIndex].grandTotal!;
+  const [counters, setCounters] = useState<Map<String, number>>();
+  const [currentPrices, setCurrentPrices] = useState(new Map<string, number>());
+  const [deliveryCosts, setDeliveryCosts] = useState(new Map<string, number>());
+
+  useEffect(() => {
+    setCounters((prevCounters) => {
+      const updatedCounters = new Map(prevCounters);
+
+      item.products?.forEach((product) => {
+        if (!updatedCounters.has(product.id!)) {
+          updatedCounters.set(product.id!, 1);
+        }
+      });
+
+      return updatedCounters;
+    });
+
+    setCurrentPrices((prevPrices) => {
+      const updatedPrices = new Map(prevPrices);
+      let price = item.products![item.products!.length - 1].price!;
+      item.products?.forEach((product) => {
+        let found = -1;
+        if (discountProducts) {
+          let found = discountProducts.findIndex(
+            (dp) => dp.product.id === product.id
+          );
+          price =
+            found === -1 ? product.price! : discountProducts![found!].price!;
+        }
+
+        if (!updatedPrices.has(product.id!)) {
+          updatedPrices.set(product.id!, price!);
+        }
+      });
+
+      return updatedPrices;
+    });
+
+    setDeliveryCosts((prevCosts) => {
+      const updatedCosts = new Map(prevCosts);
+
+      item.products?.forEach((product) => {
+        if (!updatedCosts.has(product.id!)) {
+          updatedCosts.set(product.id!, product.delivery_cost ?? 0);
+        }
+      });
+
+      return updatedCosts;
+    });
+  }, [item.products]);
+
+  const handleIncrement = (product: product) => {
+    let found = -1;
+    let price = product.price;
+    if (discountProducts) {
+      found = discountProducts?.findIndex((dp) => dp.product.id === product.id);
+      price = found === -1 ? product.price! : discountProducts![found!].price!;
+    }
+
+    console.log("price disccounted : ", price);
+    console.log("disccounted products : ", discountProducts);
+
+    setCounters((prev) => {
+      const newCounters = new Map(prev);
+      newCounters.set(product.id!, newCounters.get(product.id!)! + 1);
+      return newCounters;
+    });
+    setCurrentPrices((prev) => {
+      const newCounters = new Map(prev);
+      newCounters.set(product.id!, newCounters.get(product.id!)! + price!);
+      return newCounters;
+    });
+    setDeliveryCosts((prev) => {
+      const newCounters = new Map(prev);
+      newCounters.set(
+        product.id!,
+        newCounters.get(product.id!)! + product.delivery_cost!
+      );
+      return newCounters;
+    });
+  };
+
+  const handleDecrement = (product: product) => {
+    let found = -1;
+    let price = product.price;
+    if (discountProducts) {
+      found = discountProducts?.findIndex((dp) => dp.product.id === product.id);
+      price = found !== -1 ? discountProducts![found!].price! : product.price!;
+    }
+
+    setCounters((prev) => {
+      const newCounters = new Map(prev);
+      const currentCount = newCounters.get(product.id!) || 1;
+      if (currentCount > 1) {
+        newCounters.set(product.id!, currentCount - 1);
+      }
+      return newCounters;
+    });
+    setCurrentPrices((prev) => {
+      const newCounters = new Map(prev);
+      newCounters.set(product.id!, newCounters.get(product.id!)! - price!);
+      return newCounters;
+    });
+    setDeliveryCosts((prev) => {
+      const newCounters = new Map(prev);
+      newCounters.set(
+        product.id!,
+        newCounters.get(product.id!)! - product.delivery_cost!
+      );
+      return newCounters;
+    });
+  };
 
   const styles = useDynamicStyles();
   console.log("items passed : ", item);
@@ -67,7 +180,7 @@ const CartItemHolder = ({
             borderTopLeftRadius: 5,
             borderBottomWidth: collapse ? 0 : 2,
           }}
-          className="   p-2 items-center justify-between flex-row"
+          className="p-2 items-center justify-between flex-row"
         >
           <View className="flex-row gap-2 items-center">
             <Image
@@ -110,13 +223,21 @@ const CartItemHolder = ({
           }}
         >
           <View className="mt-2 max-h-[260px]">
-            <ScrollView>
+            <ScrollView
+            nestedScrollEnabled
+            >
               <FlatList
                 data={item.products}
                 keyExtractor={(item) => item.id!!}
                 renderItem={({ item }) => (
-                  <View className=" mb-2">
-                    <ProductItem product={item} />
+                  <View className="mb-2">
+                    <ProductItem
+                      counter={counters?.get(item.id!)! || 1}
+                      onIncrement={() => handleIncrement(item)}
+                      onDecrement={() => handleDecrement(item)}
+                      product={item}
+                      currentPrice={currentPrices.get(item.id!)!}
+                    />
                   </View>
                 )}
               />

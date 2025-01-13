@@ -27,7 +27,7 @@ const CartAnimation = () => {
     translateY.value = withSpring(-100);
     translateX.value = withSpring(100);
 
-    // Reset after animation
+ 
     setTimeout(() => {
       translateY.value = withTiming(0);
       translateX.value = withTiming(0);

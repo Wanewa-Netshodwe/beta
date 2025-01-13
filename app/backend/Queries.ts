@@ -185,7 +185,7 @@ const AddUserToCollection = async (
     password: password,
     phonenumber: phoneNumber,
     profile_pic: imageUrl,
-    store_id: "",
+
     email: email,
     username: username,
   });
@@ -506,7 +506,8 @@ const UploadBusinessMedia = async (BusinessInfo: BusinessAccount) => {
   const { foregroundImg, sections } = BusinessInfo;
 
   let updatedBusinessInfo = { ...BusinessInfo };
-
+  console.log('section : ',sections)
+  console.log('foreground : ',foregroundImg)
   try {
     if (foregroundImg) {
       updatedBusinessInfo.foregroundImg = foregroundImg.includes(
@@ -640,8 +641,9 @@ export const BE_PublishStore = async (
     try {
       await updateDoc(BusinessRef, {
         ...Bus,
-        discountedProducts: discountedProducts,
-        voucherProducts: voucherProducts,
+        discountedProducts:
+          discountedProducts?  discountedProducts : [],
+        voucherProducts: voucherProducts ? voucherProducts : [],
       });
     } catch (err) {
       console.log(err);

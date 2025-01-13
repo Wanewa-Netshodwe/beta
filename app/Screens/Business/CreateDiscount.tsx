@@ -24,8 +24,9 @@ import Animated, {
 } from "react-native-reanimated";
 import ClickableBtn from "../../components/ClickableBtn";
 import { useDispatch } from "react-redux";
-import { addDiscountProduct } from "../../redux/businessSlice";
+
 import { getBusinessById } from "../../redux/store";
+import { addDiscountProduct } from "../../redux/CartItemSlice";
 type Props = {};
 
 const CreateDiscount = (props: Props) => {
