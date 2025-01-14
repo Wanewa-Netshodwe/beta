@@ -34,7 +34,6 @@ export type StackSettingsParamList = {
 };
 export type Cart = {
   total?: number;
-
 };
 export type CartItem = {
   id?: string;
@@ -44,7 +43,7 @@ export type CartItem = {
 };
 export type voucherProduct = {
   store_id: string;
-  price: number;
+  price: number;    
   quantity: number;
   id: string;
   product: product;
@@ -139,6 +138,88 @@ export type category = {
   id?: string;
   name?: string;
   img?: string;
+};
+export type analytics = {
+  id: number;
+  business_id: number;
+  productMatrix: {
+    numOfProdutsInStore: number;
+    discountsMatrix: {
+      numberOfDiscounts: number;
+      CostOfDiscouts: number;
+      discountProducts: product[];
+    };
+    voucherMatrix: {
+      numberOfVouchers: number;
+      voucherProducts: product[];
+    };
+    lowStockProducts: product[];
+    mostViewedProducts: {
+      timeRange: {
+        monthly: {
+          views: number;
+          date: Date;
+          products: product[];
+        };
+        weekly: {
+          views: number;
+          date: Date;
+          products: product[];
+        };
+        daily: {
+          views: number;
+          date: Date;
+          products: product[];
+        };
+      };
+    };
+    bestPerfomingCategory: String;
+    lowPerfomingCategory: String;
+    revenue: {
+      TimeRange: {
+        monthly: {
+          date: Date;
+          sales: number;
+        };
+        weekly: {
+          date: Date;
+          sales: number;
+        };
+        daily: {
+          date: Date;
+          sales: number;
+        };
+      };
+    };
+  };
+  customerMatrix: {
+    visits: {
+      TimeRange: {
+        monthly: {
+          date: Date;
+          num: number;
+        };
+        weekly: {
+          date: Date;
+          num: number;
+        };
+        daily: {
+          date: Date;
+          num: number;
+        };
+      };
+    };
+    averageTimeSpendInStore: number;
+    hitAndmiss: {
+      completedOrders: number;
+      visits: number;
+      rate: number;
+    };
+    storeRating: number;
+    numberOfReviews: number;
+    numSatisfiedCustomers: number;
+    numDissatisfiedCustomers: number;
+  };
 };
 export type product = {
   id?: string;
@@ -238,7 +319,12 @@ export type Review = {
   content: string;
   likes?: number;
 };
-
+export type bid = {
+  userId?: string;
+  bid?: number;
+  name?: string;
+  img?: string;
+};
 export const reviews: Review[] = [
   {
     userid: 1,
@@ -385,12 +471,7 @@ export const reviews: Review[] = [
     likes: 17,
   },
 ];
-export type bid = {
-  userId?: string;
-  bid?: number;
-  name?: string;
-  img?: string;
-};
+
 export const bids: bid[] = [
   {
     userId: "user1",

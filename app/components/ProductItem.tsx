@@ -24,14 +24,15 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useDispatch } from "react-redux";
-
-import { getBusinessById } from "../redux/store";
-
+import { getBusinessById, RootState } from "../redux/store";
+import { useSelector } from "react-redux";
 import { decrement, delCart, increment } from "../redux/CartItemSlice";
 
 type Props = {
   product: product;
   counter: number;
+  process?: boolean;
+  setProcess?: () => void;
   onIncrement: () => void;
   onDecrement: () => void;
   currentPrice: number;
@@ -44,6 +45,10 @@ const ProductItem = ({
   onIncrement,
   currentPrice,
 }: Props) => {
+  const voucherProduct = useSelector(
+    (state: RootState) => state.cartHolderItems.voucherProducts
+  );
+
   const dispatch = useDispatch();
   const { appTheme } = useStates();
 
@@ -66,6 +71,21 @@ const ProductItem = ({
     product.delivery_cost!!
   );
 
+  if (process) {
+    const ProcessVoucher = (voucher: String) => {
+      if (voucherProduct) {
+        const found_index = voucherProduct.findIndex(
+          (vp) => vp.product.id === product.id
+        );
+        if (voucher === voucherProduct[found_index].code) {
+          const voucher_price = voucherProduct[found_index].price;
+          voucherProduct[found_index].action === "Giveaway"
+            ? setPrice(0)
+            : setPrice(voucher_price);
+        }
+      }
+    };
+  }
   const styles = useDynamicStyles();
   const TransX = useSharedValue(100);
   const opacityValue = useSharedValue(0);

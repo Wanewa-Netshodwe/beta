@@ -25,12 +25,18 @@ const SettingsNavigator = () => (
       //@ts-ignore
       component={ChangeAppTheme}
     />
-    
+
     <Stack.Screen
       options={{ headerShown: false }}
       name="BusinessSetting"
       //@ts-ignore
-      component={CreateVoucher}
+      component={CreateDiscount}
+    />
+    <Stack.Screen
+      options={{ headerShown: false }}
+      name="Discount"
+      //@ts-ignore
+      component={CreateDiscount}
     />
 
     {/* <Stack.Screen name="Carousel" component={AddCarousel} />
