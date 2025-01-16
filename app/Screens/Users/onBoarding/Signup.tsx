@@ -4,6 +4,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
+import StarRating from "react-native-star-rating-widget";
 import {
   BE_getAllBusinesses,
   BE_login,
@@ -11,8 +12,20 @@ import {
 } from "../../../backend/Queries";
 import { Rating } from "react-native-ratings";
 import { BusRegData } from "../../../utilities/Types";
+import { BarChart } from "react-native-gifted-charts";
 
 export default function SignUp() {
+  const barData = [
+    { value: 250, label: "M" },
+    { value: 500, label: "T", frontColor: "#177AD5" },
+    { value: 745, label: "W", frontColor: "#177AD5" },
+    { value: 320, label: "T" },
+    { value: 600, label: "F", frontColor: "#177AD5" },
+    { value: 256, label: "S" },
+    { value: 300, label: "S" },
+  ];
+
+  const [rating, setRating] = useState(0);
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const [name, setName] = useState("");
@@ -126,7 +139,24 @@ export default function SignUp() {
         placeholder="password"
       />
       <Button onPress={handleSignup} title="signup"></Button>
+
       <Button onPress={handleSignin} title="signin"></Button>
+      <StarRating rating={rating} onChange={setRating} />
+
+      <View>
+        <BarChart
+          isAnimated
+          dashWidth={0}
+          rulesType={"dotted"}
+          barWidth={12}
+          noOfSections={3}
+          barBorderRadius={5}
+          frontColor="lightgray"
+          data={barData}
+          yAxisThickness={0}
+          xAxisThickness={0}
+        />
+      </View>
     </View>
   );
 }

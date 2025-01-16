@@ -12,6 +12,7 @@ import {
   Animated,
 } from "react-native";
 import { Rating } from "react-native-ratings";
+import StarRating from "react-native-star-rating-widget";
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import Screen from "../../utilities/Screen";
 import { getBusinessById, getUserId, RootState } from "../../redux/store";
@@ -798,23 +799,12 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
             </Text>
 
             <View className="-left-2 mt-[2%]">
-              {/* <StarRating
+              <StarRating
                 color={appTheme.colors?.textColor}
                 starSize={15}
                 rating={item.rating}
                 onChange={() => {}}
                 animationConfig={{ scale: 1 }}
-              /> */}
-              <Rating
-                startingValue={item.rating}
-                style={{ width: "25%" }}
-                type="custom"
-                ratingColor={appTheme.colors?.textColor}
-                ratingBackgroundColor={appTheme.colors?.background}
-                tintColor={appTheme.colors?.primary}
-                readonly
-                fractions={0}
-                imageSize={15}
               />
             </View>
             <View className="flex-row gap-1 mt-[2%]">

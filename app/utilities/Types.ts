@@ -43,7 +43,7 @@ export type CartItem = {
 };
 export type voucherProduct = {
   store_id: string;
-  price: number;    
+  price: number;
   quantity: number;
   id: string;
   product: product;
@@ -139,9 +139,7 @@ export type category = {
   name?: string;
   img?: string;
 };
-export type analytics = {
-  id: number;
-  business_id: number;
+export type productAnalytics = {
   productMatrix: {
     numOfProdutsInStore: number;
     discountsMatrix: {
@@ -175,7 +173,7 @@ export type analytics = {
     };
     bestPerfomingCategory: String;
     lowPerfomingCategory: String;
-    revenue: {
+    revenue?: {
       TimeRange: {
         monthly: {
           date: Date;
@@ -192,6 +190,8 @@ export type analytics = {
       };
     };
   };
+};
+export type customerAnalytics = {
   customerMatrix: {
     visits: {
       TimeRange: {
@@ -220,6 +220,12 @@ export type analytics = {
     numSatisfiedCustomers: number;
     numDissatisfiedCustomers: number;
   };
+};
+export type analytics = {
+  id: number;
+  business_id: number;
+  customerAnalytics?:customerAnalytics,
+  productAnalytics?:productAnalytics
 };
 export type product = {
   id?: string;

@@ -28,6 +28,7 @@ import GoToBusiness from "../../Screens/Users/GoToBusiness";
 import ListStoresNav from "./ListStoresNav";
 import BusinessSettings from "../../Screens/Business/BusinessSettings";
 import Cart from "../../Screens/Users/Cart";
+import Analytics from "../../Screens/Business/Analytics";
 
 const handleTabPress = () => {
   Vibration.vibrate(100); // Vibrates for 100ms when the tab is pressed
@@ -38,16 +39,13 @@ const UserNav = () => {
   const { appTheme } = useStates();
   const styles = useDynamicStyles();
   return (
-    <Tab.Navigator 
-    
-    
-    initialRouteName="signup">
+    <Tab.Navigator initialRouteName="signup">
       <Tab.Screen
         options={{
           headerShown: false,
         }}
         name="signup"
-        component={SignUp}
+        component={Analytics}
       />
       <Tab.Screen
         options={{
@@ -92,7 +90,6 @@ const UserNav = () => {
         options={{
           headerShown: false,
         }}
-      
         name="Cart"
         //@ts-ignore
         component={Cart}
