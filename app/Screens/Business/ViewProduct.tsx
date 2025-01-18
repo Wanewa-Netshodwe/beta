@@ -16,6 +16,7 @@ import { RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
 import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons";
 import WebView from "react-native-webview";
+
 import {
   Table,
   Col,
@@ -68,6 +69,7 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
     info: [],
     property: [],
   });
+
 
   useEffect(() => {
     if (product.video) {
@@ -139,10 +141,11 @@ const ViewProduct: React.FC<Props> = ({ route }) => {
     return <Text>Loading</Text>;
   }
 
+
   return (
     <View className="relative">
       <View
-        style={styles.sections}
+        style={{ backgroundColor: bg, padding: styles.sections.padding }}
         className="   p-[2%] gap-5 flex-row items-center "
       >
         <MaterialIcons

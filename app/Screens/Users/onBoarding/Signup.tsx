@@ -12,7 +12,7 @@ import {
 } from "../../../backend/Queries";
 import { Rating } from "react-native-ratings";
 import { BusRegData } from "../../../utilities/Types";
-import { BarChart } from "react-native-gifted-charts";
+import PaystackWebView from "react-native-paystack-webview";
 
 export default function SignUp() {
   const barData = [
@@ -141,22 +141,9 @@ export default function SignUp() {
       <Button onPress={handleSignup} title="signup"></Button>
 
       <Button onPress={handleSignin} title="signin"></Button>
-      <StarRating rating={rating} onChange={setRating} />
 
-      <View>
-        <BarChart
-          isAnimated
-          dashWidth={0}
-          rulesType={"dotted"}
-          barWidth={12}
-          noOfSections={3}
-          barBorderRadius={5}
-          frontColor="lightgray"
-          data={barData}
-          yAxisThickness={0}
-          xAxisThickness={0}
-        />
-      </View>
+      <Button title="Pay R560" />
+    
     </View>
   );
 }

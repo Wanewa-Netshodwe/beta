@@ -192,42 +192,30 @@ export type productAnalytics = {
   };
 };
 export type customerAnalytics = {
-  customerMatrix: {
-    visits: {
-      TimeRange: {
-        monthly: {
-          date: Date;
-          num: number;
-        };
-        weekly: {
-          date: Date;
-          num: number;
-        };
-        daily: {
-          date: Date;
-          num: number;
-        };
-      };
-    };
-    averageTimeSpendInStore: number;
-    hitAndmiss: {
-      completedOrders: number;
-      visits: number;
-      rate: number;
-    };
-    storeRating: number;
-    numberOfReviews: number;
-    numSatisfiedCustomers: number;
-    numDissatisfiedCustomers: number;
+  userId: string;
+  date?: Date;
+  timeSpendInStore?: number;
+  productMatrix?: {
+    viewProducts?: product[];
+    productInfos: {
+      addedToCart?: boolean;
+      product: product;
+      viewTime: number;
+    }[];
   };
 };
+
 export type analytics = {
-  id: number;
-  business_id: number;
-  customerAnalytics?:customerAnalytics,
-  productAnalytics?:productAnalytics
+  id: string;
+  visits?: number;
+  business_id?: string;
+  last_modified?: Date;
+  customerAnalytics: customerAnalytics;
+  productAnalytics?: productAnalytics;
 };
+
 export type product = {
+  createdAt: Date;
   id?: string;
   category?: string;
   rating?: number;

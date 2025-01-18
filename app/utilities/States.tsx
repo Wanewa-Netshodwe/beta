@@ -5,6 +5,9 @@ import { useMemo } from "react";
 
 export const useStates = () => {
   const appTheme = useSelector((state: RootState) => state.appTheme.appTheme);
+  const current_screen = useSelector(
+    (state: RootState) => state.screens.current_screen
+  );
   const businessSections = useSelector(
     (state: RootState) => state.business.userBusiness.sections
   );
@@ -15,6 +18,7 @@ export const useStates = () => {
   const businessName = useSelector(
     (state: RootState) => state.business.userBusiness.store_name
   );
+  const guestId = useSelector((state: RootState) => state.user.guestId);
   const businessPic = useSelector(
     (state: RootState) => state.business.userBusiness.store_pic
   );
@@ -26,6 +30,9 @@ export const useStates = () => {
   );
   const businessState = useSelector(
     (state: RootState) => state.business.userBusiness
+  );
+  const lastvisitedBusiness = useSelector(
+    (state: RootState) => state.analytics.lastVistedBusiness
   );
 
   const userState = useSelector((state: RootState) => state.user);
@@ -39,7 +46,9 @@ export const useStates = () => {
 
   const states = useMemo(
     () => ({
+      guestId,
       appTheme,
+      lastvisitedBusiness,
       businessState,
       businessSections,
       userState,
@@ -51,9 +60,12 @@ export const useStates = () => {
       businessVerified,
       businessId,
       AllBusiness,
+      current_screen,
     }),
     [
+      guestId,
       AllBusiness,
+      current_screen,
       appTheme,
       businessState,
       businessForeground,
@@ -64,6 +76,7 @@ export const useStates = () => {
       userState,
       walletState,
       CategoryListState,
+      lastvisitedBusiness,
     ]
   );
   return states;

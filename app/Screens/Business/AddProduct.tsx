@@ -204,6 +204,7 @@ const AddProduct: React.FC<Props> = ({ navigation }) => {
     });
 
     const sectionInfo: product = {
+      createdAt: new Date(),
       id: createRandomId(),
       delivery_cost: Number(deliverPrice),
       descriptions: description,

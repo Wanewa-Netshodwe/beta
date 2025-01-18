@@ -45,6 +45,9 @@ import OutlineBtn from "../../components/OutlineBtn";
 import MySectionStore from "../../components/MySectionStore";
 import { useSharedValue } from "react-native-reanimated";
 import { useFocusEffect } from "@react-navigation/native";
+import { createAnayltic, updateAnayltic } from "../../utilities/UserAnayltics";
+import { setCurrentScreen } from "../../redux/ScreenSlice";
+import { setLastVisted } from "../../redux/analytics";
 
 type prop = StackScreenProps<StackStoreListParamList, "viewStore">;
 
@@ -57,7 +60,7 @@ const ViewStore: React.FC<prop> = ({ navigation, route }) => {
   const store_name = businessData.store_name;
   const verified = businessData.verified;
   const styles = useDynamicStyles();
-  const { appTheme } = useStates();
+  const { appTheme, current_screen } = useStates();
   const handleDeleteSection = (sectionInfo: sectionData) => {
     BE_deleteSection({ dispatch, sectionInfo });
   };
@@ -79,8 +82,17 @@ const ViewStore: React.FC<prop> = ({ navigation, route }) => {
   useEffect(() => {
     Focused.value = false;
   }, []);
+  useEffect(() => {
+    if (current_screen === "StoreList") {
+      dispatch(setLastVisted(businessData.id));
+      createAnayltic(businessData.id, dispatch);
+      dispatch(setCurrentScreen("ViewStore"));
+    } else if (current_screen === "ViewProduct") {
+      updateAnayltic(businessData.id, "ViewStore");
+      dispatch(setCurrentScreen("ViewStore"));
+    }
+  }, []);
 
- 
   console.log("useer is focused : ", Focused.value);
   const loadFont = async (fontName: string) => {
     if (fontMap[fontName]) {
@@ -143,10 +155,7 @@ const ViewStore: React.FC<prop> = ({ navigation, route }) => {
     },
     []
   );
-  useFocusEffect(() => {
-   
-  });
-
+  useFocusEffect(() => {});
 
   return (
     <View

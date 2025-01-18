@@ -11,12 +11,21 @@ import { FlatList } from "react-native-gesture-handler";
 import CartItem from "../../components/CartItemHolder";
 import { useDispatch } from "react-redux";
 import { BE_getAllBusinesses } from "../../backend/Queries";
+import { setCurrentScreen } from "../../redux/ScreenSlice";
+import { updateAnayltic } from "../../utilities/UserAnayltics";
+import { useFocusEffect } from "@react-navigation/native";
 
 type Props = StackScreenProps<StackStoreListParamList, "stores">;
 
 const StoreList: React.FC<Props> = ({ navigation }) => {
   const dispatch = useDispatch();
-  const { AllBusiness } = useStates();
+  const { AllBusiness, lastvisitedBusiness } = useStates();
+  useFocusEffect(() => {
+    dispatch(setCurrentScreen("StoreList"));
+    updateAnayltic(lastvisitedBusiness, "StoreList");
+  });
+  console.log("store list called ");
+  console.log("last busines visted", lastvisitedBusiness);
 
   return (
     <View className="p-[5%]">

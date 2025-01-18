@@ -29,7 +29,9 @@ import {
 // import StarRating from "react-native-star-rating-widget";
 import * as Progress from "react-native-progress";
 import {
+  analytics,
   CartItem,
+  customerAnalytics,
   DiscountedProducts,
   reviews,
   StackShopLayoutParamList,
@@ -51,10 +53,42 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import { addCart } from "../../redux/CartItemSlice";
+import { getColors } from "react-native-image-colors";
+import tinycolor from "tinycolor2";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setGuestId } from "../../redux/userSlice";
 type Props = StackScreenProps<StackStoreListParamList, "viewProduct">;
 
 const ViewProduct: React.FC<Props> = memo(({ route }) => {
+  const lightenColor = (color: string, perc: number = 10) => {
+    return tinycolor(color).lighten(perc).toString();
+  };
+  const isColorDark = (color: string) => {
+    const rgb = tinycolor(color).toRgb();
+    const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
+    return luminance < 0.5;
+  };
+  const { product } = route.params;
   console.log("view scrren called");
+  const load = () => {
+    getColors(product.imgs![0], {
+      fallback: "#228B22",
+      cache: true,
+      key: product.imgs![0],
+    }).then((v) => {
+      //@ts-ignore
+      setBg(v.dominant);
+      //@ts-ignore
+      if (isColorDark(v.darkVibrant)) {
+        //@ts-ignore
+        setTextColor(lightenColor(v.darkVibrant, 30));
+      } else {
+        //@ts-ignore
+        setTextColor(v.darkVibrant);
+      }
+    });
+  };
+  load();
   const RenderImage = useCallback(({ item }: any) => {
     return (
       <Image
@@ -66,21 +100,19 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
     );
   }, []);
   const styles = useDynamicStyles();
-  const { product } = route.params;
-  const Business = getBusinessById(product.store_id!!);
 
+  const Business = getBusinessById(product.store_id!!);
   !Business && console.log("business not found");
   const [Video, setVideo] = useState("");
   const [loading, setLoading] = useState(true);
-  const [ReviewStarsInfo, setReviewStarsInfo] = useState<
-    {
-      star: {
-        value: number;
-        num_of_people: number;
-        perc: number;
-      };
-    }[]
-  >([]);
+  const [ReviewStarsInfo, setReviewStarsInfo] = useState([
+    { star: { value: 1, num_of_people: 0, perc: 0 } },
+    { star: { value: 2, num_of_people: 0, perc: 0 } },
+    { star: { value: 3, num_of_people: 0, perc: 0 } },
+    { star: { value: 4, num_of_people: 0, perc: 0 } },
+    { star: { value: 5, num_of_people: 0, perc: 0 } },
+  ]);
+
   const [ArrHeight, setArrHeight] = useState<number[]>([]);
   const [tableData, setTableData] = useState<{
     info: string[];
@@ -89,7 +121,33 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
     info: [],
     property: [],
   });
+  const { width } = Dimensions.get("screen");
+  const { appTheme, userState } = useStates();
+  let discountProducts: DiscountedProducts[] = [];
+  let found = -1;
+  if (Business) {
+    discountProducts = Business.discountedProducts!!;
+    if (discountProducts)
+      found = discountProducts.findIndex((dp) => dp.product.id === product.id);
+  }
+  const player = useVideoPlayer(Video, (player) => {
+    player.pause();
+  });
+  const [bidPrice, setBidPrice] = useState("16765");
+  const currentPrice = 16765;
+  const [visible, setVisible] = useState(false);
+  const [bg, setBg] = useState(appTheme.colors?.primary);
+  const [darkColor, setdarkColor] = useState(false);
+  const [textColor, setTextColor] = useState(styles.text.color);
+  const scaleValue = useSharedValue(1);
+  const paddingValue = useSharedValue(8);
+  const animatedStyle = useAnimatedStyle(() => ({
+    backgroundColor: appTheme.colors?.secondary!!,
+    transform: [{ scale: withTiming(scaleValue.value, { duration: 300 }) }],
+    padding: withTiming(paddingValue.value, { duration: 300 }),
+  }));
   const dispatch = useDispatch();
+
   useEffect(() => {
     if (product.video) {
       setVideo(product.video.uri);
@@ -135,31 +193,11 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
     }
 
     setReviewStarsInfo(starsInfo);
+    console.log(starsInfo);
     setLoading(false);
   }, []);
-
-  const player = useVideoPlayer(Video, (player) => {
-    player.pause();
-  });
-
-  const { width } = Dimensions.get("screen");
-  const { appTheme } = useStates();
-  let discountProducts: DiscountedProducts[] = [];
-  let found = -1;
-  if (Business) {
-    discountProducts = Business.discountedProducts!!;
-    if (discountProducts)
-      found = discountProducts.findIndex((dp) => dp.product.id === product.id);
-  }
+  console.log("stars are :", ReviewStarsInfo);
   console.log("siscounted products", discountProducts);
-
-  const scaleValue = useSharedValue(1);
-  const paddingValue = useSharedValue(8);
-  const animatedStyle = useAnimatedStyle(() => ({
-    backgroundColor: appTheme.colors?.secondary!!,
-    transform: [{ scale: withTiming(scaleValue.value, { duration: 300 }) }],
-    padding: withTiming(paddingValue.value, { duration: 300 }),
-  }));
   const addToCart = () => {
     console.log("clicked");
     scaleValue.value = 7;
@@ -176,11 +214,6 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
 
     // console.log("cart itemsj", CartState.items);
   };
-
-  const [bidPrice, setBidPrice] = useState("16765");
-  const currentPrice = 16765;
-
-  const [visible, setVisible] = useState(false);
   const validPrice = () => {
     const num = Number(bidPrice);
     if (num < currentPrice || num - currentPrice < 90) {
@@ -190,12 +223,20 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
     }
   };
 
-  if (loading) {
-    return <Text>Loading</Text>;
-  }
+  useEffect(() => {
+    setdarkColor(isColorDark(bg!));
+  }, [bg]);
+  // useEffect(() => {
+  //   if (darkColor) {
+  //     setTextColor("white");
+  //   }
+  // }, [darkColor]);
+  console.log("color is dark : ", darkColor);
+
+  console.log(textColor);
 
   return (
-    <View className="relative">
+    <View style={{ backgroundColor: lightenColor(bg!) }} className="relative">
       <FlatList
         ListHeaderComponent={() => (
           <View>
@@ -203,18 +244,25 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
               style={[animatedStyle, { transform: [{ scale: 0.7 }] }]}
               className="p-2 z-50 absolute border top-[14%] rounded-md"
             >
-              <Text style={styles.text}>Added To Cart</Text>
+              <Text
+                style={{ color: textColor, fontFamily: styles.text.fontFamily }}
+              >
+                Added To Cart
+              </Text>
             </Animated.View>
             <View
-              style={styles.sections}
+              style={{ backgroundColor: bg, padding: styles.sections.padding }}
               className="   p-[2%] gap-5 flex-row items-center "
             >
               <MaterialIcons
                 name="arrow-back-ios-new"
                 size={20}
-                style={{ color: appTheme.colors?.textColor }}
+                style={{ color: textColor }}
               />
-              <Text style={styles.text} className=" top-2 text-[15px] ">
+              <Text
+                style={{ color: textColor, fontFamily: styles.text.fontFamily }}
+                className=" top-2 text-[15px] "
+              >
                 {product.name}
               </Text>
             </View>
@@ -222,9 +270,8 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
             <View
               style={{
                 width: width,
-                backgroundColor: appTheme.colors?.background,
               }}
-              className="mt-1"
+              className=""
             >
               {product.imgs && product.imgs?.length > 1 ? (
                 <>
@@ -247,9 +294,18 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
                 />
               )}
             </View>
-            <View style={styles.sections} className=" ">
+            <View
+              style={{ backgroundColor: bg, padding: styles.sections.padding }}
+              className=" "
+            >
               <View className="  ">
-                <Text className="text-[20px] font-semibold" style={styles.text}>
+                <Text
+                  className="text-[20px] font-semibold"
+                  style={{
+                    color: textColor,
+                    fontFamily: styles.text.fontFamily,
+                  }}
+                >
                   {product.name!!}
                 </Text>
               </View>
@@ -264,13 +320,19 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
                     />
                     <Text
                       className="text-[14px] font-semibold w-[25px]"
-                      style={styles.text}
+                      style={{
+                        color: textColor,
+                        fontFamily: styles.text.fontFamily,
+                      }}
                     >
                       {product.rating}
                     </Text>
                     <Text
                       className="text-[14px] font-semibold"
-                      style={styles.text}
+                      style={{
+                        color: textColor,
+                        fontFamily: styles.text.fontFamily,
+                      }}
                     >
                       {product.reviews?.length!!} REVIEWS
                     </Text>
@@ -280,10 +342,13 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
             </View>
 
             <View
-              style={styles.sections}
+              style={{ backgroundColor: bg, padding: styles.sections.padding }}
               className=" mt-1   flex-row items-center justify-between "
             >
-              <Text className="text-[34px]  w-fit" style={styles.text}>
+              <Text
+                className="text-[34px]  w-fit"
+                style={{ color: textColor, fontFamily: styles.text.fontFamily }}
+              >
                 R{" "}
                 {product.auction
                   ? product.auction.started
@@ -297,7 +362,10 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
                 <View>
                   <Text
                     className="text-[17px]  -top-1  w-fit"
-                    style={[styles.text, { color: "grey" }]}
+                    style={[
+                      { color: textColor, fontFamily: styles.text.fontFamily },
+                      { color: "grey" },
+                    ]}
                   >
                     R{discountProducts!![found].product.price}
                   </Text>
@@ -308,10 +376,22 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
                 </View>
               )}
               <View className="mr-4 items-end">
-                <Text className="text-[12px] font-semibold" style={styles.text}>
+                <Text
+                  className="text-[12px] font-semibold"
+                  style={{
+                    color: textColor,
+                    fontFamily: styles.text.fontFamily,
+                  }}
+                >
                   delivery cost
                 </Text>
-                <Text className="text-[14px]  " style={styles.text}>
+                <Text
+                  className="text-[14px]  "
+                  style={{
+                    color: textColor,
+                    fontFamily: styles.text.fontFamily,
+                  }}
+                >
                   R{product.delivery_cost ? product.delivery_cost : "0"}
                 </Text>
               </View>
@@ -319,17 +399,29 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
             {product.auction ? (
               <>
                 <View
-                  style={styles.sections}
+                  style={{
+                    backgroundColor: bg,
+                    padding: styles.sections.padding,
+                  }}
                   className="mt-2   flex-row items-center justify-between "
                 >
                   <View className="mr-4 gap-1">
                     <Text
                       className="text-[12px] font-semibold "
-                      style={styles.text}
+                      style={{
+                        color: textColor,
+                        fontFamily: styles.text.fontFamily,
+                      }}
                     >
                       Start Date
                     </Text>
-                    <Text className="text-[14px] " style={styles.text}>
+                    <Text
+                      className="text-[14px] "
+                      style={{
+                        color: textColor,
+                        fontFamily: styles.text.fontFamily,
+                      }}
+                    >
                       12/12/2024 00:00
                     </Text>
                   </View>
@@ -338,19 +430,28 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
             ) : null}
             {product.auction ? (
               <View
-                style={styles.sections}
+                style={{
+                  backgroundColor: bg,
+                  padding: styles.sections.padding,
+                }}
                 className="mt-2  px-4 flex-row items-center justify-between "
               >
                 <View className="mr-4 gap-1">
                   <Text
                     className="text-[12px] font-semibold "
-                    style={styles.text}
+                    style={{
+                      color: textColor,
+                      fontFamily: styles.text.fontFamily,
+                    }}
                   >
                     Closing Date
                   </Text>
                   <Text
                     className="text-[14px] font-extrabold "
-                    style={styles.text}
+                    style={{
+                      color: textColor,
+                      fontFamily: styles.text.fontFamily,
+                    }}
                   >
                     17/12/2024 16:30
                   </Text>
@@ -358,11 +459,20 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
                 <View className="mr-4 items-end">
                   <Text
                     className="text-[12px] font-semibold"
-                    style={styles.text}
+                    style={{
+                      color: textColor,
+                      fontFamily: styles.text.fontFamily,
+                    }}
                   >
                     bid increment
                   </Text>
-                  <Text className="text-[14px] font-bold " style={styles.text}>
+                  <Text
+                    className="text-[14px] font-bold "
+                    style={{
+                      color: textColor,
+                      fontFamily: styles.text.fontFamily,
+                    }}
+                  >
                     R90
                   </Text>
                 </View>
@@ -370,7 +480,7 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
             ) : null}
 
             <View
-              style={styles.sections}
+              style={{ backgroundColor: bg, padding: styles.sections.padding }}
               className="mt-2    flex-row items-center justify-between "
             >
               <TouchableNativeFeedback
@@ -380,12 +490,18 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
               >
                 <View
                   style={{
-                    borderColor: appTheme.colors?.textColor,
+                    borderColor: textColor,
                     borderWidth: 2,
                   }}
                   className="p-2 items-center"
                 >
-                  <Text className="text-[23px]  " style={styles.text}>
+                  <Text
+                    className="text-[23px]  "
+                    style={{
+                      color: textColor,
+                      fontFamily: styles.text.fontFamily,
+                    }}
+                  >
                     {product.auction
                       ? `Bid R${
                           product.auction.bidPrice!! +
@@ -415,16 +531,28 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
             </View>
             {product.auction ? (
               <>
-                <View style={styles.sections} className="mt-2 ">
+                <View
+                  style={{
+                    backgroundColor: bg,
+                    padding: styles.sections.padding,
+                  }}
+                  className="mt-2 "
+                >
                   <View className="  flex-row items-center ">
-                    <Text className="text-[20px]  " style={styles.text}>
+                    <Text
+                      className="text-[20px]  "
+                      style={{
+                        color: textColor,
+                        fontFamily: styles.text.fontFamily,
+                      }}
+                    >
                       Winning Bid
                     </Text>
                   </View>
                   <View className="mt-[4%]   flex-row items-center justify-between ">
                     <View
                       style={{
-                        borderColor: appTheme.colors?.textColor,
+                        borderColor: textColor,
                         borderWidth: 2,
                         width: width - 35,
                       }}
@@ -438,20 +566,44 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
                           }}
                           className=" w-[35px] h-[35px]  rounded-sm"
                         ></View>
-                        <Text className="text-[20px]  " style={styles.text}>
+                        <Text
+                          className="text-[20px]  "
+                          style={{
+                            color: textColor,
+                            fontFamily: styles.text.fontFamily,
+                          }}
+                        >
                           Stanley
                         </Text>
                       </View>
 
-                      <Text className="text-[20px] " style={styles.text}>
+                      <Text
+                        className="text-[20px] "
+                        style={{
+                          color: textColor,
+                          fontFamily: styles.text.fontFamily,
+                        }}
+                      >
                         R16 675
                       </Text>
                     </View>
                   </View>
                 </View>
-                <View style={styles.sections} className="mt-2 ">
+                <View
+                  style={{
+                    backgroundColor: bg,
+                    padding: styles.sections.padding,
+                  }}
+                  className="mt-2 "
+                >
                   <View className=" flex-row items-center justify-between ">
-                    <Text className="text-[15px]  " style={styles.text}>
+                    <Text
+                      className="text-[15px]  "
+                      style={{
+                        color: textColor,
+                        fontFamily: styles.text.fontFamily,
+                      }}
+                    >
                       Previous Bids
                     </Text>
                   </View>
@@ -460,7 +612,7 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
                       <ScrollView nestedScrollEnabled={true}>
                         <View
                           style={{
-                            borderColor: appTheme.colors?.textColor,
+                            borderColor: textColor,
                             borderWidth: 2,
                             width: width - 35,
                           }}
@@ -469,23 +621,35 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
                           <View className="flex-row w-[200px] items-center gap-4">
                             <View
                               style={{
-                                borderColor: appTheme.colors?.textColor,
+                                borderColor: textColor,
                                 borderWidth: 2,
                               }}
                               className=" w-[25px] h-[25px]  rounded-sm"
                             ></View>
-                            <Text className="text-[15px]  " style={styles.text}>
+                            <Text
+                              className="text-[15px]  "
+                              style={{
+                                color: textColor,
+                                fontFamily: styles.text.fontFamily,
+                              }}
+                            >
                               Greg421
                             </Text>
                           </View>
 
-                          <Text className="text-[15px] " style={styles.text}>
+                          <Text
+                            className="text-[15px] "
+                            style={{
+                              color: textColor,
+                              fontFamily: styles.text.fontFamily,
+                            }}
+                          >
                             R16475
                           </Text>
                         </View>
                         <View
                           style={{
-                            borderColor: appTheme.colors?.textColor,
+                            borderColor: textColor,
                             borderWidth: 2,
                             width: width - 35,
                           }}
@@ -494,23 +658,35 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
                           <View className="flex-row w-[200px] items-center gap-4">
                             <View
                               style={{
-                                borderColor: appTheme.colors?.textColor,
+                                borderColor: textColor,
                                 borderWidth: 2,
                               }}
                               className=" w-[25px] h-[25px]  rounded-sm"
                             ></View>
-                            <Text className="text-[15px]  " style={styles.text}>
+                            <Text
+                              className="text-[15px]  "
+                              style={{
+                                color: textColor,
+                                fontFamily: styles.text.fontFamily,
+                              }}
+                            >
                               ThaB090
                             </Text>
                           </View>
 
-                          <Text className="text-[15px]  " style={styles.text}>
+                          <Text
+                            className="text-[15px]  "
+                            style={{
+                              color: textColor,
+                              fontFamily: styles.text.fontFamily,
+                            }}
+                          >
                             R16 175
                           </Text>
                         </View>
                         <View
                           style={{
-                            borderColor: appTheme.colors?.textColor,
+                            borderColor: textColor,
                             borderWidth: 2,
                             width: width - 35,
                           }}
@@ -519,17 +695,29 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
                           <View className="flex-row w-[200px] items-center gap-4">
                             <View
                               style={{
-                                borderColor: appTheme.colors?.textColor,
+                                borderColor: textColor,
                                 borderWidth: 2,
                               }}
                               className=" w-[25px] h-[25px]  rounded-sm"
                             ></View>
-                            <Text className="text-[15px]  " style={styles.text}>
+                            <Text
+                              className="text-[15px]  "
+                              style={{
+                                color: textColor,
+                                fontFamily: styles.text.fontFamily,
+                              }}
+                            >
                               Mark
                             </Text>
                           </View>
 
-                          <Text className="text-[15px]  " style={styles.text}>
+                          <Text
+                            className="text-[15px]  "
+                            style={{
+                              color: textColor,
+                              fontFamily: styles.text.fontFamily,
+                            }}
+                          >
                             R14 675
                           </Text>
                         </View>
@@ -540,16 +728,28 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
               </>
             ) : null}
 
-            <View style={styles.sections} className=" mt-2 ">
+            <View
+              style={{ backgroundColor: bg, padding: styles.sections.padding }}
+              className=" mt-2 "
+            >
               <View className="   flex-row items-center ">
-                <Text className="text-[20px]  " style={styles.text}>
+                <Text
+                  className="text-[20px]  "
+                  style={{
+                    color: textColor,
+                    fontFamily: styles.text.fontFamily,
+                  }}
+                >
                   Description
                 </Text>
               </View>
               <View className="mt-[3%]   flex-row items-center ">
                 <Text
                   className="text-[13px] font-semibold "
-                  style={[{ width: width - 45 }, styles.text]}
+                  style={[
+                    { width: width - 45 },
+                    { color: textColor, fontFamily: styles.text.fontFamily },
+                  ]}
                 >
                   {product.descriptions!!}
                 </Text>
@@ -559,9 +759,21 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
             {product.video ? (
               product.video.type === "web" ? (
                 <>
-                  <View style={styles.sections} className=" mt-2 ">
+                  <View
+                    style={{
+                      backgroundColor: bg,
+                      padding: styles.sections.padding,
+                    }}
+                    className=" mt-2 "
+                  >
                     <View className="  flex-row items-center ">
-                      <Text className="text-[20px] " style={styles.text}>
+                      <Text
+                        className="text-[20px] "
+                        style={{
+                          color: textColor,
+                          fontFamily: styles.text.fontFamily,
+                        }}
+                      >
                         Video Preview
                       </Text>
                     </View>
@@ -577,9 +789,21 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
                 </>
               ) : (
                 <>
-                  <View style={styles.sections} className=" mt-2 ">
+                  <View
+                    style={{
+                      backgroundColor: bg,
+                      padding: styles.sections.padding,
+                    }}
+                    className=" mt-2 "
+                  >
                     <View className="    flex-row items-center ">
-                      <Text className="text-[20px] " style={styles.text}>
+                      <Text
+                        className="text-[20px] "
+                        style={{
+                          color: textColor,
+                          fontFamily: styles.text.fontFamily,
+                        }}
+                      >
                         Video Preview
                       </Text>
                     </View>
@@ -601,9 +825,18 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
               )
             ) : null}
 
-            <View style={styles.sections} className=" mt-2 ">
+            <View
+              style={{ backgroundColor: bg, padding: styles.sections.padding }}
+              className=" mt-2 "
+            >
               <View className=" flex-row items-center ">
-                <Text className="text-[20px]  " style={styles.text}>
+                <Text
+                  className="text-[20px]  "
+                  style={{
+                    color: textColor,
+                    fontFamily: styles.text.fontFamily,
+                  }}
+                >
                   Product Information
                 </Text>
               </View>
@@ -621,26 +854,47 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
                     <Col
                       heightArr={ArrHeight}
                       width={120}
-                      textStyle={{ ...styles.text, padding: 5 }}
+                      textStyle={{
+                        ...{
+                          color: textColor,
+                          fontFamily: styles.text.fontFamily,
+                        },
+                        padding: 5,
+                      }}
                       data={tableData.property}
                     />
                     <Col
                       data={tableData.info}
                       heightArr={ArrHeight}
                       width={width - 140}
-                      textStyle={{ ...styles.text, padding: 5 }}
+                      textStyle={{
+                        ...{
+                          color: textColor,
+                          fontFamily: styles.text.fontFamily,
+                        },
+                        padding: 5,
+                      }}
                     />
                   </TableWrapper>
                 </Table>
               </View>
             </View>
-            <View style={styles.sections} className="mt-2 ">
+            <View
+              style={{ backgroundColor: bg, padding: styles.sections.padding }}
+              className="mt-2 "
+            >
               <View className="  mt-3  flex-row items-center  ">
-                <Text className="text-[34px]  w-[55px]" style={styles.text}>
+                <Text
+                  className="text-[34px]  w-[55px]"
+                  style={{
+                    color: textColor,
+                    fontFamily: styles.text.fontFamily,
+                  }}
+                >
                   {product.rating}
                 </Text>
                 {/* <StarRating
-                  color={appTheme.colors?.textColor}
+                  color={textColor}
                   rating={
                     Number.isInteger(product.rating)
                       ? product.rating!!
@@ -649,141 +903,180 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
                   onChange={() => {}}
                   animationConfig={{ scale: 1 }}
                 /> */}
-                <Rating
-                  ratingCount={5}
-                  startingValue={product.rating}
-                  style={{ top: -4 }}
-                  type="custom"
-                  ratingColor={appTheme.colors?.textColor}
-                  ratingBackgroundColor={appTheme.colors?.background}
-                  tintColor={appTheme.colors?.primary}
-                  readonly
-                  fractions={1}
-                  imageSize={32}
+
+                <StarRating
+                  color={textColor}
+                  rating={
+                    Number.isInteger(product.rating)
+                      ? product.rating!!
+                      : parseFloat(`${product.rating?.toString().charAt(0)}.5`)
+                  }
+                  onChange={() => {}}
+                  animationConfig={{ scale: 1 }}
                 />
               </View>
               <View className="mt-2   flex-row items-center gap-5">
                 <View className=" flex-row gap-1 items-center">
-                  <Text className="text-[20px]  " style={styles.text}>
+                  <Text
+                    className="text-[20px]  "
+                    style={{
+                      color: textColor,
+                      fontFamily: styles.text.fontFamily,
+                    }}
+                  >
                     5
                   </Text>
-                  <Feather
-                    name="star"
-                    size={12}
-                    style={{ color: appTheme.colors?.textColor }}
-                  />
+                  <Feather name="star" size={12} style={{ color: textColor }} />
                 </View>
 
                 <Progress.Bar
                   height={9}
                   borderRadius={4}
                   borderWidth={0}
-                  color={appTheme.colors?.textColor}
+                  color={textColor}
                   progress={ReviewStarsInfo[4].star.perc}
                   unfilledColor={appTheme.colors?.background}
                   width={200}
                 />
-                <Text className="text-[17px]  " style={styles.text}>
+                <Text
+                  className="text-[17px]  "
+                  style={{
+                    color: textColor,
+                    fontFamily: styles.text.fontFamily,
+                  }}
+                >
                   {ReviewStarsInfo[4].star.num_of_people}
                 </Text>
               </View>
               <View className="mt-[3%]   flex-row items-center gap-5">
                 <View className=" flex-row gap-1 items-center">
-                  <Text className="text-[20px] " style={styles.text}>
+                  <Text
+                    className="text-[20px] "
+                    style={{
+                      color: textColor,
+                      fontFamily: styles.text.fontFamily,
+                    }}
+                  >
                     4
                   </Text>
-                  <Feather
-                    name="star"
-                    size={12}
-                    style={{ color: appTheme.colors?.textColor }}
-                  />
+                  <Feather name="star" size={12} style={{ color: textColor }} />
                 </View>
 
                 <Progress.Bar
                   height={9}
                   borderRadius={4}
                   borderWidth={0}
-                  color={appTheme.colors?.textColor}
+                  color={textColor}
                   progress={ReviewStarsInfo[3].star.perc}
                   unfilledColor={appTheme.colors?.background}
                   width={200}
                 />
-                <Text className="text-[17px]  " style={styles.text}>
+                <Text
+                  className="text-[17px]  "
+                  style={{
+                    color: textColor,
+                    fontFamily: styles.text.fontFamily,
+                  }}
+                >
                   {ReviewStarsInfo[3].star.num_of_people}
                 </Text>
               </View>
               <View className="mt-[3%]  flex-row items-center gap-5">
                 <View className=" flex-row gap-1 items-center">
-                  <Text className="text-[20px]" style={styles.text}>
+                  <Text
+                    className="text-[20px]"
+                    style={{
+                      color: textColor,
+                      fontFamily: styles.text.fontFamily,
+                    }}
+                  >
                     3
                   </Text>
-                  <Feather
-                    name="star"
-                    size={12}
-                    style={{ color: appTheme.colors?.textColor }}
-                  />
+                  <Feather name="star" size={12} style={{ color: textColor }} />
                 </View>
 
                 <Progress.Bar
                   height={9}
                   borderRadius={4}
                   borderWidth={0}
-                  color={appTheme.colors?.textColor}
+                  color={textColor}
                   progress={ReviewStarsInfo[2].star.perc}
                   unfilledColor={appTheme.colors?.background}
                   width={200}
                 />
-                <Text className="text-[17px]  " style={styles.text}>
+                <Text
+                  className="text-[17px]  "
+                  style={{
+                    color: textColor,
+                    fontFamily: styles.text.fontFamily,
+                  }}
+                >
                   {ReviewStarsInfo[2].star.num_of_people}
                 </Text>
               </View>
               <View className="mt-[3%]   flex-row items-center gap-5">
                 <View className=" flex-row gap-1 items-center">
-                  <Text className="text-[20px] " style={styles.text}>
+                  <Text
+                    className="text-[20px] "
+                    style={{
+                      color: textColor,
+                      fontFamily: styles.text.fontFamily,
+                    }}
+                  >
                     2
                   </Text>
-                  <Feather
-                    name="star"
-                    size={12}
-                    style={{ color: appTheme.colors?.textColor }}
-                  />
+                  <Feather name="star" size={12} style={{ color: textColor }} />
                 </View>
 
                 <Progress.Bar
                   height={9}
                   borderRadius={4}
                   borderWidth={0}
-                  color={appTheme.colors?.textColor}
+                  color={textColor}
                   progress={ReviewStarsInfo[1].star.perc}
                   unfilledColor={appTheme.colors?.background}
                   width={200}
                 />
-                <Text className="text-[17px]  " style={styles.text}>
+                <Text
+                  className="text-[17px]  "
+                  style={{
+                    color: textColor,
+                    fontFamily: styles.text.fontFamily,
+                  }}
+                >
                   {ReviewStarsInfo[1].star.num_of_people}
                 </Text>
               </View>
               <View className="mt-[3%]  flex-row items-center gap-5">
                 <View className=" flex-row gap-1 items-center">
-                  <Text className="text-[20px]  " style={styles.text}>
+                  <Text
+                    className="text-[20px]  "
+                    style={{
+                      color: textColor,
+                      fontFamily: styles.text.fontFamily,
+                    }}
+                  >
                     1
                   </Text>
-                  <Feather
-                    name="star"
-                    size={12}
-                    style={{ color: appTheme.colors?.textColor }}
-                  />
+                  <Feather name="star" size={12} style={{ color: textColor }} />
                 </View>
 
                 <Progress.Bar
                   height={9}
                   borderRadius={4}
                   borderWidth={0}
-                  color={appTheme.colors?.textColor}
+                  color={textColor}
                   progress={ReviewStarsInfo[0].star.perc}
                   unfilledColor={appTheme.colors?.background}
                   width={200}
                 />
-                <Text className="text-[17px]  " style={styles.text}>
+                <Text
+                  className="text-[17px]  "
+                  style={{
+                    color: textColor,
+                    fontFamily: styles.text.fontFamily,
+                  }}
+                >
                   {ReviewStarsInfo[0].star.num_of_people}
                 </Text>
               </View>
@@ -793,14 +1086,20 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
         data={product.reviews}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
-          <View style={styles.sections} className="  mt-2  ">
-            <Text style={styles.text} className="text-[24px]  w-[250px]">
+          <View
+            style={{ backgroundColor: bg, padding: styles.sections.padding }}
+            className="  mt-2  "
+          >
+            <Text
+              style={{ color: textColor, fontFamily: styles.text.fontFamily }}
+              className="text-[24px]  w-[250px]"
+            >
               {item.Title}
             </Text>
 
             <View className="-left-2 mt-[2%]">
               <StarRating
-                color={appTheme.colors?.textColor}
+                color={textColor}
                 starSize={15}
                 rating={item.rating}
                 onChange={() => {}}
@@ -808,33 +1107,35 @@ const ViewProduct: React.FC<Props> = memo(({ route }) => {
               />
             </View>
             <View className="flex-row gap-1 mt-[2%]">
-              <Text className="text-[15px] " style={styles.text}>
+              <Text
+                className="text-[15px] "
+                style={{ color: textColor, fontFamily: styles.text.fontFamily }}
+              >
                 {item.name} -
               </Text>
-              <Text className="text-[15px] " style={styles.text}>
+              <Text
+                className="text-[15px] "
+                style={{ color: textColor, fontFamily: styles.text.fontFamily }}
+              >
                 {/* {item.date && item.date.toUTCString().substring(0, 16)} */}
                 {String(item.date)}
               </Text>
             </View>
-            <Text style={styles.text} className="mt-[2%] w-[290px]">
+            <Text
+              style={{ color: textColor, fontFamily: styles.text.fontFamily }}
+              className="mt-[2%] w-[290px]"
+            >
               {item.content}
             </Text>
             <View
               style={{
-                borderColor: appTheme.colors?.textColor,
+                borderColor: textColor,
                 borderWidth: 1,
               }}
               className="rounded-[69px] mt-[5%] p-2 items-center flex-row gap-2 w-[70px] self-end "
             >
-              <AntDesign
-                name="like1"
-                size={16}
-                style={{ color: appTheme.colors?.textColor }}
-              />
-              <Text
-                className="text-[15px] "
-                style={{ color: appTheme.colors?.textColor }}
-              >
+              <AntDesign name="like1" size={16} style={{ color: textColor }} />
+              <Text className="text-[15px] " style={{ color: textColor }}>
                 ({item.likes})
               </Text>
             </View>

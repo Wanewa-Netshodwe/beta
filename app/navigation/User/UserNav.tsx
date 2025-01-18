@@ -29,6 +29,7 @@ import ListStoresNav from "./ListStoresNav";
 import BusinessSettings from "../../Screens/Business/BusinessSettings";
 import Cart from "../../Screens/Users/Cart";
 import Analytics from "../../Screens/Business/Analytics";
+import ImageHolder from "../../Screens/Business/ImageHolder";
 
 const handleTabPress = () => {
   Vibration.vibrate(100); // Vibrates for 100ms when the tab is pressed
@@ -45,14 +46,14 @@ const UserNav = () => {
           headerShown: false,
         }}
         name="signup"
-        component={Analytics}
+        component={SignUp}
       />
       <Tab.Screen
         options={{
           headerShown: false,
         }}
         name="start"
-        component={Start}
+        component={ImageHolder}
       />
       <Tab.Screen
         options={{

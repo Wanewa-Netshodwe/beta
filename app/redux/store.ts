@@ -5,6 +5,8 @@ import businessSlice from "./businessSlice";
 import walletSlice from "./walletSlice";
 import categoryListSlice from "./categoryList";
 import CartHolderItemsSlice from "./CartItemSlice";
+import analyticsSlice from "./analytics";
+import ScreenSlice from "./ScreenSlice";
 
 export const store = configureStore({
   reducer: {
@@ -14,19 +16,26 @@ export const store = configureStore({
     wallet: walletSlice,
     categoryLists: categoryListSlice,
     cartHolderItems: CartHolderItemsSlice,
+    analytics: analyticsSlice,
+    screens: ScreenSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
     }),
 });
+export const getLastVistedBusinessId = () => {
+  const state = store.getState();
+  return state.analytics.lastVistedBusiness;
+};
+
 export const getCurrentUser = () => {
   const state = store.getState();
   return state.user.currentUser;
 };
 export const getDiscountProducts = () => {
   const state = store.getState();
-  return state.business.discountedProducts;
+  return state.cartHolderItems.discountedProducts;
 };
 
 export const getBusinessCategories = () => {
@@ -54,6 +63,10 @@ export const getBusinessById = (id: string) => {
 export const getUserId = () => {
   const state = store.getState();
   return state.user.currentUser.id;
+};
+export const getGuestId = () => {
+  const state = store.getState();
+  return state.user.guestId
 };
 
 export type RootState = ReturnType<typeof store.getState>;

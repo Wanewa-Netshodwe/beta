@@ -452,8 +452,8 @@ export const BE_login = (data: {
     errorMsg("Fields Can Not be Empty");
   } else {
     try {
-      signInWithEmailAndPassword(auth, email, password).then(
-        async ({ user }) => {
+      signInWithEmailAndPassword(auth, email, password)
+        .then(async ({ user }) => {
           await updateUserinfo({ id: user.uid, isOnline: true });
           const userinfo = await getUserInfo(user.uid);
           console.log(userinfo);
@@ -466,8 +466,11 @@ export const BE_login = (data: {
             dispatch(setBusiness(business));
           }
           console.log("done");
-        }
-      );
+        })
+        .catch((err) => {
+          console.log("error occucured");
+          console.log(err);
+        });
     } catch (err) {
       console.log(err);
     }
@@ -506,8 +509,8 @@ const UploadBusinessMedia = async (BusinessInfo: BusinessAccount) => {
   const { foregroundImg, sections } = BusinessInfo;
 
   let updatedBusinessInfo = { ...BusinessInfo };
-  console.log('section : ',sections)
-  console.log('foreground : ',foregroundImg)
+  console.log("section : ", sections);
+  console.log("foreground : ", foregroundImg);
   try {
     if (foregroundImg) {
       updatedBusinessInfo.foregroundImg = foregroundImg.includes(
@@ -641,8 +644,7 @@ export const BE_PublishStore = async (
     try {
       await updateDoc(BusinessRef, {
         ...Bus,
-        discountedProducts:
-          discountedProducts?  discountedProducts : [],
+        discountedProducts: discountedProducts ? discountedProducts : [],
         voucherProducts: voucherProducts ? voucherProducts : [],
       });
     } catch (err) {

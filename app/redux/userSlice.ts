@@ -11,13 +11,13 @@ import { act } from "react";
 import { getBusinessById, getDiscountProducts } from "./store";
 
 export const defaultUser: personalAccount = {
-  businessid: "hjoZMJGDpAe802w4SDEw",
+  businessid: "",
   buyer_rating: 0,
   followers: [],
   following: [],
   has_business: true,
   has_wallet: false,
-  id: "Hd81oqoxT0NDLs80xJY33Vlwbs23",
+  id: "",
   isOnline: true,
   last_seen: new Date(),
   password: "Wanewa@12",
@@ -27,11 +27,13 @@ export const defaultUser: personalAccount = {
   email: "Waneex@gamil.com",
   username: "Carl Johnson",
 };
+const defaultGuestId = "";
 
 const defaultBusRegData: BusRegData = {};
 const initialState = {
   currentUser: defaultUser,
   busRegData: defaultBusRegData,
+  guestId: defaultGuestId,
 };
 
 const userSlice = createSlice({
@@ -46,8 +48,12 @@ const userSlice = createSlice({
       const data: BusRegData = action.payload;
       state.busRegData = { ...data };
     },
+    setGuestId:(state, action) => {
+      const id = action.payload;
+      state.guestId = id
+    },
   },
 });
 
-export const { setRegData, setUser } = userSlice.actions;
+export const { setRegData, setUser ,setGuestId} = userSlice.actions;
 export default userSlice.reducer;

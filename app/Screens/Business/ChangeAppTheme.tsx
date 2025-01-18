@@ -1,6 +1,7 @@
 import { View, Text, TouchableNativeFeedback } from "react-native";
 import React, { useEffect, useState } from "react";
 import Screen from "../../utilities/Screen";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoadingComp from "../../utilities/LoadingComp";
 import { useDynamicStyles } from "../../utilities/Styles";
 import { useStates } from "../../utilities/States";
@@ -25,7 +26,7 @@ import {
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { ChangeThemeLoader } from "../../utilities/Loaders";
 
-type Props = BottomTabScreenProps<TabParamList,"settings">;
+type Props = BottomTabScreenProps<TabParamList, "settings">;
 
 const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
   console.log("change app scrren called");
@@ -44,7 +45,7 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
     appTheme.colors?.background
   );
   const [textColor, setTextColor] = useState(appTheme.colors?.textColor!!);
-  const handleSave = () => {
+  const handleSave = async () => {
     const data: AppTheme = {
       current_screen: "layout",
       colors: {
@@ -75,6 +76,11 @@ const ChangeAppTheme: React.FC<Props> = ({ navigation }) => {
         primary: selectedFont,
       },
     };
+    try {
+      await AsyncStorage.setItem("userSettings", JSON.stringify(data));
+    } catch (err) {
+      alert(err);
+    }
     dispatch(setColor(data));
     navigation.navigate("Layout");
   };

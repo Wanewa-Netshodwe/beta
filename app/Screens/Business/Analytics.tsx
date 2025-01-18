@@ -8,7 +8,10 @@ import {
   Animated,
   StyleSheet,
 } from "react-native";
-import React, { useState, useMemo, useCallback, memo } from "react";
+import {BarChart}from "react-native-chart-kit";
+import { PieChart } from "react-native-gifted-charts";
+import AnimatedNumbers from "react-native-animated-numbers";
+import React, { useState, useMemo, useCallback, memo, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import Screen from "../../utilities/Screen";
@@ -33,72 +36,25 @@ const Analytics: React.FC<Prop> = ({ navigation }) => {
   const dispatch = useDispatch();
   const { appTheme, businessSections, businessId } = useStates();
   const businessData = businessSections;
+  const discountedProducts = useSelector(
+    (state: RootState) => state.cartHolderItems.discountedProducts
+  );
+  const voucherProducts = useSelector(
+    (state: RootState) => state.cartHolderItems.voucherProducts
+  );
   const [img, setImg] = useState("");
   const [Position, setPosition] = useState("");
   const [title, setTitle] = useState("");
   const [timeRange, setTimeRange] = useState("");
   const [layout, setLayout] = useState("grid");
   const [loading, setLoading] = useState(false);
+  const [numOfProducts, setNumOfProducts] = useState(0);
+  const [numOfProductsChange, setNumOfProductsChange] = useState(0);
   const [salesAnalyticsTimeFrame, setSalesAnalyticsTimeFrame] = useState("");
   const [show, setShow] = useState(false);
   const [data, setData] = useState<{ key: number; value: string }[]>([]);
   const [d, setD] = useState<{ key: string; value: number }[]>([]);
   console.log(salesAnalyticsTimeFrame, "sales in fo tinme frame");
-  const ptData = [
-    { value: 160, date: "1 Apr 2022" },
-    { value: 180, date: "2 Apr 2022" },
-    { value: 190, date: "3 Apr 2022" },
-    { value: 180, date: "4 Apr 2022" },
-    { value: 140, date: "5 Apr 2022" },
-    { value: 145, date: "6 Apr 2022" },
-    { value: 160, date: "7 Apr 2022" },
-    { value: 200, date: "8 Apr 2022" },
-
-    { value: 220, date: "9 Apr 2022" },
-    {
-      value: 240,
-      date: "10 Apr 2022",
-      label: "10 Apr",
-      labelTextStyle: { color: "lightgray", width: 60 },
-    },
-    { value: 280, date: "11 Apr 2022" },
-    { value: 260, date: "12 Apr 2022" },
-    { value: 340, date: "13 Apr 2022" },
-    { value: 385, date: "14 Apr 2022" },
-    { value: 280, date: "15 Apr 2022" },
-    { value: 390, date: "16 Apr 2022" },
-
-    { value: 370, date: "17 Apr 2022" },
-    { value: 285, date: "18 Apr 2022" },
-    { value: 295, date: "19 Apr 2022" },
-    {
-      value: 300,
-      date: "20 Apr 2022",
-      label: "20 Apr",
-      labelTextStyle: { color: "lightgray", width: 60 },
-    },
-    { value: 280, date: "21 Apr 2022" },
-    { value: 295, date: "22 Apr 2022" },
-    { value: 260, date: "23 Apr 2022" },
-    { value: 255, date: "24 Apr 2022" },
-
-    { value: 190, date: "25 Apr 2022" },
-    { value: 220, date: "26 Apr 2022" },
-    { value: 205, date: "27 Apr 2022" },
-    { value: 230, date: "28 Apr 2022" },
-    { value: 210, date: "29 Apr 2022" },
-    {
-      value: 200,
-      date: "30 Apr 2022",
-      label: "30 Apr",
-      labelTextStyle: { color: "lightgray", width: 60 },
-    },
-    { value: 240, date: "1 May 2022" },
-    { value: 250, date: "2 May 2022" },
-    { value: 280, date: "3 May 2022" },
-    { value: 250, date: "4 May 2022" },
-    { value: 210, date: "5 May 2022" },
-  ];
 
   useFocusEffect(
     useCallback(() => {
@@ -127,6 +83,137 @@ const Analytics: React.FC<Prop> = ({ navigation }) => {
     }, [businessData])
   );
 
+  useEffect(() => {
+    let sum = 0;
+    const numProducts = businessData
+      .map((section) => {
+        if (section.type === "Section") {
+          return section.products ? section.products.length : 0;
+        }
+      })
+      .filter((num) => num != undefined)
+      .forEach((num) => (sum += num));
+    console.log(numOfProducts);
+    setTimeout(() => {
+      setNumOfProducts(sum);
+    }, 150);
+  }, []);
+  const chartConfig = {
+    backgroundGradientFrom: "#1E2923",
+    backgroundGradientFromOpacity: 0,
+    backgroundGradientTo: "#08130D",
+    backgroundGradientToOpacity: 0.5,
+    color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
+    strokeWidth: 2, // optional, default 3
+    barPercentage: 0.5,
+    useShadowColorFromDataset: false // optional
+  };
+  const getProducts = useCallback(() => {
+    const products = businessData
+      .map((section) => {
+        if (section.type === "Section") {
+          return section.products;
+        }
+      })
+      .filter((num) => num != undefined)
+      .flat();
+    return products;
+  }, [businessData]);
+
+  const calculateNumOfProducts = (timeRange: string) => {
+    const products = getProducts();
+    console.log(products[0].createdAt < new Date());
+    switch (timeRange) {
+      case "0": {
+        setNumOfProducts(products.length);
+        setNumOfProductsChange(0);
+        break;
+      }
+      case "7": {
+        if (numOfProductsChange > 0) {
+        } else {
+          const today = new Date();
+          const weekAgo = new Date();
+          weekAgo.setDate(today.getDate() - 7);
+          const validProducts = products
+            .map((product) => {
+              if (product.createdAt >= weekAgo && product.createdAt <= today) {
+                return product;
+              }
+            })
+            .filter((product) => product != undefined);
+          const number = validProducts.length;
+          const dif = numOfProducts - numOfProductsChange;
+          setNumOfProductsChange(dif);
+          setNumOfProducts(number);
+        }
+
+        break;
+      }
+
+      case "14": {
+        const today = new Date();
+        const weekAgo = new Date();
+        weekAgo.setDate(today.getDate() - 14);
+        const validProducts = products
+          .map((product) => {
+            if (product.createdAt >= weekAgo && product.createdAt <= today) {
+              return product;
+            }
+          })
+          .filter((product) => product != undefined);
+        const number = validProducts.length;
+        setNumOfProducts(number);
+        break;
+      }
+      case "21": {
+        const today = new Date();
+        const weekAgo = new Date();
+        weekAgo.setDate(today.getDate() - 21);
+        const validProducts = products
+          .map((product) => {
+            if (product.createdAt >= weekAgo && product.createdAt <= today) {
+              return product;
+            }
+          })
+          .filter((product) => product != undefined);
+        const number = validProducts.length;
+        setNumOfProducts(number);
+        break;
+      }
+    }
+  };
+  calculateNumOfProducts("dooo");
+  const determinePromoCost = useCallback(() => {
+    let productsSum = 0;
+    let discountSum = 0;
+    let voucherSum = 0;
+    const products = getProducts();
+    products.forEach((product) => {
+      productsSum += product.price!;
+    });
+    if (voucherProducts) {
+      voucherProducts.forEach((vp) => {
+        if (vp.action === "Giveaway") {
+          voucherSum += vp.product.price!;
+        } else {
+          voucherSum += vp.price;
+        }
+      });
+    }
+    if (discountedProducts) {
+      discountedProducts.forEach((dp) => {
+        discountSum += dp.price!;
+      });
+    }
+    return [productsSum, voucherSum, discountSum];
+  }, []);
+  const result = determinePromoCost();
+  const pieData = [
+    { value: result[0], color: appTheme.colors?.tertiary },
+    { value: result[1], color: appTheme.colors?.textColor },
+    { value: result[2], color: appTheme.colors?.secondary },
+  ];
   const createRandomId = useCallback(() => {
     return Math.random().toString(36).substring(2, 27);
   }, []);
@@ -177,6 +264,14 @@ const Analytics: React.FC<Prop> = ({ navigation }) => {
     ],
     []
   );
+  const datay = {
+    labels: ["January", "February", "March", "April", "May", "June"],
+    datasets: [
+      {
+        data: [20, 45, 28, 80, 99, 43],
+      },
+    ],
+  };
 
   const handleImageUpload = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -204,6 +299,12 @@ const Analytics: React.FC<Prop> = ({ navigation }) => {
       gap: 9,
     },
   });
+  const barData = [
+    { value: 150, label: "A" },
+    { value: 200, label: "B" },
+    { value: 300, label: "C" },
+    { value: 100, label: "D" },
+  ];
   return (
     <View
       style={{ backgroundColor: appTheme.colors?.background }}
@@ -233,58 +334,113 @@ const Analytics: React.FC<Prop> = ({ navigation }) => {
             </View>
             <View>
               <SelectModal
+                calculate={calculateNumOfProducts}
                 onSelection={setSalesAnalyticsTimeFrame}
-                data={["Last 7 days ", "Last 14 days ", "Last 3 Months "]}
+                data={[
+                  { key: "Now", value: "0" },
+                  { key: "Last 7 days ", value: "7" },
+                  { key: "Last 14 days ", value: "14" },
+                  { key: "Last 2 Months ", value: "2" },
+                ]}
               />
             </View>
           </View>
           <View
-            style={{ borderColor: appTheme.colors?.background, borderWidth: 2 }}
+            style={{ borderColor: appTheme.colors?.textColor, borderWidth: 1 }}
             className=" mt-5  rounded-sm p-2 flex-row flex-wrap"
           >
-            <View
-              style={{
-                borderColor: appTheme.colors?.background,
-                borderRightWidth: 2,
-              }}
-              className="  p-2  w-[170px]"
-            >
-              <Text style={styles2.text} className="text-[11px]">
-                Orders Processed
-              </Text>
-              <View>
-                <View className="left-3 flex-row items-center gap-2">
-                  <Text
-                    style={styles2.text}
-                    className="text-[30px] border border-transparent "
-                  >
-                    25
-                  </Text>
-                  <View className="flex-row">
-                    <MaterialIcons
-                      name="trending-up"
-                      size={19}
-                      color={"green"}
-                    />
+            <View>
+              <View
+                style={{
+                  borderColor: appTheme.colors?.textColor,
+                  borderRightWidth: 1,
+                }}
+                className="  p-2  w-[170px]"
+              >
+                <Text style={styles2.text} className="text-[11px]">
+                  Orders Processed
+                </Text>
+                <View>
+                  <View className="left-3 flex-row items-center gap-2">
                     <Text
-                      style={{
-                        fontFamily: styles2.text.fontFamily,
-                        color: "green",
-                      }}
-                      className="text-[12px]"
+                      style={styles2.text}
+                      className="text-[30px] border border-transparent "
                     >
-                      13%
+                      25
                     </Text>
+                    <View className="flex-row">
+                      <MaterialIcons
+                        name="trending-up"
+                        size={19}
+                        color={"green"}
+                      />
+                      <Text
+                        style={{
+                          fontFamily: styles2.text.fontFamily,
+                          color: "green",
+                        }}
+                        className="text-[12px]"
+                      >
+                        13%
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+
+              <View
+                style={{
+                  borderColor: appTheme.colors?.textColor,
+                  borderRightWidth: 1,
+                  borderTopWidth: 1,
+                }}
+                className="  p-2  w-[170px]"
+              >
+                <Text style={styles2.text} className="text-[11px]">
+                  Products in store
+                </Text>
+                <View>
+                  <View className="left-3 flex-row items-center gap-2">
+                    <Text
+                      style={styles2.text}
+                      className="text-[30px] border border-transparent "
+                    >
+                      <AnimatedNumbers
+                        includeComma
+                        animationDuration={1200}
+                        animateToNumber={numOfProducts}
+                        fontStyle={{
+                          color: appTheme.colors?.textColor,
+                          fontSize: 30,
+                          fontFamily: styles2.text.fontFamily,
+                        }}
+                      />
+                    </Text>
+                    {numOfProductsChange !== 0 && (
+                      <View className="flex-row">
+                        <Text
+                          style={{
+                            fontFamily: styles2.text.fontFamily,
+                            color: numOfProductsChange > 0 ? "green" : "red",
+                          }}
+                          className="text-[13px]"
+                        >
+                          {numOfProductsChange > 0 ? "+ " : ""}{" "}
+                          {numOfProductsChange}
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 </View>
               </View>
             </View>
-            <View style={{}} className="  p-2  left-3  w-[170px]">
-              <Text style={styles2.text} className="text-[11px]">
+
+            <View className="  p-2  px-4   justify-center  w-[170px]">
+              <Text style={styles2.text} className="text-[15px] ">
                 Revenue
               </Text>
-              <View>
-                <View className="left-3 flex-row items-center gap-2">
+              <View className="">
+                <View className=" flex-row  items-center gap-2">
                   <Text
                     style={styles2.text}
                     className="text-[30px] border border-transparent "
@@ -310,84 +466,136 @@ const Analytics: React.FC<Prop> = ({ navigation }) => {
                 </View>
               </View>
             </View>
-            <View
-              style={{
-                borderColor: appTheme.colors?.background,
-                borderRightWidth: 2,
-                borderTopWidth: 2,
-              }}
-              className="  p-2  w-[170px]"
-            >
-              <Text style={styles2.text} className="text-[11px]">
-                Products in store
+          </View>
+        </View>
+        <View
+          style={{ backgroundColor: appTheme.colors?.primary }}
+          className="p-[5%]"
+        >
+          <View className="flex-row items-center justify-start">
+            <View>
+              <Text
+                style={styles2.text}
+                className="text-[19px]  items-center  border-bg -top-1 font-semibold"
+              >
+                Promotions
               </Text>
-              <View>
-                <View className="left-3 flex-row items-center gap-2">
-                  <Text
-                    style={styles2.text}
-                    className="text-[30px] border border-transparent "
-                  >
-                    55
-                  </Text>
-                  <View className="flex-row">
-                    <MaterialIcons
-                      name="trending-down"
-                      size={19}
-                      color={"red"}
-                    />
-                    <Text
-                      style={{
-                        fontFamily: styles2.text.fontFamily,
-                        color: "red",
-                      }}
-                      className="text-[12px]"
-                    >
-                      5.4%
-                    </Text>
-                  </View>
-                </View>
-              </View>
             </View>
-            <View
-              style={{
-                borderColor: appTheme.colors?.background,
+          </View>
+          <View
+            style={{
+              backgroundColor: appTheme.colors?.quaternarySup,
+              borderColor: appTheme.colors?.textColor,
+              borderWidth: 0,
+            }}
+            className=" mt-5  rounded-md p-2 flex-row "
+          >
+            <View className="flex-1">
+              <PieChart
+                data={pieData}
+                donut
+                innerCircleColor={appTheme.colors?.primary}
+                focusOnPress
+                radius={55}
+                isAnimated
+                innerRadius={42}
+                centerLabelComponent={() => {
+                  return (
+                    <View className="justify-center items-center">
+                      <Text style={styles2.text}>Store</Text>
+                      <Text style={styles2.text}>Assets</Text>
+                    </View>
+                  );
+                }}
+              />
+            </View>
 
-                borderTopWidth: 2,
-              }}
-              className="   p-2 px-5 w-[170px]"
-            >
-              <Text style={styles2.text} className="text-[11px]">
-                Products in store
-              </Text>
-              <View>
-                <View className="left-3 flex-row items-center gap-2">
+            <View className="  p-2         w-[170px]">
+              <View className="flex-row mt-2 gap-3">
+                <View
+                  className="w-[13px] h-[13px] items-center rounded-full"
+                  style={{ backgroundColor: appTheme.colors?.textColor }}
+                ></View>
+                <Text style={styles2.text} className="text-[10px] ">
+                  Voucher Products
+                </Text>
+              </View>
+              <View className="flex-row mt-2 gap-3">
+                <View
+                  className="w-[13px] h-[13px] items-center rounded-full"
+                  style={{ backgroundColor: appTheme.colors?.secondary }}
+                ></View>
+                <Text style={styles2.text} className="text-[10px] ">
+                  Discount Products
+                </Text>
+              </View>
+              <View className="flex-row mt-2 gap-3">
+                <View
+                  className="w-[13px] h-[13px] items-center rounded-full"
+                  style={{ backgroundColor: appTheme.colors?.tertiary }}
+                ></View>
+                <Text style={styles2.text} className="text-[10px] ">
+                  {" "}
+                  Products
+                </Text>
+              </View>
+              <View className="top-4">
+                <Text style={styles2.text} className="text-[10px]">
+                  Cost To Store : R
                   <Text
-                    style={styles2.text}
-                    className="text-[30px] border border-transparent "
+                    style={{
+                      color: "red",
+                      fontFamily: styles2.text.fontFamily,
+                    }}
+                    className="text-[13px]"
                   >
-                    55
-                  </Text>
-                  <View className="flex-row">
-                    <MaterialIcons
-                      name="trending-down"
-                      size={19}
-                      color={"red"}
-                    />
-                    <Text
-                      style={{
-                        fontFamily: styles2.text.fontFamily,
-                        color: "red",
-                      }}
-                      className="text-[12px]"
-                    >
-                      5.4%
-                    </Text>
-                  </View>
-                </View>
+                    {result[1] + result[2]}
+                  </Text>{" "}
+                </Text>
               </View>
             </View>
           </View>
         </View>
+        <View
+          style={{ backgroundColor: appTheme.colors?.primary }}
+          className="p-[5%]"
+        >
+          <View className="flex-row items-center justify-start">
+            <View>
+              <Text
+                style={styles2.text}
+                className="text-[19px]  items-center  border-bg -top-1 font-semibold"
+              >
+                Popular Categories
+              </Text>
+            </View>
+          </View>
+          <View
+            style={{
+              backgroundColor: appTheme.colors?.quaternarySup,
+              borderColor: appTheme.colors?.textColor,
+              borderWidth: 0,
+            }}
+            className=" mt-5  rounded-md p-2 flex-row "
+          >
+            <View className="border ">
+              <View>
+                <BarChart
+                chartConfig={chartConfig}
+                  yAxisSuffix=""
+                  data={datay}
+                  width={360}
+                  height={220}
+                  yAxisLabel="$"
+                
+                
+                  verticalLabelRotation={30}
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+
         <View
           style={{ backgroundColor: appTheme.colors?.primary }}
           className="p-[5%] mt-2 "

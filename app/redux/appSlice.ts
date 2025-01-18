@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppTheme } from "../utilities/Types";
 
 const defaultTheme: AppTheme = {
-  current_screen: "layout",
   colors: {
     background: "#e6e6e6",
     primary: "#ffffff",
