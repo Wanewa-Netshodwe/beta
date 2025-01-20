@@ -1,11 +1,22 @@
 package com.analytics.API.DTOs;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 public class CustomerAnalytic {
     private String date;
     private double timeSpendInStore;
     private String userId;
+    private List<ProductInfos> productMatrix;
+
+    public List<ProductInfos> getProductMatrix() {
+        return productMatrix;
+    }
+
+    public void setProductMatrix(List<ProductInfos> productMatrix) {
+        this.productMatrix = productMatrix;
+    }
+
     public String toString() {
         return "CustomerAnalyticDto{" +
                 "date=" + date +

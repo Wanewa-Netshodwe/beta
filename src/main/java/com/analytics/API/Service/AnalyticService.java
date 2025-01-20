@@ -107,6 +107,7 @@ public class AnalyticService {
         System.out.println("Total businesses: " + updatedBusinesses.size());
 
         setPrevData(updatedBusinesses);
+//saveToDatabase();
 
     }
 
@@ -212,25 +213,60 @@ public class AnalyticService {
         DayDataDTO mergedDay = new DayDataDTO();
         List<CustomerAnalytic> mergedAnalytics = new ArrayList<>();
 
-        // Handle null cases
+
         List<CustomerAnalytic> newAnalytics = (newDay != null && newDay.getCustomerAnalytic() != null) ?
                 newDay.getCustomerAnalytic() : new ArrayList<>();
         List<CustomerAnalytic> oldAnalytics = (oldDay != null && oldDay.getCustomerAnalytic() != null) ?
                 oldDay.getCustomerAnalytic() : new ArrayList<>();
 
-        // Add all new analytics
+
+        Map<String, ProductInfos> oldProductInfoMap = oldAnalytics.stream()
+                .flatMap(analytic -> analytic.getProductMatrix().stream())
+                .collect(Collectors.toMap(
+                        productInfo -> productInfo.getProduct().getProductId(),
+                        productInfo -> productInfo
+                ));
+
+
+        List<ProductInfos> mergedProductInfos = new ArrayList<>();
+        for (CustomerAnalytic newAnalytic : newAnalytics) {
+            List<ProductInfos> updatedProductInfos = new ArrayList<>();
+
+            for (ProductInfos newProductInfo : newAnalytic.getProductMatrix()) {
+                String productId = newProductInfo.getProduct().getProductId();
+                ProductInfos oldProductInfo = oldProductInfoMap.get(productId);
+
+                if (oldProductInfo != null) {
+
+                    oldProductInfo.setViewTime(newProductInfo.getViewTime());
+                    oldProductInfo.setAddedToCart(newProductInfo.isAddedToCart());
+                    oldProductInfo.setInCheckout(newProductInfo.isInCheckout());
+                    updatedProductInfos.add(oldProductInfo);
+                } else {
+
+                    updatedProductInfos.add(newProductInfo);
+                }
+            }
+
+
+            newAnalytic.setProductMatrix(updatedProductInfos);
+            mergedProductInfos.addAll(updatedProductInfos);
+        }
+
+
         mergedAnalytics.addAll(newAnalytics);
 
-        // Add old analytics that aren't in the new set
+
         oldAnalytics.stream()
                 .filter(oldAnalytic -> !newAnalytics.contains(oldAnalytic))
                 .forEach(mergedAnalytics::add);
+
 
         mergedDay.setCustomerAnalytic(mergedAnalytics);
         return mergedDay;
     }
 
-    @Scheduled(cron = "30 5 21 * * ?")
+    @Scheduled(cron = "30 5 22 * * ?")
     private void saveToDatabase() {
         Analytics analytics = new Analytics();
         analytics.setId("eeyeygdggGGgT$5");
