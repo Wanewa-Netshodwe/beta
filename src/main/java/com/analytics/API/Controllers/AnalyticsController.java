@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.InvocationTargetException;
+
 @RestController
 @RequestMapping("analytics")
 public class AnalyticsController {
@@ -22,7 +24,7 @@ public class AnalyticsController {
 
  }
     @GetMapping ("/get/{businessid}")
-    public ResponseEntity<IndividualBusinessAnalytic> CalculateAnalytic(@PathVariable String businessid) {
+    public ResponseEntity<IndividualBusinessAnalytic> CalculateAnalytic(@PathVariable String businessid) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         IndividualBusinessAnalytic businessAnalytic = As.getAnalytics(businessid);
         return  ResponseEntity.status(HttpStatus.OK).body(businessAnalytic);
 

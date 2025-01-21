@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -283,7 +284,7 @@ public class AnalyticService {
     }
 
 
-    public IndividualBusinessAnalytic getAnalytics(String businessId) {
+    public IndividualBusinessAnalytic getAnalytics(String businessId) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         if (databaseDoc.getId() == null) {
             Optional<Analytics> analytics = ar.findById("eeyeygdggGGgT$5");
             if (analytics.isPresent()) {
@@ -293,43 +294,6 @@ public class AnalyticService {
         }
         BusinessDataDTO business = databaseDoc.getBusinesses().stream().filter(businessDataDTO -> businessDataDTO.getBusinessId().equals(businessId)).findFirst().orElse(null);
         return BuiltAnalytic(business);
-    }
-    private Daily determineDaily(BusinessDataDTO businessData) {
-        LocalDate today = LocalDate.now();
-        String year = Integer.toString(today.getYear());
-        String shortMon = today.getMonth().toString().charAt(0) + today.getMonth().toString().substring(1, 3).toLowerCase();
-        String day = Integer.toString(today.getDayOfMonth());
-        System.out.println(businessData);
-        System.out.println(year);
-        List<CustomerAnalytic> customerAnalytics = businessData.getInfo().getYearData().get(year).getMonthData().get(shortMon).getDayData().get(day).getCustomerAnalytic();
-        Daily daily = new Daily();
-        Current current = new Current();
-        Metrics metrics = new Metrics();
-        CustomerBehavior customerBehavior = new CustomerBehavior();
-        TemporalAnalysis temporalAnalysis = new TemporalAnalysis();
-        ProductAnalytics productAnalytics = new ProductAnalytics();
-        OverallMetrics overallMetrics = calculateOverMetrics(customerAnalytics);
-        EngagementMetrics engagementMetrics = calculateEngagementMetrics(customerAnalytics);
-        CustomerSegments customerSegments = calculateCustomerSegments(customerAnalytics);
-        Overview overview = calculateOverview(customerAnalytics);
-        PeakHours peakHours = calculatePeakHours(customerAnalytics);
-        List<ProductPerformance> performanceList = calculateProductPerformance(customerAnalytics);
-        productAnalytics.setProductPerformance(performanceList);
-        productAnalytics.setOverview(overview);
-        ConversionRates conversionRate = calculateConversionRates(customerAnalytics);
-        temporalAnalysis.setPeakHours(peakHours);
-        customerBehavior.setEngagementMetrics(engagementMetrics);
-        customerBehavior.setCustomerSegments(customerSegments);
-        metrics.setOverallMetrics(overallMetrics);
-        metrics.setConversionRates(conversionRate);
-        metrics.setCustomerBehavior(customerBehavior);
-        metrics.setTemporalAnalysis(temporalAnalysis);
-        metrics.setProductAnalytics(productAnalytics);
-        current.setMetrics(metrics);
-        daily.setCurrent(current);
-
-        return daily;
-
     }
 
     private OverallMetrics calculateOverMetrics(List<CustomerAnalytic> customerAnalytics){
@@ -619,14 +583,295 @@ public class AnalyticService {
 
     }
 
-    private IndividualBusinessAnalytic BuiltAnalytic(BusinessDataDTO businessData){
+    private <T extends CurrentInterface> T aggregateWeeklyAnalytics(List<Daily> dailyAnalysisList,Class<T> type) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        T weekly = type.getDeclaredConstructor().newInstance();
+        Current current = new Current();
+        Metrics metrics = new Metrics();
+
+
+        OverallMetrics aggregatedOverallMetrics = new OverallMetrics();
+        EngagementMetrics aggregatedEngagementMetrics = new EngagementMetrics();
+        CustomerSegments aggregatedCustomerSegments = new CustomerSegments();
+        Overview aggregatedOverview = new Overview();
+        ConversionRates aggregatedConversionRates = new ConversionRates();
+        Map<Integer, Integer> hourlyTrafficMap = new HashMap<>();
+        Map<String, ProductPerformance> productPerformanceMap = new HashMap<>();
+
+        int daysCount = dailyAnalysisList.size();
+
+
+        for (Daily daily : dailyAnalysisList) {
+            Metrics dailyMetrics = daily.getCurrent().getMetrics();
+
+
+            OverallMetrics dailyOverall = dailyMetrics.getOverallMetrics();
+            aggregatedOverallMetrics.setTotalCustomers(aggregatedOverallMetrics.getTotalCustomers() + dailyOverall.getTotalCustomers());
+            aggregatedOverallMetrics.setTotalVisits(aggregatedOverallMetrics.getTotalVisits() + dailyOverall.getTotalVisits());
+            aggregatedOverallMetrics.setTotalRevenue(aggregatedOverallMetrics.getTotalRevenue() + dailyOverall.getTotalRevenue());
+            aggregatedOverallMetrics.setAverageTimeInStore(aggregatedOverallMetrics.getAverageTimeInStore() + dailyOverall.getAverageTimeInStore());
+            aggregatedOverallMetrics.setConversionRate(aggregatedOverallMetrics.getConversionRate() + dailyOverall.getConversionRate());
+
+
+            EngagementMetrics dailyEngagement = dailyMetrics.getCustomerBehavior().getEngagementMetrics();
+            aggregatedEngagementMetrics.setAverageVisitDuration(aggregatedEngagementMetrics.getAverageVisitDuration() + dailyEngagement.getAverageVisitDuration());
+            aggregatedEngagementMetrics.setBounceRate(aggregatedEngagementMetrics.getBounceRate() + dailyEngagement.getBounceRate());
+            aggregatedEngagementMetrics.setReturnRate(aggregatedEngagementMetrics.getReturnRate() + dailyEngagement.getReturnRate());
+
+
+            CustomerSegments dailySegments = dailyMetrics.getCustomerBehavior().getCustomerSegments();
+            aggregatedCustomerSegments.setActiveShoppers(aggregatedCustomerSegments.getActiveShoppers() + dailySegments.getActiveShoppers());
+            aggregatedCustomerSegments.setBrowsers(aggregatedCustomerSegments.getBrowsers() + dailySegments.getBrowsers());
+            aggregatedCustomerSegments.setCartAbandoners(aggregatedCustomerSegments.getCartAbandoners() + dailySegments.getCartAbandoners());
+
+
+            Overview dailyOverview = dailyMetrics.getProductAnalytics().getOverview();
+            aggregatedOverview.setTotalProductViews(aggregatedOverview.getTotalProductViews() + dailyOverview.getTotalProductViews());
+            aggregatedOverview.setAverageViewTime(aggregatedOverview.getAverageViewTime() + dailyOverview.getAverageViewTime());
+            aggregatedOverview.setCartAddRate(aggregatedOverview.getCartAddRate() + dailyOverview.getCartAddRate());
+            aggregatedOverview.setCheckoutRate(aggregatedOverview.getCheckoutRate() + dailyOverview.getCheckoutRate());
+            aggregatedOverview.setPurchaseRate(aggregatedOverview.getPurchaseRate() + dailyOverview.getPurchaseRate());
+
+
+            ConversionRates dailyConversion = dailyMetrics.getConversionRates();
+            aggregatedConversionRates.setViewToCart(aggregatedConversionRates.getViewToCart() + dailyConversion.getViewToCart());
+            aggregatedConversionRates.setCartToCheckout(aggregatedConversionRates.getCartToCheckout() + dailyConversion.getCartToCheckout());
+            aggregatedConversionRates.setCheckoutToPurchase(aggregatedConversionRates.getCheckoutToPurchase() + dailyConversion.getCheckoutToPurchase());
+            aggregatedConversionRates.setOverall(aggregatedConversionRates.getOverall() + dailyConversion.getOverall());
+
+
+            int peakHour = dailyMetrics.getTemporalAnalysis().getPeakHours().getMostTraffic();
+            hourlyTrafficMap.put(peakHour, hourlyTrafficMap.getOrDefault(peakHour, 0) + 1);
+
+
+            for (ProductPerformance dailyProduct : dailyMetrics.getProductAnalytics().getProductPerformance()) {
+                ProductPerformance aggregatedProduct = productPerformanceMap.getOrDefault(
+                        dailyProduct.getProductId(),
+                        new ProductPerformance()
+                );
+
+                if (aggregatedProduct.getProductId() == null) {
+                    aggregatedProduct.setProductId(dailyProduct.getProductId());
+                    aggregatedProduct.setMetrics(new ProductMetrics());
+                }
+
+                ProductMetrics aggregatedMetrics = aggregatedProduct.getMetrics();
+                ProductMetrics dailyMetrics2 = dailyProduct.getMetrics();
+
+                aggregatedMetrics.setView(aggregatedMetrics.getView() + dailyMetrics2.getView());
+                aggregatedMetrics.setCartAdds(aggregatedMetrics.getCartAdds() + dailyMetrics2.getCartAdds());
+                aggregatedMetrics.setCheckouts(aggregatedMetrics.getCheckouts() + dailyMetrics2.getCheckouts());
+                aggregatedMetrics.setRevenue(aggregatedMetrics.getRevenue() + dailyMetrics2.getRevenue());
+                aggregatedMetrics.setAverageViewTime(aggregatedMetrics.getAverageViewTime() + dailyMetrics2.getAverageViewTime());
+                aggregatedMetrics.setConversionRate(aggregatedMetrics.getConversionRate() + dailyMetrics2.getConversionRate());
+
+                productPerformanceMap.put(dailyProduct.getProductId(), aggregatedProduct);
+            }
+        }
+
+        if (daysCount > 0) {
+
+            aggregatedOverallMetrics.setAverageTimeInStore(aggregatedOverallMetrics.getAverageTimeInStore() / daysCount);
+            aggregatedOverallMetrics.setConversionRate(aggregatedOverallMetrics.getConversionRate() / daysCount);
+
+
+            aggregatedEngagementMetrics.setAverageVisitDuration(aggregatedEngagementMetrics.getAverageVisitDuration() / daysCount);
+            aggregatedEngagementMetrics.setBounceRate(aggregatedEngagementMetrics.getBounceRate() / daysCount);
+            aggregatedEngagementMetrics.setReturnRate(aggregatedEngagementMetrics.getReturnRate() / daysCount);
+
+
+            aggregatedOverview.setAverageViewTime(aggregatedOverview.getAverageViewTime() / daysCount);
+            aggregatedOverview.setCartAddRate(aggregatedOverview.getCartAddRate() / daysCount);
+            aggregatedOverview.setCheckoutRate(aggregatedOverview.getCheckoutRate() / daysCount);
+            aggregatedOverview.setPurchaseRate(aggregatedOverview.getPurchaseRate() / daysCount);
+
+
+            aggregatedConversionRates.setViewToCart(aggregatedConversionRates.getViewToCart() / daysCount);
+            aggregatedConversionRates.setCartToCheckout(aggregatedConversionRates.getCartToCheckout() / daysCount);
+            aggregatedConversionRates.setCheckoutToPurchase(aggregatedConversionRates.getCheckoutToPurchase() / daysCount);
+            aggregatedConversionRates.setOverall(aggregatedConversionRates.getOverall() / daysCount);
+
+            for (ProductPerformance product : productPerformanceMap.values()) {
+                ProductMetrics pMetrics = product.getMetrics();
+                pMetrics.setAverageViewTime(pMetrics.getAverageViewTime() / daysCount);
+                pMetrics.setConversionRate(pMetrics.getConversionRate() / daysCount);
+            }
+        }
+
+        PeakHours weeklyPeakHours = new PeakHours();
+        int weeklyPeakHour = hourlyTrafficMap.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(0);
+        weeklyPeakHours.setMostTraffic(weeklyPeakHour);
+        weeklyPeakHours.setMostPurchases(weeklyPeakHour);
+
+
+        ProductAnalytics productAnalytics = new ProductAnalytics();
+        productAnalytics.setOverview(aggregatedOverview);
+        productAnalytics.setProductPerformance(new ArrayList<>(productPerformanceMap.values()));
+
+        CustomerBehavior customerBehavior = new CustomerBehavior();
+        customerBehavior.setEngagementMetrics(aggregatedEngagementMetrics);
+        customerBehavior.setCustomerSegments(aggregatedCustomerSegments);
+
+        TemporalAnalysis temporalAnalysis = new TemporalAnalysis();
+        temporalAnalysis.setPeakHours(weeklyPeakHours);
+
+        metrics.setOverallMetrics(aggregatedOverallMetrics);
+        metrics.setConversionRates(aggregatedConversionRates);
+        metrics.setCustomerBehavior(customerBehavior);
+        metrics.setTemporalAnalysis(temporalAnalysis);
+        metrics.setProductAnalytics(productAnalytics);
+
+        current.setMetrics(metrics);
+        weekly.setCurrent(current);
+
+        return weekly;
+    }
+    private Weekly determineWeekly(BusinessDataDTO businessData) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        List<Integer> validDates = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        int Year = today.getYear();
+        List<DayDataDTO> daysList = new ArrayList<>();
+        List<Daily> dailyAnalysisList = new ArrayList<>();
+        String shortMon = today.getMonth().toString().charAt(0) + today.getMonth().toString().substring(1, 3).toLowerCase();
+        LocalDate aWeekAgo = today.minusDays(7);
+        for(int i = aWeekAgo.getDayOfMonth();i<=today.getDayOfMonth();i++){
+            validDates.add(i);
+        }
+        for(Integer i :validDates){
+            DayDataDTO dailyData = businessData.getInfo().getYearData().get(Integer.toString(Year)).getMonthData().get(shortMon).getDayData().get(Integer.toString(i));
+            if (dailyData == null){
+
+            }else {
+                daysList.add(dailyData);
+            }
+        }
+        for( DayDataDTO dayDataDTO :daysList){
+            dailyAnalysisList.add(determineDaily(businessData,dayDataDTO.getCustomerAnalytic()));
+        }
+        return (Weekly) aggregateWeeklyAnalytics(dailyAnalysisList, Weekly.class);
+
+
+    }
+    private BiWeekly determineBiWeekly(BusinessDataDTO businessData) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        List<Integer> validDates = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        int Year = today.getYear();
+        List<DayDataDTO> daysList = new ArrayList<>();
+        List<Daily> dailyAnalysisList = new ArrayList<>();
+        String shortMon = today.getMonth().toString().charAt(0) + today.getMonth().toString().substring(1, 3).toLowerCase();
+        LocalDate aWeekAgo = today.minusDays(14);
+        for(int i = aWeekAgo.getDayOfMonth();i<=today.getDayOfMonth();i++){
+            validDates.add(i);
+        }
+        for(Integer i :validDates){
+            DayDataDTO dailyData = businessData.getInfo().getYearData().get(Integer.toString(Year)).getMonthData().get(shortMon).getDayData().get(Integer.toString(i));
+            if (dailyData == null){
+
+            }else {
+                daysList.add(dailyData);
+            }
+        }
+        for( DayDataDTO dayDataDTO :daysList){
+            dailyAnalysisList.add(determineDaily(businessData,dayDataDTO.getCustomerAnalytic()));
+        }
+        return (BiWeekly) aggregateWeeklyAnalytics(dailyAnalysisList,BiWeekly.class);
+
+
+
+    }
+
+    private Month determineMonth(BusinessDataDTO businessData) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        List<Integer> validDates = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        int Year = today.getYear();
+        List<DayDataDTO> daysList = new ArrayList<>();
+        List<Daily> dailyAnalysisList = new ArrayList<>();
+        String shortMon = today.getMonth().toString().charAt(0) + today.getMonth().toString().substring(1, 3).toLowerCase();
+        LocalDate aWeekAgo = today.minusDays(30);
+        if(aWeekAgo.getMonth() != today.getMonth()){
+            aWeekAgo = today.withDayOfMonth(1);
+        }
+        for(int i = aWeekAgo.getDayOfMonth();i<=today.getDayOfMonth();i++){
+            validDates.add(i);
+        }
+        for(Integer i :validDates){
+            DayDataDTO dailyData = businessData.getInfo().getYearData().get(Integer.toString(Year)).getMonthData().get(shortMon).getDayData().get(Integer.toString(i));
+            if (dailyData == null){
+
+            }else {
+                daysList.add(dailyData);
+            }
+        }
+        for( DayDataDTO dayDataDTO :daysList){
+            dailyAnalysisList.add(determineDaily(businessData,dayDataDTO.getCustomerAnalytic()));
+        }
+        return (Month) aggregateWeeklyAnalytics(dailyAnalysisList,Month.class);
+
+
+
+    }
+
+    private Daily determineDaily(BusinessDataDTO businessData ,List<CustomerAnalytic> ... cusAnalytics ) {
+        LocalDate today = LocalDate.now();
+        List<CustomerAnalytic> customerAnalytics;
+        String year = Integer.toString(today.getYear());
+        String shortMon = today.getMonth().toString().charAt(0) + today.getMonth().toString().substring(1, 3).toLowerCase();
+        String day = Integer.toString(today.getDayOfMonth());
+        System.out.println(businessData);
+        System.out.println(year);
+        if(cusAnalytics.length > 0){
+            customerAnalytics = cusAnalytics[0];
+        }
+        else{
+            customerAnalytics = businessData.getInfo().getYearData().get(year).getMonthData().get(shortMon).getDayData().get(day).getCustomerAnalytic();
+        }
+
+        Daily daily = new Daily();
+        Current current = new Current();
+        Metrics metrics = new Metrics();
+        CustomerBehavior customerBehavior = new CustomerBehavior();
+        TemporalAnalysis temporalAnalysis = new TemporalAnalysis();
+        ProductAnalytics productAnalytics = new ProductAnalytics();
+        OverallMetrics overallMetrics = calculateOverMetrics(customerAnalytics);
+        EngagementMetrics engagementMetrics = calculateEngagementMetrics(customerAnalytics);
+        CustomerSegments customerSegments = calculateCustomerSegments(customerAnalytics);
+        Overview overview = calculateOverview(customerAnalytics);
+        PeakHours peakHours = calculatePeakHours(customerAnalytics);
+        List<ProductPerformance> performanceList = calculateProductPerformance(customerAnalytics);
+        productAnalytics.setProductPerformance(performanceList);
+        productAnalytics.setOverview(overview);
+        ConversionRates conversionRate = calculateConversionRates(customerAnalytics);
+        temporalAnalysis.setPeakHours(peakHours);
+        customerBehavior.setEngagementMetrics(engagementMetrics);
+        customerBehavior.setCustomerSegments(customerSegments);
+        metrics.setOverallMetrics(overallMetrics);
+        metrics.setConversionRates(conversionRate);
+        metrics.setCustomerBehavior(customerBehavior);
+        metrics.setTemporalAnalysis(temporalAnalysis);
+        metrics.setProductAnalytics(productAnalytics);
+        current.setMetrics(metrics);
+        daily.setCurrent(current);
+
+        return daily;
+
+    }
+
+    private IndividualBusinessAnalytic BuiltAnalytic(BusinessDataDTO businessData) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         IndividualBusinessAnalytic analytic = new IndividualBusinessAnalytic();
         TimePeriods timePeriods = new TimePeriods();
         Daily daily = determineDaily(businessData);
+        Month mon = determineMonth(businessData);
+        Weekly weekly = determineWeekly(businessData);
+        BiWeekly biWeekly = determineBiWeekly(businessData);
         timePeriods.setDaily(daily);
+        timePeriods.setWeekly(weekly);
+        timePeriods.setBiWeekly(biWeekly);
+        timePeriods.setMonth(mon);
         analytic.setBusiness_id(businessData.getBusinessId());
         analytic.setTimePeriods(timePeriods);
+        determineWeekly(businessData);
         return analytic;
     }
-
 }
