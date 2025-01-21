@@ -1,12 +1,17 @@
 package com.analytics.API.Service;
 
 import com.analytics.API.DTOs.*;
+import com.analytics.API.DTOs.AnalyticsForBusiness.*;
 import com.analytics.API.Models.Analytics;
 import com.analytics.API.Repository.AnalyticRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoField;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -15,6 +20,7 @@ public class AnalyticService {
     @Autowired
     private AnalyticRepository ar;
     private List<BusinessDataDTO> prevData = new ArrayList<>();
+    private Analytics databaseDoc = new Analytics();
 
     public List<BusinessDataDTO> getPrevData() {
         return prevData;
@@ -274,4 +280,340 @@ public class AnalyticService {
         ar.save(analytics);
         System.out.println("Analytics saved to database");
     }
+
+
+    public IndividualBusinessAnalytic getAnalytics(String businessId) {
+        if (databaseDoc.getId() == null) {
+            Optional<Analytics> analytics = ar.findById("eeyeygdggGGgT$5");
+            if (analytics.isPresent()) {
+                databaseDoc = analytics.get();
+
+            }
+        }
+        BusinessDataDTO business = databaseDoc.getBusinesses().stream().filter(businessDataDTO -> businessDataDTO.getBusinessId().equals(businessId)).findFirst().orElse(null);
+        return BuiltAnalytic(business);
+    }
+
+    private IndividualBusinessAnalytic determineDaily(BusinessDataDTO businessData) {
+        IndividualBusinessAnalytic businessAnalytic = new IndividualBusinessAnalytic();
+
+        businessAnalytic.setBusiness_id(businessAnalytic.getBusiness_id());
+        LocalDate today = LocalDate.now();
+        String year = Integer.toString(today.getYear());
+        String shortMon = today.getMonth().toString().charAt(0) + today.getMonth().toString().substring(1, 3).toLowerCase();
+        String day = Integer.toString(today.getDayOfMonth());
+        List<CustomerAnalytic> customerAnalytics = businessData.getInfo().getYearData().get(year).getMonthData().get(shortMon).getDayData().get(day).getCustomerAnalytic();
+        TimePeriods timePeriods = new TimePeriods();
+        Daily daily = new Daily();
+        Current current = new Current();
+        Metrics metrics = new Metrics();
+        CustomerBehavior customerBehavior = new CustomerBehavior();
+        TemporalAnalysis temporalAnalysis = new TemporalAnalysis();
+        ProductAnalytics productAnalytics = new ProductAnalytics();
+        OverallMetrics overallMetrics = calculateOverMetrics(customerAnalytics);
+        EngagementMetrics engagementMetrics = calculateEngagementMetrics(customerAnalytics);
+        CustomerSegments customerSegments = calculateCustomerSegments(customerAnalytics);
+        Overview overview = calculateOverview(customerAnalytics);
+        PeakHours peakHours = calculatePeakHours(customerAnalytics);
+        List<ProductPerformance> performanceList = calculateProductPerformance(customerAnalytics);
+        productAnalytics.setProductPerformance(performanceList);
+        productAnalytics.setOverview(overview);
+        ConversionRates conversionRate = calculateConversionRates(customerAnalytics);
+        temporalAnalysis.setPeakHours(peakHours);
+        customerBehavior.setEngagementMetrics(engagementMetrics);
+        customerBehavior.setCustomerSegments(customerSegments);
+        metrics.setOverallMetrics(overallMetrics);
+        metrics.setConversionRates(conversionRate);
+        metrics.setCustomerBehavior(customerBehavior);
+        metrics.setTemporalAnalysis(temporalAnalysis);
+        current.setMetrics(metrics);
+        daily.setCurrent(current);
+        timePeriods.setDaily(daily);
+        businessAnalytic.setTimePeriods(timePeriods);
+        return businessAnalytic;
+
+    }
+
+
+    private OverallMetrics calculateOverMetrics(List<CustomerAnalytic> customerAnalytics){
+     int totalCustomers=0;
+     int totalVisits=0;
+     double averageTimeInStore=0;
+     double totalRevenue=0;
+     double conversionRate=0;
+     double sumTimeInStore =0;
+     double inCheckout=0;
+     double inCart=0;
+     totalCustomers = customerAnalytics.size();
+     totalVisits = customerAnalytics.size();
+    for(CustomerAnalytic cusAnalytic : customerAnalytics ){
+        sumTimeInStore +=cusAnalytic.getTimeSpendInStore();
+        for(ProductInfos productInfo : cusAnalytic.getProductMatrix()){
+            if(productInfo.isAddedToCart()){
+                inCart++;
+            }
+            if(productInfo.isInCheckout()){
+                inCheckout++;
+
+            }
+            if(productInfo.isPurchased()){
+                totalRevenue += productInfo.getProduct().getPrice();
+            }
+        }
+    }
+    averageTimeInStore = (sumTimeInStore/totalCustomers)/1000;
+    conversionRate = inCart/inCheckout;
+    OverallMetrics overallMetrics = new OverallMetrics();
+    overallMetrics.setConversionRate(conversionRate);
+    overallMetrics.setTotalCustomers(totalCustomers);
+    overallMetrics.setTotalRevenue(totalRevenue);
+    overallMetrics.setAverageTimeInStore(averageTimeInStore);
+    overallMetrics.setTotalVisits(totalVisits);
+    return  overallMetrics;
+
+
+
+
+}
+    private EngagementMetrics calculateEngagementMetrics(List<CustomerAnalytic> customerAnalytics){
+     double averageVisitDuration;
+     double bounceRate;
+      double returnRate =0;
+        int totalCustomers=0;
+        double sumTimeInStore =0;
+        double inCart=0;
+        totalCustomers = customerAnalytics.size();
+        for(CustomerAnalytic cusAnalytic : customerAnalytics ){
+            sumTimeInStore +=cusAnalytic.getTimeSpendInStore();
+            for(ProductInfos productInfo : cusAnalytic.getProductMatrix()){
+                if(productInfo.isAddedToCart()){
+                    inCart++;
+                }
+
+            }
+        }
+        bounceRate = totalCustomers/inCart;
+        averageVisitDuration=(sumTimeInStore/totalCustomers)/1000;
+        EngagementMetrics metric = new EngagementMetrics();
+        metric.setBounceRate(bounceRate);
+        metric.setAverageVisitDuration(averageVisitDuration);
+        metric.setReturnRate(0);
+        return  metric;
+
+
+
+
+    }
+
+    private Overview calculateOverview(List<CustomerAnalytic> customerAnalytics){
+         int totalProductViews;
+          double averageViewTime;
+          double sumViewTime=0;
+         double cartAddRate;
+         double addToCart=0;
+         double checkoutRate;
+         double purchaseRate;
+        double isPurchased=0;
+         double inCheckout=0;
+
+        List<ProductInfos> productInfos = customerAnalytics.stream()
+                .flatMap(customerAnalytic -> customerAnalytic.getProductMatrix().stream())
+                .collect(Collectors.toList());
+        totalProductViews =productInfos.size();
+        for(ProductInfos productInfo :productInfos){
+            sumViewTime +=productInfo.getViewTime();
+            if(productInfo.isAddedToCart()){
+                addToCart++;
+            }
+            if(productInfo.isInCheckout()){
+                inCheckout++;
+            }
+            if(productInfo.isPurchased()){
+                isPurchased++;
+            }
+        }
+        purchaseRate =totalProductViews/isPurchased;
+        checkoutRate =totalProductViews/inCheckout;
+        cartAddRate =totalProductViews/addToCart;
+        averageViewTime =(sumViewTime/totalProductViews)/1000;
+        Overview overview = new Overview();
+        overview.setAverageViewTime(averageViewTime);
+        overview.setCheckoutRate(checkoutRate);
+        overview.setCartAddRate(cartAddRate);
+        overview.setPurchaseRate(purchaseRate);
+        overview.setTotalProductViews(totalProductViews);
+        return overview;
+
+    }
+
+    private PeakHours calculatePeakHours(List<CustomerAnalytic> customerAnalytics) {
+        List<Integer> customersHours = customerAnalytics.stream()
+                .map(customerAnalytic -> {
+                    Instant date = Instant.parse(customerAnalytic.getDate());
+                    LocalDate localDate = date.atZone(ZoneId.of("GMT+2")).toLocalDate();
+                    return localDate.get(ChronoField.HOUR_OF_DAY);
+                }).collect(Collectors.toList());
+
+        Map<Integer, Integer> trafficMap = new HashMap<>();
+        customersHours.forEach(hour -> {
+            for (int i = -3; i <= 3; i++) {
+                int adjustedHour = (hour + i + 24) % 24;
+                trafficMap.put(adjustedHour, trafficMap.getOrDefault(adjustedHour, 0) + 1);
+            }
+        });
+
+        int mostTrafficHour = -1;
+        int maxCount = 0;
+
+        for (Map.Entry<Integer, Integer> entry : trafficMap.entrySet()) {
+            if (entry.getValue() > maxCount) {
+                maxCount = entry.getValue();
+                mostTrafficHour = entry.getKey();
+            }
+        }
+
+        PeakHours peakHours = new PeakHours();
+        peakHours.setMostTraffic(mostTrafficHour);
+        peakHours.setMostPurchases(mostTrafficHour);
+        return peakHours;
+    }
+    private ConversionRates calculateConversionRates(List<CustomerAnalytic> customerAnalytics) {
+        double viewToCart;
+        int viewedProducts=0;
+        int inCartProducts=0;
+        int purchasedProducts=0;
+        int inCheckoutProducts=0;
+        double cartToCheckout;
+        double checkoutToPurchase;
+        double overall;
+        List<ProductInfos> productInfos = customerAnalytics.stream()
+                .flatMap(customerAnalytic -> customerAnalytic.getProductMatrix().stream())
+                .collect(Collectors.toList());
+       for(ProductInfos productInfo : productInfos){
+           viewedProducts++;
+           if(productInfo.isAddedToCart()){
+               inCartProducts++;
+           }
+           if(productInfo.isPurchased()){
+               purchasedProducts++;
+           }
+           if(productInfo.isInCheckout()){
+               inCheckoutProducts++;
+           }
+       }
+        cartToCheckout = inCartProducts/inCheckoutProducts;
+        checkoutToPurchase = inCheckoutProducts/purchasedProducts;
+        viewToCart = viewedProducts/inCartProducts;
+        overall = viewedProducts/purchasedProducts;
+        ConversionRates conversionRate = new ConversionRates();
+        conversionRate.setOverall(overall);
+        conversionRate.setCartToCheckout(cartToCheckout);
+        conversionRate.setCheckoutToPurchase(checkoutToPurchase);
+        conversionRate.setViewToCart(viewToCart);
+        return  conversionRate;
+
+    }
+
+    private CustomerSegments calculateCustomerSegments(List<CustomerAnalytic> customerAnalytics) {
+        int activeShoppers = 0;
+        int browsers = customerAnalytics.size();
+        int cartAbandoners = 0;
+
+        Set<String> purchasedProducts = new HashSet<>();
+        Set<String> addedToCartProducts = new HashSet<>();
+        Set<String> cartAbandonedProducts = new HashSet<>();
+
+        for (CustomerAnalytic cusAnalytic : customerAnalytics) {
+            for (ProductInfos productInfo : cusAnalytic.getProductMatrix()) {
+                if (productInfo.isPurchased()) {
+                    purchasedProducts.add(productInfo.getProduct().getProductId());
+                }
+                if (productInfo.isAddedToCart()) {
+                    addedToCartProducts.add(productInfo.getProduct().getProductId());
+                }
+            }
+        }
+
+        for (String productId : addedToCartProducts) {
+            if (!purchasedProducts.contains(productId)) {
+                cartAbandoners++;
+            }
+        }
+
+        activeShoppers = purchasedProducts.size();
+
+        CustomerSegments segment = new CustomerSegments();
+        segment.setBrowsers(browsers);
+        segment.setCartAbandoners(cartAbandoners);
+        segment.setActiveShoppers(activeShoppers);
+
+        return segment;
+    }
+
+    private ProductMetrics calculateProductMetrics(ProductInfos productInfo){
+          int view=1;
+         double averageViewTime;
+          int cartAdds=0;
+          int checkouts=0;
+         double  revenue=0;
+         double conversionRate;
+         averageViewTime = productInfo.getViewTime();
+         if(productInfo.isInCheckout()){
+             checkouts++;
+         }
+         if(productInfo.isAddedToCart()){
+             cartAdds++;
+         }
+         conversionRate = cartAdds/checkouts;
+         revenue =productInfo.getProduct().getPrice();
+         ProductMetrics metrics = new ProductMetrics();
+         metrics.setCheckouts(checkouts);
+         metrics.setCartAdds(cartAdds);
+         metrics.setView(view);
+         metrics.setRevenue(revenue);
+         metrics.setConversionRate(conversionRate);
+         metrics.setAverageViewTime(averageViewTime);
+         return  metrics;
+
+    }
+    private List<ProductPerformance> calculateProductPerformance(List<CustomerAnalytic> customerAnalytics){
+         String productId;
+         ProductMetrics metrics;
+         List<ProductPerformance> performanceList = new ArrayList<>();
+        List<ProductInfos> productInfos = customerAnalytics.stream()
+                .flatMap(customerAnalytic -> customerAnalytic.getProductMatrix().stream())
+                .collect(Collectors.toList());
+        productInfos.forEach(productInfos1 -> {
+            ProductPerformance performance=new ProductPerformance();
+            performance.setProductId(productInfos1.getProduct().getProductId());
+            performance.setMetrics(calculateProductMetrics(productInfos1));
+            Optional<ProductPerformance> existingProduct = performanceList.stream().filter(productPerformance -> productPerformance.getProductId().equals(performance.getProductId())).findFirst();
+            if(existingProduct.isPresent()){
+                ProductPerformance updatedPerformance =new ProductPerformance();
+                updatedPerformance.setProductId(performance.getProductId());
+                ProductMetrics updatedMetrics = new ProductMetrics();
+                updatedMetrics.setRevenue(existingProduct.get().getMetrics().getRevenue() + performance.getMetrics().getRevenue());
+                updatedMetrics.setView(existingProduct.get().getMetrics().getView() + performance.getMetrics().getView());
+                updatedMetrics.setCheckouts(existingProduct.get().getMetrics().getCheckouts() + performance.getMetrics().getCheckouts());
+                updatedMetrics.setCartAdds(existingProduct.get().getMetrics().getCartAdds() + performance.getMetrics().getCartAdds());
+                updatedMetrics.setAverageViewTime(existingProduct.get().getMetrics().getAverageViewTime() + performance.getMetrics().getAverageViewTime());
+                updatedMetrics.setConversionRate((existingProduct.get().getMetrics().getConversionRate() + performance.getMetrics().getConversionRate())/2);
+                int index = performanceList.indexOf(existingProduct);
+                performanceList.remove(index);
+                performanceList.add(updatedPerformance);
+            }
+            else{
+                performanceList.add(performance);
+            }
+        });
+        return performanceList;
+
+
+    }
+
+    private IndividualBusinessAnalytic BuiltAnalytic(BusinessDataDTO businessData){
+        IndividualBusinessAnalytic businessAnalytic = determineDaily(businessData);
+        return businessAnalytic;
+    }
+
 }

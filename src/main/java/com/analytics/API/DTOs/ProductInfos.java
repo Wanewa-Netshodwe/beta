@@ -8,12 +8,25 @@ public class ProductInfos {
     @NotEmpty
     private boolean inCheckout;
     @NotEmpty
+    private boolean purchased;
+
+
+
+    @NotEmpty
     private  double viewTime;
     @NotEmpty
     private Product product;
 
     public boolean isAddedToCart() {
         return addedToCart;
+    }
+
+    public boolean isPurchased() {
+        return purchased;
+    }
+
+    public void setPurchased(boolean purchased) {
+        this.purchased = purchased;
     }
 
     public void setAddedToCart(boolean addedToCart) {

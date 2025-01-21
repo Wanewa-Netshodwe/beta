@@ -1,15 +1,13 @@
 package com.analytics.API.Controllers;
 
+import com.analytics.API.DTOs.AnalyticsForBusiness.IndividualBusinessAnalytic;
 import com.analytics.API.DTOs.MainDataDTO;
 import com.analytics.API.Service.AnalyticService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("analytics")
@@ -23,6 +21,13 @@ public class AnalyticsController {
      return  ResponseEntity.status(HttpStatus.OK).body(" recived ");
 
  }
+    @GetMapping ("/get/{businessid}")
+    public ResponseEntity<IndividualBusinessAnalytic> CalculateAnalytic(@PathVariable String businessid) {
+        IndividualBusinessAnalytic businessAnalytic = As.getAnalytics(businessid);
+        return  ResponseEntity.status(HttpStatus.OK).body(businessAnalytic);
+
+    }
+
 
 
 
