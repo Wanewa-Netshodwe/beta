@@ -274,7 +274,7 @@ public class AnalyticService {
         return mergedDay;
     }
 
-    @Scheduled(cron = "30 5 22 * * ?")
+    @Scheduled(cron = "0 30 19 * * ?")
     private void saveToDatabase() {
         Analytics analytics = new Analytics();
         analytics.setId("eeyeygdggGGgT$5");
