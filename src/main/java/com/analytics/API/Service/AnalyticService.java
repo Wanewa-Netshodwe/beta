@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoField;
 import java.util.*;
@@ -26,7 +27,7 @@ public class AnalyticService {
         return prevData;
     }
 
-    public void setPrevData(List<BusinessDataDTO> prevData) {
+    private void setPrevData(List<BusinessDataDTO> prevData) {
         this.prevData = prevData;
     }
 
@@ -72,7 +73,7 @@ public class AnalyticService {
         updateDocs(businessesToUpdate, newBusinessList, businessDataList);
     }
 
-    public void updateDocs(List<BusinessDataDTO> businessesToUpdate, List<BusinessDataDTO> newBusinessList,
+    private void updateDocs(List<BusinessDataDTO> businessesToUpdate, List<BusinessDataDTO> newBusinessList,
                            List<BusinessDataDTO> businessDataList) {
         List<BusinessDataDTO> updatedBusinesses = new ArrayList<>();
 
@@ -92,12 +93,12 @@ public class AnalyticService {
             });
         }
 
-        // Add new businesses
+
         if (newBusinessList != null) {
             updatedBusinesses.addAll(newBusinessList);
         }
 
-        // Add businesses that weren't updated
+
         List<BusinessDataDTO> notUpdatedBusinesses = prevData.stream()
                 .filter(oldBusiness -> oldBusiness != null &&
                         updatedBusinesses.stream()
@@ -117,7 +118,7 @@ public class AnalyticService {
 
     }
 
-    public BusinessDataDTO updateBusiness(BusinessDataDTO newBusiness, BusinessDataDTO oldBusiness) {
+    private BusinessDataDTO updateBusiness(BusinessDataDTO newBusiness, BusinessDataDTO oldBusiness) {
         if (newBusiness == null) {
             return oldBusiness;
         }
@@ -293,17 +294,14 @@ public class AnalyticService {
         BusinessDataDTO business = databaseDoc.getBusinesses().stream().filter(businessDataDTO -> businessDataDTO.getBusinessId().equals(businessId)).findFirst().orElse(null);
         return BuiltAnalytic(business);
     }
-
-    private IndividualBusinessAnalytic determineDaily(BusinessDataDTO businessData) {
-        IndividualBusinessAnalytic businessAnalytic = new IndividualBusinessAnalytic();
-
-        businessAnalytic.setBusiness_id(businessAnalytic.getBusiness_id());
+    private Daily determineDaily(BusinessDataDTO businessData) {
         LocalDate today = LocalDate.now();
         String year = Integer.toString(today.getYear());
         String shortMon = today.getMonth().toString().charAt(0) + today.getMonth().toString().substring(1, 3).toLowerCase();
         String day = Integer.toString(today.getDayOfMonth());
+        System.out.println(businessData);
+        System.out.println(year);
         List<CustomerAnalytic> customerAnalytics = businessData.getInfo().getYearData().get(year).getMonthData().get(shortMon).getDayData().get(day).getCustomerAnalytic();
-        TimePeriods timePeriods = new TimePeriods();
         Daily daily = new Daily();
         Current current = new Current();
         Metrics metrics = new Metrics();
@@ -326,14 +324,13 @@ public class AnalyticService {
         metrics.setConversionRates(conversionRate);
         metrics.setCustomerBehavior(customerBehavior);
         metrics.setTemporalAnalysis(temporalAnalysis);
+        metrics.setProductAnalytics(productAnalytics);
         current.setMetrics(metrics);
         daily.setCurrent(current);
-        timePeriods.setDaily(daily);
-        businessAnalytic.setTimePeriods(timePeriods);
-        return businessAnalytic;
+
+        return daily;
 
     }
-
 
     private OverallMetrics calculateOverMetrics(List<CustomerAnalytic> customerAnalytics){
      int totalCustomers=0;
@@ -344,10 +341,12 @@ public class AnalyticService {
      double sumTimeInStore =0;
      double inCheckout=0;
      double inCart=0;
+     int products_Length =0;
      totalCustomers = customerAnalytics.size();
      totalVisits = customerAnalytics.size();
     for(CustomerAnalytic cusAnalytic : customerAnalytics ){
         sumTimeInStore +=cusAnalytic.getTimeSpendInStore();
+        products_Length =cusAnalytic.getProductMatrix().size();
         for(ProductInfos productInfo : cusAnalytic.getProductMatrix()){
             if(productInfo.isAddedToCart()){
                 inCart++;
@@ -362,7 +361,7 @@ public class AnalyticService {
         }
     }
     averageTimeInStore = (sumTimeInStore/totalCustomers)/1000;
-    conversionRate = inCart/inCheckout;
+    conversionRate = (inCart/inCheckout)/products_Length;
     OverallMetrics overallMetrics = new OverallMetrics();
     overallMetrics.setConversionRate(conversionRate);
     overallMetrics.setTotalCustomers(totalCustomers);
@@ -432,9 +431,9 @@ public class AnalyticService {
                 isPurchased++;
             }
         }
-        purchaseRate =totalProductViews/isPurchased;
-        checkoutRate =totalProductViews/inCheckout;
-        cartAddRate =totalProductViews/addToCart;
+        purchaseRate =(totalProductViews/isPurchased)/productInfos.size();
+        checkoutRate =(totalProductViews/inCheckout)/productInfos.size();
+        cartAddRate =(totalProductViews/addToCart)/productInfos.size();
         averageViewTime =(sumViewTime/totalProductViews)/1000;
         Overview overview = new Overview();
         overview.setAverageViewTime(averageViewTime);
@@ -449,9 +448,18 @@ public class AnalyticService {
     private PeakHours calculatePeakHours(List<CustomerAnalytic> customerAnalytics) {
         List<Integer> customersHours = customerAnalytics.stream()
                 .map(customerAnalytic -> {
-                    Instant date = Instant.parse(customerAnalytic.getDate());
-                    LocalDate localDate = date.atZone(ZoneId.of("GMT+2")).toLocalDate();
-                    return localDate.get(ChronoField.HOUR_OF_DAY);
+                    System.out.println("DATE BEFORE BEING USED "+customerAnalytic.getDate());
+                    String d = customerAnalytic.getDate();
+                    if (d == null) {
+                        throw new IllegalArgumentException("Date string is null");
+                    }
+                    Instant date = Instant.parse(d);
+
+                    LocalDateTime localDate = date.atZone(ZoneId.of("GMT+2")).toLocalDateTime();
+                    System.out.println("Instance localDate  : "+localDate);
+                    int hour = localDate.get(ChronoField.HOUR_OF_DAY);
+                    System.out.println("calcu;atd hour   : "+hour);
+                    return hour;
                 }).collect(Collectors.toList());
 
         Map<Integer, Integer> trafficMap = new HashMap<>();
@@ -501,10 +509,10 @@ public class AnalyticService {
                inCheckoutProducts++;
            }
        }
-        cartToCheckout = inCartProducts/inCheckoutProducts;
-        checkoutToPurchase = inCheckoutProducts/purchasedProducts;
-        viewToCart = viewedProducts/inCartProducts;
-        overall = viewedProducts/purchasedProducts;
+        cartToCheckout = (inCartProducts/inCheckoutProducts);
+        checkoutToPurchase = (inCheckoutProducts/purchasedProducts);
+        viewToCart = (viewedProducts/inCartProducts);
+        overall = (viewedProducts/purchasedProducts)/customerAnalytics.size();
         ConversionRates conversionRate = new ConversionRates();
         conversionRate.setOverall(overall);
         conversionRate.setCartToCheckout(cartToCheckout);
@@ -564,7 +572,7 @@ public class AnalyticService {
          if(productInfo.isAddedToCart()){
              cartAdds++;
          }
-         conversionRate = cartAdds/checkouts;
+         conversionRate = (checkouts == 0 ? 0: cartAdds/checkouts);
          revenue =productInfo.getProduct().getPrice();
          ProductMetrics metrics = new ProductMetrics();
          metrics.setCheckouts(checkouts);
@@ -612,8 +620,13 @@ public class AnalyticService {
     }
 
     private IndividualBusinessAnalytic BuiltAnalytic(BusinessDataDTO businessData){
-        IndividualBusinessAnalytic businessAnalytic = determineDaily(businessData);
-        return businessAnalytic;
+        IndividualBusinessAnalytic analytic = new IndividualBusinessAnalytic();
+        TimePeriods timePeriods = new TimePeriods();
+        Daily daily = determineDaily(businessData);
+        timePeriods.setDaily(daily);
+        analytic.setBusiness_id(businessData.getBusinessId());
+        analytic.setTimePeriods(timePeriods);
+        return analytic;
     }
 
 }

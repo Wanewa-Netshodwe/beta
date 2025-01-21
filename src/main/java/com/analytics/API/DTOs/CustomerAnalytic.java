@@ -1,12 +1,18 @@
 package com.analytics.API.DTOs;
 
+import jakarta.validation.constraints.NotEmpty;
+import org.springframework.lang.NonNull;
+
 import java.time.ZonedDateTime;
 import java.util.List;
 
 public class CustomerAnalytic {
+@NotEmpty
     private String date;
+    @NotEmpty
     private double timeSpendInStore;
     private String userId;
+    @NotEmpty
     private List<ProductInfos> productMatrix;
 
     public List<ProductInfos> getProductMatrix() {
